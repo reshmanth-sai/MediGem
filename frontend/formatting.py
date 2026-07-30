@@ -1,6 +1,17 @@
-"""HTML and Markdown Visual Formatters for MediGem Gradio UI."""
+"""HTML and Visual Formatters for MediGem Gradio UI."""
 
 from typing import Any, Dict, List, Optional
+
+
+def format_empty_state(title: str = "No Analysis Executed", message: str = "Upload a medical file or click a Demo Mode preset to begin analysis.") -> str:
+    """Format standardized friendly empty state card."""
+    return f"""
+    <div class="empty-state-card">
+        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🩺</div>
+        <h4 style="margin: 0; color: #475569; font-weight: 600;">{title}</h4>
+        <p style="margin: 0.3rem 0 0 0; font-size: 0.88rem; color: #94A3B8;">{message}</p>
+    </div>
+    """
 
 
 def format_risk_card(risk_level: str, urgency_score: float = 0.0, emergency_intercepted: bool = False) -> str:
@@ -48,7 +59,7 @@ def format_risk_card(risk_level: str, urgency_score: float = 0.0, emergency_inte
 
 
 def format_reasoning_transparency(reasons: List[str]) -> str:
-    """Format 'Why This Recommendation?' reasoning transparency card."""
+    """Format 'Why was this recommendation generated?' reasoning transparency card."""
     if not reasons:
         reasons = [
             "Clinical presentation and symptoms analyzed.",
@@ -61,7 +72,7 @@ def format_reasoning_transparency(reasons: List[str]) -> str:
     return f"""
     <div class="medigem-card" style="background-color: #F0FDFA; border-color: #CCFBF1;">
         <div class="section-title" style="color: #0F766E;">
-            💡 Why This Recommendation? (Reasoning Transparency)
+            💡 Why was this recommendation generated? (Reasoning Transparency)
         </div>
         <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem;">
             {bullets}
@@ -140,5 +151,42 @@ def format_referral_letter(referral_data: Optional[Dict[str, Any]]) -> str:
         <p><strong>PRIORITY:</strong> {priority}</p>
         <p><strong>REASON FOR REFERRAL:</strong> {reason}</p>
         <p><strong>CLINICAL NOTES:</strong> {notes}</p>
+    </div>
+    """
+
+
+def format_stage_tracker(active_stage_index: int = 0) -> str:
+    """Format live pipeline stage tracker HTML."""
+    stages = [
+        "Upload Complete",
+        "Input Processing",
+        "OCR Extraction",
+        "Context Fusion",
+        "Gemma Reasoning",
+        "Output Validation",
+        "Safety Guard",
+        "Explanation Builder",
+        "Completed",
+    ]
+
+    html_items = []
+    for idx, stage in enumerate(stages):
+        if idx < active_stage_index:
+            cls = "stage-item completed"
+            icon = "✓"
+        elif idx == active_stage_index:
+            cls = "stage-item active"
+            icon = "⟳"
+        else:
+            cls = "stage-item"
+            icon = "□"
+        html_items.append(f"<div class='{cls}'><span>{icon}</span> {stage}</div>")
+
+    return f"""
+    <div class="medigem-card" style="padding: 0.75rem 1rem;">
+        <div style="font-weight: 600; font-size: 0.85rem; color: #0F172A; margin-bottom: 0.4rem;">LIVE PIPELINE PROGRESS</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem;">
+            {''.join(html_items)}
+        </div>
     </div>
     """

@@ -12,6 +12,10 @@ from frontend.components import (
     create_header,
     create_landing_experience,
 )
+from frontend.formatting import (
+    format_empty_state,
+    format_stage_tracker,
+)
 from frontend.themes import CLINICAL_CSS, get_clinical_theme
 
 
@@ -58,7 +62,7 @@ def build_app() -> gr.Blocks:
 
                 gr.Markdown("### 📜 Session History")
                 history_dropdown = gr.Dropdown(
-                    label="Previous Analyses",
+                    label="Previous Analyses Timeline",
                     choices=[],
                     value="",
                     interactive=True,
@@ -66,7 +70,7 @@ def build_app() -> gr.Blocks:
 
             # CENTER WORKSPACE (35%)
             with gr.Column(scale=35, min_width=320):
-                gr.Markdown("### 📁 Input Workspace")
+                gr.Markdown("### 📁 Medical Input Workspace")
                 file_upload = gr.File(
                     label="Upload Medical Image or PDF Document",
                     file_types=[".png", ".jpg", ".jpeg", ".pdf", ".txt"],
@@ -83,35 +87,24 @@ def build_app() -> gr.Blocks:
                 )
 
                 gr.Markdown("### ⚙️ Processing Status")
-                progress_html = gr.HTML(
-                    """
-                    <div style="font-size: 0.85rem; color: #64748B;">
-                        ✓ System Ready. Upload medical input or select Demo Mode to analyze.
-                    </div>
-                    """
-                )
+                progress_html = gr.HTML(format_stage_tracker(0))
 
             # RIGHT RESULTS PANEL (40% - Primary Focus)
             with gr.Column(scale=40, min_width=380):
                 gr.Markdown("### 📋 Analysis Results & Reasoning Output")
 
                 # Risk Assessment Card Output
-                risk_output_html = gr.HTML(
-                    """
-                    <div class="medigem-card" style="text-align: center; color: #94A3B8;">
-                        <em>No analysis performed yet. Select Demo Mode or click Execute to analyze.</em>
-                    </div>
-                    """
-                )
+                risk_output_html = gr.HTML(format_empty_state("No Analysis Executed", "Select Demo Mode or click Execute to analyze."))
 
                 # Clinical Summary Output
                 summary_output_text = gr.Textbox(
                     label="Clinical Summary (Healthcare Worker View)",
                     lines=4,
                     interactive=False,
+                    placeholder="Clinical reasoning summary will appear here following execution.",
                 )
 
-                # Reasoning Transparency Card ("Why This Recommendation?")
+                # Reasoning Transparency Card ("Why was this recommendation generated?")
                 transparency_output_html = gr.HTML()
 
                 # Analysis Quality & Provenance Card
@@ -195,6 +188,7 @@ def build_app() -> gr.Blocks:
                 file_patient_out,
                 file_referral_out,
                 file_json_out,
+                progress_html,
             ],
         )
 

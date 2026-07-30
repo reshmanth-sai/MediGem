@@ -12,10 +12,12 @@ from backend.schemas.analysis import AnalysisRequest, MedicalImage, PatientInput
 from backend.services.orchestrator import orchestrator
 from frontend.formatting import (
     format_analysis_quality,
+    format_empty_state,
     format_observation_list,
     format_reasoning_transparency,
     format_referral_letter,
     format_risk_card,
+    format_stage_tracker,
 )
 
 # In-Memory Session History
@@ -37,7 +39,6 @@ def parse_vitals_text(vitals_text: str) -> Dict[str, float]:
             key_clean = k.strip()
             val_clean = v.strip()
 
-            # Handle blood pressure string format e.g. "150/95"
             if "/" in val_clean and key_clean.upper() in ("BP", "BLOOD PRESSURE"):
                 parts = val_clean.split("/")
                 if len(parts) == 2:
@@ -64,7 +65,7 @@ def handle_analysis_request(
     notes_text: str,
     file_upload: Optional[Any],
     history_state: List[Dict[str, Any]],
-) -> Tuple[str, str, str, str, str, str, str, str, List[Dict[str, Any]], str, str, str, str]:
+) -> Tuple[str, str, str, str, str, str, str, str, List[Dict[str, Any]], str, str, str, str, str]:
     """Callback executing full clinical analysis through MediGemOrchestrator."""
     request_id = f"REQ-UI-{len(history_state) + 1:03d}"
 
@@ -111,7 +112,7 @@ def handle_analysis_request(
     except Exception as e:
         logger.error(f"UI Callback Execution error: {e}")
         err_card = f"<div class='medigem-card' style='border-left: 6px solid #DC2626;'><strong style='color: #DC2626;'>Analysis Error:</strong> {e}</div>"
-        return err_card, "Analysis failed.", "", "", "", "", "", "", history_state, "", "", "", ""
+        return err_card, "Analysis failed.", "", "", "", "", "", "", history_state, "", "", "", "", format_stage_tracker(0)
 
     # 4. Extract Response Details & Format Outputs
     risk_level = "LOW"
@@ -125,11 +126,13 @@ def handle_analysis_request(
     risk_html = format_risk_card(risk_level, urgency_score, emergency_intercepted)
     summary_text = response.summary
 
-    # Default Reasoning Transparency Bullets
+    # Reasoning Transparency Bullets ("Why was this recommendation generated?")
     reasons = [
         f"Modality evaluated: {request.image.image_type.value if request.image else 'GENERAL'}",
-        f"Emergency gate status: {'INTERCEPTED' if emergency_intercepted else 'PASSED'}",
+        f"Emergency safety gate status: {'INTERCEPTED (Immediate referral generated)' if emergency_intercepted else 'PASSED'}",
         f"Processing latency: {response.duration_ms:.1f}ms",
+        "Deterministic rule checks executed prior to AI inference.",
+        "Clinical output validated against non-diagnostic healthcare safety contract.",
     ]
     transparency_html = format_reasoning_transparency(reasons)
 
@@ -169,17 +172,31 @@ def handle_analysis_request(
     history_dropdown_choices = [f"{h['request_id']} | Risk: {h['risk_level']} | {h['timestamp']}" for h in history_state]
     history_dropdown_val = history_dropdown_choices[-1] if history_dropdown_choices else ""
 
-    # Pre-generate Download File Exports
+    # Pre-generate Download File Exports with Presentation Metadata Header
+    header_meta = f"MEDIGEM CLINICAL REPORT [{request_id}]\nTimestamp: {response.timestamp}\nModel: gemma3:4b\nPrompt Version: v1.0\nReasoning Version: v1.0\n----------------------------------------\n"
+
     tmp_dir = Path(tempfile.gettempdir())
     worker_file = str(tmp_dir / f"{request_id}_worker_summary.txt")
     patient_file = str(tmp_dir / f"{request_id}_patient_summary.txt")
     referral_file = str(tmp_dir / f"{request_id}_referral_note.txt")
     json_file = str(tmp_dir / f"{request_id}_report.json")
 
-    Path(worker_file).write_text(f"MEDIGEM WORKER SUMMARY [{request_id}]\nRisk: {risk_level}\n\n{summary_text}", encoding="utf-8")
-    Path(patient_file).write_text(f"MEDIGEM PATIENT SUMMARY\n\n{summary_text}", encoding="utf-8")
-    Path(referral_file).write_text(f"MEDIGEM REFERRAL MEMORANDUM\nPriority: {referral_dict.get('priority')}\nReason: {referral_dict.get('reason_for_referral')}\nNotes: {referral_dict.get('clinical_summary')}", encoding="utf-8")
-    Path(json_file).write_text(json.dumps(response.model_dump(), indent=2), encoding="utf-8")
+    Path(worker_file).write_text(f"{header_meta}WORKER SUMMARY\nRisk: {risk_level}\n\n{summary_text}", encoding="utf-8")
+    Path(patient_file).write_text(f"{header_meta}PATIENT SUMMARY\n\n{summary_text}", encoding="utf-8")
+    Path(referral_file).write_text(f"{header_meta}CLINICAL REFERRAL MEMORANDUM\nPriority: {referral_dict.get('priority')}\nReason: {referral_dict.get('reason_for_referral')}\nNotes: {referral_dict.get('clinical_summary')}", encoding="utf-8")
+
+    full_payload = {
+        "metadata": {
+            "timestamp": response.timestamp,
+            "model": "gemma3:4b",
+            "prompt_version": "v1.0",
+            "reasoning_version": "v1.0",
+        },
+        "response": response.model_dump(),
+    }
+    Path(json_file).write_text(json.dumps(full_payload, indent=2), encoding="utf-8")
+
+    progress_final = format_stage_tracker(8)
 
     return (
         risk_html,
@@ -195,6 +212,7 @@ def handle_analysis_request(
         patient_file,
         referral_file,
         json_file,
+        progress_final,
     )
 
 

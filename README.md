@@ -6,9 +6,9 @@ MediGem is a multimodal, offline-first AI assistant designed for healthcare prov
 
 ---
 
-## 🖥️ Interactive Gradio UI Application (Phase 9)
+## 🏆 Hackathon Presentation & Demo Experience (Phase 10)
 
-MediGem features a clinical SaaS Web UI built with Gradio 5+, optimized for rural health workers and healthcare providers.
+MediGem features a clinical SaaS Web UI built with Gradio 5+, optimized for rural health workers, judges, and healthcare providers.
 
 ```text
 ┌───────────────────────────┬───────────────────────────────┬───────────────────────────────────────────┐
@@ -19,18 +19,19 @@ MediGem features a clinical SaaS Web UI built with Gradio 5+, optimized for rura
 │ • Vital Signs Input       │   Lab, ECG, Rx, Wound)        │ • Reasoning Transparency Card             │
 │ • Healthcare Worker Notes │ • Execute Analysis Trigger    │ • Analysis Quality & Provenance Card      │
 │ • Session History Dropdown│ • Live Stage Progress Tracker │ • Supporting Observation Cards            │
-│                           │                               │ • Patient View & Referral Note            │
-│                           │                               │ • Download Exports (txt/json)             │
+│                           │   (✓ Processing -> ⟳ Gemma)   │ • Patient View & Referral Memorandum      │
+│                           │                               │ • Download Exports (txt/json + metadata)  │
 └───────────────────────────┴───────────────────────────────┴───────────────────────────────────────────┘
 ```
 
-### Key UI/UX Highlights
-1. **Clinical SaaS Aesthetics**: White-first design with teal accents (`#0D9488`), soft rounded cards (12–16px radius), subtle shadows, Inter/Roboto typography, and subtle micro-animations.
+### Presentation Highlights & Judge Transparency
+1. **Clinical SaaS Aesthetics**: White-first design with teal accents (`#0D9488`), soft rounded cards (14px radius), subtle shadows, Inter/Roboto typography, and micro-interactions.
 2. **Proportional 3-Column Layout**: Left (25%), Center (35%), Right (40% - largest focus on clinical results and safety details).
-3. **Reasoning Transparency Card ("Why This Recommendation?")**: Explains AI reasoning rationale (e.g. "Elevated glucose values detected", "OCR confidence 97%", "Emergency gate status: PASSED") without ever formulating a diagnosis.
-4. **Demo Mode Preset Gallery**: One-click fixture loading for synthetic Lab Reports, ECG strips, Prescriptions, and Wound inspection photos.
-5. **Download File Exports**: One-click download triggers for Healthcare Worker Summary, Patient Summary, Referral Memorandum, and full JSON audit payload.
-6. **Developer & Judge Evaluation Inspector**: Collapsible inspection accordion revealing OpenCV blur scores, Tesseract OCR confidence scores, information completeness levels, and execution latency.
+3. **Reasoning Transparency Card ("Why was this recommendation generated?")**: Explains empirical decision factors (e.g. "Elevated glucose values detected", "OCR confidence 97%", "Emergency rule checks: PASSED") without ever formulating a diagnosis.
+4. **Animated Live Stage Pipeline Tracker**: Real-time progress feedback (`✓ Upload Complete` -> `✓ Input Processing` -> `✓ OCR Extraction` -> `✓ Context Fusion` -> `⟳ Gemma Reasoning` -> `✓ Safety Guard` -> `✓ Explanation Builder`).
+5. **Interactive Demo Preset Gallery**: Visual 1-click presets for synthetic Lab Reports, ECG rhythm strips, Prescription scans, and Wound inspection photos.
+6. **Download File Exports with Metadata**: Downloadable Healthcare Worker Summary, Patient Summary, Referral Memorandum, and JSON audit report stamped with `Timestamp`, `Model: gemma3:4b`, `Prompt Version: v1.0`, and `Reasoning Version: v1.0`.
+7. **Developer & Judge Evaluation Inspector**: Collapsible inspection accordion revealing OpenCV blur scores, Tesseract OCR confidence scores, information completeness levels, and execution latency.
 
 ---
 
@@ -70,12 +71,12 @@ MediGem/
 │   ├── services/           # Services & MediGemOrchestrator master coordinator
 │   ├── utils/              # Generic helper utilities
 │   └── validation/         # Clinical request validators
-├── frontend/               # Gradio UI application (Phase 9)
+├── frontend/               # Gradio UI application (Phase 9 & 10)
 │   ├── app.py              # Core Gradio Blocks 3-column layout
-│   ├── callbacks.py        # Event callbacks delegating to MediGemOrchestrator
-│   ├── components.py       # Header, Landing, Patient, Upload, Results, Timeline, Footer
-│   ├── formatting.py       # HTML formatters for Risk Cards, Transparency & Quality Cards
-│   ├── themes.py           # Custom Clinical SaaS Theme & CSS stylesheet
+│   ├── callbacks.py        # Event callbacks with live stage tracker & export headers
+│   ├── components.py       # Header, Landing, Patient, Upload, Demo Gallery, Results, Footer
+│   ├── formatting.py       # HTML formatters for Risk Cards, Transparency, Quality & Empty States
+│   ├── themes.py           # Custom Clinical SaaS Theme, Micro-Interactions & CSS stylesheet
 │   └── tests/              # Frontend unit test suite (test_ui.py)
 ├── logs/                   # Application log files (app.log)
 ├── outputs/                # Generated reports & exported artifacts
@@ -119,7 +120,7 @@ Run the Frontend UI test suite:
 python -m unittest frontend/tests/test_ui.py
 ```
 
-Run all 49 system unit tests:
+Run all 51 system unit tests:
 ```bash
 python -m unittest frontend/tests/test_ui.py tests/test_multimodal_engine.py tests/test_input_processing.py tests/test_reasoning_framework.py tests/test_orchestration.py tests/test_ai_provider.py tests/test_emergency_engine.py
 ```

@@ -1,4 +1,4 @@
-"""Unit test suite for Gradio Frontend UI and Callbacks (Phase 9)."""
+"""Unit test suite for Gradio Frontend UI and Callbacks (Phase 10)."""
 
 import unittest
 from pathlib import Path
@@ -11,10 +11,12 @@ from frontend.callbacks import (
 )
 from frontend.formatting import (
     format_analysis_quality,
+    format_empty_state,
     format_observation_list,
     format_reasoning_transparency,
     format_referral_letter,
     format_risk_card,
+    format_stage_tracker,
 )
 
 
@@ -26,7 +28,19 @@ class TestGradioFrontendUI(unittest.TestCase):
         app = build_app()
         self.assertIsInstance(app, gr.Blocks)
 
-    # 2. Test Demo Preset Loading
+    # 2. Test Empty State Rendering
+    def test_format_empty_state(self) -> None:
+        html = format_empty_state("No Analysis Executed", "Select Demo Mode")
+        self.assertIn("empty-state-card", html)
+        self.assertIn("No Analysis Executed", html)
+
+    # 3. Test Live Stage Tracker Rendering
+    def test_format_stage_tracker(self) -> None:
+        html = format_stage_tracker(3)
+        self.assertIn("LIVE PIPELINE PROGRESS", html)
+        self.assertIn("stage-item completed", html)
+
+    # 4. Test Demo Preset Loading
     def test_handle_demo_selection(self) -> None:
         age, gender, symptoms, vitals, f_path = handle_demo_selection("LAB_REPORT")
         self.assertEqual(age, 45.0)
@@ -35,20 +49,20 @@ class TestGradioFrontendUI(unittest.TestCase):
         self.assertIsNotNone(f_path)
         self.assertTrue(Path(f_path).exists())
 
-    # 3. Test Risk Card HTML Formatting
+    # 5. Test Risk Card HTML Formatting
     def test_format_risk_card(self) -> None:
         html = format_risk_card("HIGH", urgency_score=7.5, emergency_intercepted=False)
         self.assertIn("HIGH RISK", html)
         self.assertIn("7.5", html)
 
-    # 4. Test Reasoning Transparency HTML Formatting
+    # 6. Test Reasoning Transparency HTML Formatting
     def test_format_reasoning_transparency(self) -> None:
         reasons = ["Elevated glucose values detected", "OCR confidence 97%"]
         html = format_reasoning_transparency(reasons)
-        self.assertIn("Why This Recommendation?", html)
+        self.assertIn("Why was this recommendation generated?", html)
         self.assertIn("Elevated glucose values detected", html)
 
-    # 5. Test Analysis Request UI Callback
+    # 7. Test Analysis Request UI Callback
     def test_handle_analysis_request_callback(self) -> None:
         history_state = []
         (
@@ -65,6 +79,7 @@ class TestGradioFrontendUI(unittest.TestCase):
             f_patient,
             f_referral,
             f_json,
+            progress_final,
         ) = handle_analysis_request(
             age=40,
             gender="Female",
@@ -82,6 +97,7 @@ class TestGradioFrontendUI(unittest.TestCase):
         self.assertTrue(Path(f_patient).exists())
         self.assertTrue(Path(f_referral).exists())
         self.assertTrue(Path(f_json).exists())
+        self.assertIn("Completed", progress_final)
 
 
 if __name__ == "__main__":

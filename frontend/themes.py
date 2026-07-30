@@ -1,4 +1,4 @@
-"""Custom Clinical SaaS Theme and CSS styling for MediGem Gradio Application."""
+"""Custom Clinical SaaS Theme, Micro-Interactions, and CSS styling for MediGem Gradio Application."""
 
 import gradio as gr
 
@@ -30,7 +30,12 @@ body, .gradio-container {
     padding: 1.25rem 2rem;
     border-radius: 16px;
     margin-bottom: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.1), 0 2px 4px -1px rgba(13, 148, 136, 0.06);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.medigem-header:hover {
+    box-shadow: 0 6px 16px rgba(13, 148, 136, 0.25);
 }
 
 .medigem-header h1 {
@@ -49,7 +54,7 @@ body, .gradio-container {
     font-size: 0.95rem !important;
 }
 
-/* Card Styling */
+/* Card Styling & Micro-Interactions */
 .medigem-card {
     background-color: var(--card-bg) !important;
     border: 1px solid var(--border-color) !important;
@@ -57,11 +62,45 @@ body, .gradio-container {
     padding: 1.25rem !important;
     margin-bottom: 1rem !important;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
-    transition: all 0.2s ease-in-out !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .medigem-card:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -2px rgba(15, 23, 42, 0.08) !important;
+    border-color: #CBD5E1 !important;
+}
+
+/* Empty State Styling */
+.empty-state-card {
+    background-color: #F8FAFC !important;
+    border: 2px dashed #E2E8F0 !important;
+    border-radius: 14px !important;
+    padding: 2rem 1.5rem !important;
+    text-align: center !important;
+    color: #94A3B8 !important;
+    transition: all 0.2s ease !important;
+}
+
+.empty-state-card:hover {
+    border-color: #0D9488 !important;
+    background-color: #F0FDFA !important;
+}
+
+/* Demo Gallery Preset Cards */
+.demo-preset-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.demo-preset-card:hover {
+    border-color: #0D9488;
+    background-color: #F0FDFA;
+    transform: translateY(-2px);
 }
 
 /* Risk Badges */
@@ -72,7 +111,7 @@ body, .gradio-container {
     padding: 0.5rem 1rem;
     border-radius: 9999px;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     letter-spacing: 0.025em;
     text-transform: uppercase;
 }
@@ -107,24 +146,25 @@ body, .gradio-container {
     50% { opacity: 0.7; }
 }
 
-/* Section Titles */
-.section-title {
-    font-size: 1.1rem !important;
-    font-weight: 600 !important;
-    color: var(--slate-dark) !important;
+/* Live Stage Tracker */
+.stage-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 0.75rem !important;
+    font-size: 0.88rem;
+    padding: 0.3rem 0;
+    color: #64748B;
 }
 
-/* Observation Cards */
-.observation-card {
-    background-color: #F8FAFC;
-    border-left: 4px solid var(--primary-teal);
-    padding: 0.75rem 1rem;
-    border-radius: 0 8px 8px 0;
-    margin-bottom: 0.5rem;
+.stage-item.completed {
+    color: #0F766E;
+    font-weight: 600;
+}
+
+.stage-item.active {
+    color: #0D9488;
+    font-weight: 700;
+    animation: pulse 1.5s infinite;
 }
 
 /* Footer Styling */
