@@ -9,12 +9,12 @@ MediGem is a multimodal, offline-first AI assistant designed for healthcare prov
 ## 🛠️ Technology Stack
 
 - **Primary AI Engine**: Ollama (Gemma 3 4B / Gemma 2B / MedGemma)
-- **Language & Runtime**: Python 3.14+
+- **Backend Architecture**: Clean Architecture, Pydantic v2, Python 3.14+
 - **Frontend / UI**: Gradio
 - **Computer Vision & Image Processing**: OpenCV, Pillow (PIL), Scikit-Image
 - **Document & Data Processing**: PyMuPDF (`fitz`), PyTesseract, Pandas, NumPy
-- **API & Schemas**: Pydantic, Python-Dotenv, Requests
-- **UI Terminal & Formatting**: Rich, Markdown
+- **API & Schemas**: Pydantic v2, Python-Dotenv, Requests
+- **Logging & Diagnostics**: Rich, Standard Logging
 
 ---
 
@@ -24,27 +24,51 @@ MediGem is a multimodal, offline-first AI assistant designed for healthcare prov
 MediGem/
 ├── app.py                  # Main application entry point (Placeholder)
 ├── backend/                # Modular backend package
-│   ├── ai/                 # Ollama LLM integration & offline inference
-│   ├── emergency/          # Triage & emergency protocols
-│   ├── prompts/            # Prompt templates & system instructions
-│   ├── models/             # Data models & schemas
-│   ├── services/           # Business logic & domain services
-│   ├── utils/              # Utility helpers & file parsers
-│   ├── config/             # Environment configuration & settings
-│   └── validation/         # Input & output validation logic
+│   ├── config/             # Environment settings & constants
+│   │   ├── constants.py    # RiskLevel, ImageType, File extension & limit constants
+│   │   └── settings.py     # Pydantic environment configuration loader
+│   ├── exceptions/         # Custom exception hierarchy
+│   │   └── __init__.py     # ApplicationError, ConfigurationError, AppValidationError, etc.
+│   ├── logging/            # Central logging infrastructure
+│   │   └── logger.py       # Rich colored console + rotating file logger (logs/app.log)
+│   ├── pipeline/           # Abstract pipeline workflow interfaces
+│   │   └── base_pipeline.py# BasePipeline(ABC) for ECG, Report, Prescription & Wound workflows
+│   ├── schemas/            # Modular Pydantic v2 schemas
+│   │   ├── patient.py          # PatientInput schema
+│   │   ├── medical_image.py    # MedicalImage schema
+│   │   ├── analysis.py         # AnalysisRequest & AnalysisResponse schemas
+│   │   ├── risk.py             # RiskAssessment schema
+│   │   ├── referral.py         # ReferralSummary schema
+│   │   ├── system.py           # ApplicationStatus schema
+│   │   └── validation_error.py # SchemaValidationError schema
+│   ├── services/           # Abstract Base Class interfaces
+│   │   └── __init__.py     # BaseService(ABC), BaseAnalyzer(ABC), BaseValidator(ABC)
+│   ├── utils/              # Generic helper utilities
+│   │   ├── file_utils.py       # Safe file reading/writing & path utilities
+│   │   ├── image_utils.py      # Image resolution & PIL format helpers
+│   │   ├── json_utils.py       # Safe JSON serialization
+│   │   ├── time_utils.py       # ISO-8601 UTC timestamp utilities
+│   │   └── validation_utils.py # Range validation & text sanitization
+│   └── (ai, emergency, prompts, models, validation...) # Domain modules
 ├── frontend/               # Gradio UI components & layouts
 ├── assets/                 # Static assets, branding, and test images
+├── logs/                   # Application log files (app.log)
 ├── outputs/                # Generated reports & exported artifacts
+│   ├── analysis/           # Analysis outputs
+│   ├── referrals/          # Generated referral PDFs & documents
+│   └── reports/            # Summary clinical reports
 ├── sample_data/            # Sample healthcare datasets
 │   ├── ecg/                # Sample ECG wave images/data
 │   ├── prescriptions/      # Sample prescription scans
 │   ├── reports/            # Lab reports & clinical notes
 │   └── wounds/             # Wound visual inspection samples
 ├── tests/                  # Automated verification & test suite
-│   ├── test_dependencies.py
-│   ├── test_gradio.py
-│   └── test_image_processing.py
-├── docs/                   # Project documentation
+│   ├── health_check.py          # System diagnostic & health check suite
+│   ├── test_dependencies.py     # Package import verification
+│   ├── test_gradio.py           # Gradio interface verification
+│   ├── test_image_processing.py # Image loader verification
+│   └── test_offline_inference.py# Ollama Gemma inference test
+├── tmp/                    # Temporary working files
 ├── .env.example            # Environment settings template
 ├── .gitignore              # Git ignore configuration
 ├── README.md               # Project overview & guide
@@ -53,77 +77,71 @@ MediGem/
 
 ---
 
-## 🚀 Environment Setup & Installation
+## 🏗️ How Future Modules Plug Into This Architecture
 
-### Prerequisites
-1. **Python 3.10+** (Python 3.14 used)
-2. **Git**
-3. **Ollama CLI** (`brew install ollama` or official installer)
+MediGem's backend foundation enforces clean architecture separation:
 
-### 1. Clone & Navigate
-```bash
-git clone <repository-url>
-cd MediGem
-```
+1. **Adding a New Analysis Workflow (e.g. ECG Analysis Pipeline)**:
+   - Inherit from `backend.pipeline.BasePipeline`:
+     ```python
+     from backend.pipeline import BasePipeline
+     from backend.schemas import AnalysisRequest, AnalysisResponse
 
-### 2. Virtual Environment Setup
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-```
+     class EcgPipeline(BasePipeline):
+         def preprocess(self, request: AnalysisRequest): ...
+         def process(self, preprocessed_data): ...
+         def postprocess(self, process_output, request: AnalysisRequest) -> AnalysisResponse: ...
+     ```
 
-### 3. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+2. **Creating Domain Analyzers**:
+   - Inherit from `backend.services.BaseAnalyzer`:
+     ```python
+     from backend.services import BaseAnalyzer
 
-### 4. Setup Ollama & Gemma Models
-Ensure Ollama service is running:
-```bash
-brew services start ollama
-# OR
-ollama serve
-```
+     class WoundAnalyzer(BaseAnalyzer):
+         def analyze(self, input_data): ...
+     ```
 
-Pull the required Gemma models:
-```bash
-ollama pull gemma3:4b
-# or fallback fast model
-ollama pull gemma2:2b
-```
+3. **Input & Data Validation**:
+   - Import schemas from `backend.schemas` and use `AppValidationError` from `backend.exceptions` for domain error handling:
+     ```python
+     from backend.schemas import PatientInput
+     from backend.exceptions import AppValidationError
+     ```
 
----
-
-## 🧪 Verification & Testing
-
-Run the environment test suite to verify all core dependencies and tools:
-
-```bash
-# 1. Verify python package imports
-python tests/test_dependencies.py
-
-# 2. Verify Gradio interface setup
-python tests/test_gradio.py
-
-# 3. Verify Image processing capabilities
-python tests/test_image_processing.py
-```
+4. **Logging Across Modules**:
+   - Always import logger from `backend.logging`:
+     ```python
+     from backend.logging import logger
+     logger.info("Clinical analysis initiated for patient P-10492")
+     ```
 
 ---
 
-## 💻 How to Start Development
+## 🧪 Verification & Health Check
 
-Once the hackathon begins:
-1. Copy `.env.example` to `.env` and adjust configuration if necessary:
-   ```bash
-   cp .env.example .env
-   ```
-2. Activate virtual environment:
-   ```bash
-   source .venv/bin/activate
-   ```
-3. Run `app.py`:
-   ```bash
-   python app.py
-   ```
+Run the diagnostic health check to verify the entire foundation:
+
+```bash
+python tests/health_check.py
+```
+
+Expected diagnostic output:
+- `✓ Python Version Check: PASS`
+- `✓ Virtual Environment: PASS`
+- `✓ Ollama Service Connection: PASS`
+- `✓ AI Model Existence: PASS`
+- `✓ Configuration Settings: PASS`
+- `✓ Directory Hierarchy: PASS`
+- `✓ Logging Infrastructure: PASS`
+- `✓ Pydantic Schemas Import: PASS`
+- `✓ Service & Pipeline Base: PASS`
+
+---
+
+## 📜 Development Workflow & Coding Standards
+
+1. **Type Annotations**: All functions must include complete Python type hints (`str`, `int`, `Optional`, `Dict`, `List`).
+2. **Docstrings**: Use standard Google-style docstrings for all classes, methods, and modules.
+3. **No Hardcoded Constants**: Store configuration in `backend/config/settings.py` or `backend/config/constants.py`.
+4. **Exception Handling**: Raise domain-specific exceptions inheriting from `ApplicationError` (`backend/exceptions`).
