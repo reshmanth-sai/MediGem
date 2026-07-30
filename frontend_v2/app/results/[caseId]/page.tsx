@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { use } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ResultsTemplate } from "@/components/templates/Templates";
 import { ConfidenceDashboard } from "@/components/results/ConfidenceDashboard";
@@ -13,12 +15,12 @@ import { MedicalTimeline } from "@/components/results/MedicalTimeline";
 import { TechnicalInspector } from "@/components/results/TechnicalInspector";
 import { ExportWorkspace } from "@/components/results/ExportWorkspace";
 
-export default async function CaseResultsPage({
+export default function CaseResultsPage({
   params,
 }: {
   params: Promise<{ caseId: string }>;
 }) {
-  const { caseId } = await params;
+  const { caseId } = use(params);
 
   return (
     <AppShell>
