@@ -10,6 +10,7 @@ from rich.table import Table
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from backend.ai import check_ai_health, ai_manager, ResponseFormat
 from backend.config import settings, RiskLevel, ImageType
 from backend.emergency import (
     EmergencyEngine,
@@ -30,7 +31,7 @@ from backend.schemas import (
     RiskAssessment,
     SchemaValidationError,
 )
-from backend.services import BaseAnalyzer, BaseService, BaseValidator
+from backend.services import BaseAnalyzer, BaseService, BaseValidator, BaseMedicalAnalyzer
 from backend.exceptions import (
     ApplicationError,
     ConfigurationError,
@@ -165,15 +166,31 @@ def run_health_check() -> bool:
     if not emg_ok:
         overall_pass = False
 
-    # 10. Pipeline & Services Base Interfaces
+    # 10. AI Inference Layer Diagnostics
+    ai_ok = False
+    ai_details = "AI Layer check failed"
+    try:
+        ai_status = check_ai_health()
+        if ai_status.is_available:
+            ai_ok = True
+            ai_details = f"Provider: {ai_status.provider_name} | Model: {ai_status.model_name} | {ai_status.details}"
+    except Exception as e:
+        ai_details = str(e)
+
+    table.add_row("AI Inference Layer (Gemma)", "[green]PASS[/green]" if ai_ok else "[red]FAIL[/red]", ai_details)
+    if not ai_ok:
+        overall_pass = False
+
+    # 11. Pipeline & Services Base Interfaces
     interfaces_ok = False
     try:
         assert issubclass(BasePipeline, object)
         assert issubclass(BaseService, object)
         assert issubclass(BaseAnalyzer, object)
         assert issubclass(BaseValidator, object)
+        assert issubclass(BaseMedicalAnalyzer, object)
         interfaces_ok = True
-        interfaces_details = "BasePipeline, BaseService, BaseAnalyzer, BaseValidator verified"
+        interfaces_details = "BasePipeline, BaseService, BaseAnalyzer, BaseMedicalAnalyzer verified"
     except Exception as e:
         interfaces_details = f"Interface check failed: {e}"
 
@@ -185,7 +202,7 @@ def run_health_check() -> bool:
     console.print(table)
 
     if overall_pass:
-        console.print("[bold green]OVERALL STATUS: PASS (Backend foundation & Emergency Engine operational)[/bold green]")
+        console.print("[bold green]OVERALL STATUS: PASS (Backend, Emergency Engine & AI Inference Layer operational)[/bold green]")
     else:
         console.print("[bold red]OVERALL STATUS: FAIL (Some backend diagnostics failed)[/bold red]")
 

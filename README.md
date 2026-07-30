@@ -9,7 +9,8 @@ MediGem is a multimodal, offline-first AI assistant designed for healthcare prov
 ## 🛠️ Technology Stack
 
 - **Primary AI Engine**: Ollama (Gemma 3 4B / Gemma 2B / MedGemma)
-- **Safety Gate**: Deterministic Rule-Based Emergency Engine (No AI / Zero LLM Dependency)
+- **AI Infrastructure Layer**: Provider-Agnostic Architecture, Function-Calling Ready, Resilient JSON Parser
+- **Safety Gate**: Deterministic Rule-Based Emergency Safety Engine (No AI / Zero LLM Dependency)
 - **Backend Architecture**: Clean Architecture, Pydantic v2, Python 3.14+
 - **Frontend / UI**: Gradio
 - **Computer Vision & Image Processing**: OpenCV, Pillow (PIL), Scikit-Image
@@ -18,31 +19,32 @@ MediGem is a multimodal, offline-first AI assistant designed for healthcare prov
 
 ---
 
-## 🚨 Emergency Safety Engine Architecture (Phase 3)
+## 🤖 AI Inference Layer Architecture (Phase 4)
 
-The **Emergency Safety Engine** operates as an immediate, deterministic safety gate. It evaluates patient symptoms **BEFORE** any LLM or AI inference occurs.
+MediGem isolates Ollama and Gemma implementation details behind a provider-agnostic infrastructure layer. Higher application layers interact strictly via `AIManager` and structured Pydantic models.
 
-### Workflow Gate
 ```text
-Patient Input (Symptoms)
+Emergency Safety Engine
         ↓
-Text Normalization & Synonym Expansion
+safe_for_ai_processing (True)
         ↓
-Emergency Safety Engine (JSON Rule Database)
-        ↓
-Emergency Detected?
-  ├─► YES ──► Immediate Emergency Response (Ambulance / Referral)
-  │            safe_for_ai_processing = False (Gemma BLOCKED)
-  └─► NO  ──► Continue to Gemma AI Multimodal Analysis
-               safe_for_ai_processing = True
+AIManager (Orchestration & RetryPolicy)
+        │
+        ├─► PromptBuilder (Loads Markdown templates from backend/prompts/system/)
+        │
+        ├─► GemmaProvider (Communicates with local Ollama server, measures latency)
+        │
+        ├─► ResponseParser (Extracts embedded JSON objects/arrays, validates schema)
+        │
+        └─► InferenceResponse (Parsed output, InferenceMetadata, TokenUsage)
 ```
 
-### Key Architectural Characteristics
-1. **100% Deterministic**: No AI, Ollama, or probabilistic reasoning.
-2. **Externalized JSON Rules**: Rules are stored separately in `backend/emergency/rules.json`.
-3. **Synonym Matching**: Synonym dictionary resolves colloquial expressions (e.g., `"passed out"` -> `"loss of consciousness"`, `"dyspnea"` -> `"shortness of breath"`).
-4. **Transparent Explanations**: Generates human-readable `matched_reason` for auditing.
-5. **Score & Priority**: Computes `rule_match_score` and resolves conflicts using priority hierarchy (`CRITICAL` > `HIGH` > `MEDIUM` > `LOW`).
+### Key AI Infrastructure Capabilities
+1. **Gemma Provider (`backend/ai/gemma_provider.py`)**: Connects to local Ollama server, exposes `ModelInfo` and `ProviderCapabilities` (`supports_multimodal=True`, `supports_function_calling=True`).
+2. **Function Calling Infrastructure (`backend/ai/functions/`)**: `BaseFunction` and `FunctionRegistry` ready for native Gemma tool execution.
+3. **Markdown Prompt Templates (`backend/prompts/system/`)**: System, analysis, patient, and referral prompts stored in Markdown files (`.md`) for clean version control.
+4. **Strengthened Response Parser (`backend/ai/parser.py`)**: Robustly extracts the first valid JSON object or array from mixed free-text outputs (e.g. `Text... { "key": "val" } ...`), raw JSON, and markdown code fences (` ```json ... ``` `).
+5. **Session Tracing & Retries**: `InferenceContext` tracks requests across logs; `RetryPolicy` handles transient connection and timeout failures automatically.
 
 ---
 
@@ -52,20 +54,27 @@ Emergency Detected?
 MediGem/
 ├── app.py                  # Main application entry point (Placeholder)
 ├── backend/                # Modular backend package
+│   ├── ai/                 # AI Inference Layer (Phase 4)
+│   │   ├── base.py         # Abstract BaseAIProvider(ABC) interface
+│   │   ├── exceptions.py   # AIProviderError, ResponseParsingError, etc.
+│   │   ├── gemma_provider.py# GemmaProvider Ollama driver
+│   │   ├── health.py       # Comprehensive check_ai_health() diagnostic
+│   │   ├── manager.py      # AIManager facade & retry orchestrator
+│   │   ├── models.py       # InferenceRequest, InferenceResponse, ModelInfo, ProviderCapabilities
+│   │   ├── parser.py       # Resilient JSON parser & extraction engine
+│   │   ├── prompts.py      # PromptBuilder loading Markdown templates
+│   │   └── functions/      # Function calling infrastructure
+│   │       ├── base.py     # BaseFunction(ABC)
+│   │       └── registry.py # FunctionRegistry for tool registration
 │   ├── config/             # Environment settings & constants
-│   ├── emergency/          # Emergency Safety Engine
-│   │   ├── constants.py    # EmergencyCategory, RulePriority, RecommendedAction
-│   │   ├── engine.py       # Priority resolution engine & transparent explanation builder
-│   │   ├── evaluator.py    # Synonym-aware symptom evaluator & matching algorithm
-│   │   ├── exceptions.py   # EmergencyEngineError, InvalidRuleDefinitionError
-│   │   ├── models.py       # EmergencyRule, EmergencyResponse schemas
-│   │   ├── rules.json      # Externalized JSON rule database & synonym dictionary
-│   │   └── rules.py        # JSON rule loader & persistence manager
+│   ├── emergency/          # Emergency Safety Engine (Phase 3)
 │   ├── exceptions/         # Custom exception hierarchy
 │   ├── logging/            # Central logging infrastructure
 │   ├── pipeline/           # Abstract pipeline workflow interfaces
+│   ├── prompts/            # Markdown prompt templates
+│   │   └── system/         # system.md, analysis.md, patient.md, referral.md
 │   ├── schemas/            # Modular Pydantic v2 schemas
-│   ├── services/           # Abstract Base Class interfaces
+│   ├── services/           # Abstract Base Class interfaces & BaseMedicalAnalyzer
 │   └── utils/              # Generic helper utilities
 ├── frontend/               # Gradio UI components & layouts
 ├── logs/                   # Application log files (app.log)
@@ -73,6 +82,7 @@ MediGem/
 ├── sample_data/            # Sample healthcare datasets
 ├── tests/                  # Automated verification & test suite
 │   ├── health_check.py            # System diagnostic & health check suite
+│   ├── test_ai_provider.py        # AI Inference Layer unit tests
 │   ├── test_emergency_engine.py   # Emergency engine unit tests
 │   ├── test_dependencies.py       # Package import verification
 │   ├── test_gradio.py             # Gradio interface verification
@@ -87,53 +97,15 @@ MediGem/
 
 ---
 
-## 💡 How to Add New Emergency Rules
-
-Rules are completely decoupled from Python code. To add a new emergency trigger rule:
-
-Add an entry to `backend/emergency/rules.json`:
-
-```json
-{
-  "rule_id": "R-HEAT-01",
-  "rule_name": "Heat Stroke Emergency",
-  "description": "Triggers on high fever with absence of sweating during extreme heat.",
-  "symptoms_required": ["extreme heat fever", "no sweating"],
-  "min_match_count": 1,
-  "priority": 3,
-  "recommended_action": "IMMEDIATE_REFERRAL",
-  "emergency_category": "GENERAL_EMERGENCY",
-  "enabled": true
-}
-```
-
-Or add dynamically at runtime in Python:
-```python
-from backend.emergency import emergency_engine, EmergencyRule, RulePriority, EmergencyCategory
-
-custom_rule = EmergencyRule(
-    rule_id="R-HEAT-01",
-    rule_name="Heat Stroke Emergency",
-    description="Custom heat stroke trigger",
-    symptoms_required=["extreme heat fever"],
-    min_match_count=1,
-    priority=RulePriority.HIGH,
-    emergency_category=EmergencyCategory.GENERAL_EMERGENCY,
-)
-emergency_engine.add_rule(custom_rule)
-```
-
----
-
 ## 🧪 Verification & Unit Testing
 
-Run the emergency engine test suite:
+Run the AI Inference Layer test suite:
 
 ```bash
-python -m unittest tests/test_emergency_engine.py
+python -m unittest tests/test_ai_provider.py
 ```
 
-Run system health diagnostics:
+Run complete system health diagnostics:
 ```bash
 python tests/health_check.py
 ```

@@ -3,6 +3,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
+from backend.services.analyzer_interface import BaseMedicalAnalyzer
+
 
 class BaseService(ABC):
     """Abstract base class for stateful backend services."""
@@ -36,4 +38,4 @@ class BaseValidator(ABC):
         pass
 
 
-__all__ = ["BaseService", "BaseAnalyzer", "BaseValidator"]
+__all__ = ["BaseService", "BaseAnalyzer", "BaseValidator", "BaseMedicalAnalyzer"]
