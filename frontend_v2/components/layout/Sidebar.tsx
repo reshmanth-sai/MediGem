@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -30,6 +30,11 @@ export function Sidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const sections = [
     {
@@ -69,6 +74,7 @@ export function Sidebar() {
         "bg-[#090D16] text-slate-300 border-r border-slate-800/80 p-3 flex flex-col justify-between hidden md:flex shrink-0 min-h-screen select-none transition-all duration-300 ease-in-out relative z-30",
         isCollapsed ? "w-20" : "w-72"
       )}
+      suppressHydrationWarning
     >
       <div className="space-y-4">
         {/* Brand Header & Minimize Toggle Button */}
@@ -181,15 +187,16 @@ export function Sidebar() {
           </div>
         )}
 
+        {/* Hydration Safe Interface Theme Switcher */}
         {!isCollapsed ? (
           <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
             <span className="text-slate-400 text-xs font-medium pl-1">Interface Theme</span>
-            <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+            <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800" suppressHydrationWarning>
               <button
                 onClick={() => setTheme("light")}
                 className={cn(
                   "p-1 rounded transition-colors",
-                  theme === "light" ? "bg-slate-800 text-amber-400" : "text-slate-500 hover:text-slate-300"
+                  mounted && theme === "light" ? "bg-slate-800 text-amber-400" : "text-slate-500 hover:text-slate-300"
                 )}
               >
                 <Sun className="h-3.5 w-3.5" />
@@ -198,7 +205,7 @@ export function Sidebar() {
                 onClick={() => setTheme("dark")}
                 className={cn(
                   "p-1 rounded transition-colors",
-                  theme === "dark" ? "bg-slate-800 text-teal-400" : "text-slate-500 hover:text-slate-300"
+                  mounted && theme === "dark" ? "bg-slate-800 text-teal-400" : "text-slate-500 hover:text-slate-300"
                 )}
               >
                 <Moon className="h-3.5 w-3.5" />
@@ -207,7 +214,7 @@ export function Sidebar() {
                 onClick={() => setTheme("system")}
                 className={cn(
                   "p-1 rounded transition-colors",
-                  theme === "system" ? "bg-slate-800 text-slate-300" : "text-slate-500 hover:text-slate-300"
+                  mounted && theme === "system" ? "bg-slate-800 text-slate-300" : "text-slate-500 hover:text-slate-300"
                 )}
               >
                 <Monitor className="h-3.5 w-3.5" />
@@ -221,7 +228,7 @@ export function Sidebar() {
               className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-teal-400 hover:text-white"
               title="Toggle Theme"
             >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
           </div>
         )}
