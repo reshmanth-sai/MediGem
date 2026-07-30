@@ -15,8 +15,6 @@ import {
   Terminal,
   Settings,
   ShieldCheck,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
   Sun,
   Moon,
@@ -68,7 +66,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "bg-[#090D16] text-slate-300 border-r border-slate-800/80 p-3 flex flex-col justify-between hidden md:flex shrink-0 min-h-screen select-none transition-all duration-300 ease-in-out",
+        "bg-[#090D16] text-slate-300 border-r border-slate-800/80 p-3 flex flex-col justify-between hidden md:flex shrink-0 min-h-screen select-none transition-all duration-300 ease-in-out relative z-30",
         isCollapsed ? "w-20" : "w-72"
       )}
     >
@@ -138,10 +136,10 @@ export function Sidebar() {
                     <Link key={item.label} href={item.href as any} className="block" title={isCollapsed ? item.label : undefined}>
                       <div
                         className={cn(
-                          "flex items-center py-2 rounded-xl text-xs font-semibold transition-all group",
+                          "relative flex items-center py-2 rounded-xl text-xs font-semibold transition-all group",
                           isCollapsed ? "justify-center px-0 h-10 w-10 mx-auto" : "space-x-3 px-3",
                           isActive
-                            ? "bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 shadow-md shadow-emerald-950/40"
+                            ? "bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 shadow-md shadow-emerald-950/50 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-5 before:bg-emerald-400 before:rounded-r-full"
                             : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
                         )}
                       >
@@ -164,7 +162,6 @@ export function Sidebar() {
 
       {/* Footer Controls */}
       <div className="space-y-3 pt-3 border-t border-slate-800/80">
-        {/* Offline Session Badge Card */}
         {!isCollapsed ? (
           <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
             <div className="space-y-0.5">
@@ -184,7 +181,6 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* Interface Theme Switcher */}
         {!isCollapsed ? (
           <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
             <span className="text-slate-400 text-xs font-medium pl-1">Interface Theme</span>
@@ -230,7 +226,6 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* User Profile Pill */}
         {!isCollapsed ? (
           <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
             <div className="flex items-center space-x-2.5">

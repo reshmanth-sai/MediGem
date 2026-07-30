@@ -1,33 +1,46 @@
-import React from "react";
-import { Lightbulb, Check } from "lucide-react";
+"use client";
+
+import React, { useState } from "react";
+import { Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 
 export function EducationalTips() {
+  const [isOpen, setIsOpen] = useState(false);
+
   const tips = [
-    { title: "Capture Clear Images", desc: "Ensure good lighting and avoid camera motion blur to maximize OCR text extraction confidence." },
-    { title: "Enter Full Symptoms", desc: "Include all present symptoms (e.g. chest tightness, fever, duration) to activate emergency rule evaluation." },
-    { title: "Check Emergency Banners", desc: "If acute symptoms are detected, the Emergency Engine intercepts immediately with a red alert banner." },
-    { title: "Review Provenance", desc: "Inspect 'Why was this recommendation generated?' to review empirical quality scores and PDF text layers." },
+    { title: "Capture Clear Images", text: "Ensure decent lighting and focus so OpenCV image quality evaluation passes blur checks." },
+    { title: "Enter Full Symptoms", text: "Include chest tightness, fever, or onset duration to trigger safety checks immediately." },
+    { title: "Check Emergency Engine", text: "Acute presentations trigger immediate referral guidelines without waiting for LLM inference." },
   ];
 
   return (
-    <Card className="space-y-3 bg-teal-50/50 dark:bg-teal-950/20 border-teal-200 dark:border-teal-900">
-      <div className="flex items-center space-x-2 text-teal-800 dark:text-teal-300 font-bold text-sm">
-        <Lightbulb className="h-4 w-4 text-teal-600" />
-        <span>Clinical Co-Pilot Tips & Best Practices</span>
+    <Card className="space-y-3">
+      <div
+        className="flex items-center justify-between cursor-pointer select-none"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center space-x-2">
+          <Lightbulb className="h-4 w-4 text-amber-500" />
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            Clinical Co-Pilot Tips & Best Practices
+          </h3>
+        </div>
+        <button className="text-xs text-slate-400 font-semibold flex items-center gap-1 hover:text-slate-200">
+          <span>{isOpen ? "Collapse" : "Expand"}</span>
+          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {tips.map((t) => (
-          <div key={t.title} className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-teal-100 dark:border-teal-900 space-y-1">
-            <div className="flex items-center space-x-1.5 font-bold text-xs text-slate-900 dark:text-white">
-              <Check className="h-3.5 w-3.5 text-teal-600 shrink-0" />
-              <span>{t.title}</span>
+      {isOpen && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs animate-in fade-in duration-200">
+          {tips.map((t) => (
+            <div key={t.title} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-1">
+              <p className="font-bold text-slate-900 dark:text-white">{t.title}</p>
+              <p className="text-slate-500 text-[11px] leading-relaxed">{t.text}</p>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pl-5">{t.desc}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }

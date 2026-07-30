@@ -17,38 +17,38 @@ import { Footer } from "@/components/dashboard/Footer";
 export default function HomePage() {
   return (
     <AppShell>
-      <div className="space-y-8 max-w-7xl mx-auto pb-6">
+      <div className="space-y-10 max-w-7xl mx-auto pb-12">
         {/* Section 1: Hero Header Banner */}
         <HeroHeader />
 
-        {/* Why MediGem Feature Cards */}
+        {/* Section 2: Why MediGem Feature Cards */}
         <WhyMediGem />
 
-        {/* MANDATORY BONUS: Hackathon Judge Executive Summary */}
+        {/* Section 3: Hackathon Judge Executive Summary */}
         <JudgeDashboard />
 
-        {/* Section 2: Quick Action Cards */}
+        {/* Section 4: Quick Action Cards */}
         <QuickActions />
 
-        {/* Section 3: Recent Patient Cases Panel */}
+        {/* Section 5: Recent Patient Cases Panel */}
         <RecentCasesPanel />
 
-        {/* Section 4: System Overview Metrics */}
+        {/* Section 6: System Overview Metrics */}
         <SystemOverview />
 
-        {/* Section 5: Supported Analysis Types Grid */}
+        {/* Section 7: Supported Analysis Modalities */}
         <AnalysisTypesGrid />
 
-        {/* Section 6: AI Pipeline Workflow Visualization */}
+        {/* Section 8: Interactive Multimodal AI Pipeline */}
         <PipelineWorkflow />
 
-        {/* Section 7 & 8: Recent Activity & Tips */}
+        {/* Section 9: Collapsible System Activity & Tips */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ActivityTimeline />
           <EducationalTips />
         </div>
 
-        {/* Section 9: Clinical SaaS Footer */}
+        {/* Section 10: Clinical SaaS Footer */}
         <Footer />
       </div>
     </AppShell>
