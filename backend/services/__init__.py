@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 from backend.services.analyzer_interface import BaseMedicalAnalyzer
+from backend.services.orchestrator import MediGemOrchestrator, orchestrator
 
 
 class BaseService(ABC):
@@ -38,4 +39,11 @@ class BaseValidator(ABC):
         pass
 
 
-__all__ = ["BaseService", "BaseAnalyzer", "BaseValidator", "BaseMedicalAnalyzer"]
+__all__ = [
+    "BaseService",
+    "BaseAnalyzer",
+    "BaseValidator",
+    "BaseMedicalAnalyzer",
+    "MediGemOrchestrator",
+    "orchestrator",
+]

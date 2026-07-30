@@ -20,7 +20,7 @@ from backend.emergency import (
     RulePriority,
 )
 from backend.logging import logger
-from backend.pipeline import BasePipeline
+from backend.pipeline import BasePipeline, MedicalPipeline, AnalysisRouter, MedicalModality, WorkflowState, AnalysisContext
 from backend.schemas import (
     AnalysisRequest,
     AnalysisResponse,
@@ -31,7 +31,7 @@ from backend.schemas import (
     RiskAssessment,
     SchemaValidationError,
 )
-from backend.services import BaseAnalyzer, BaseService, BaseValidator, BaseMedicalAnalyzer
+from backend.services import BaseAnalyzer, BaseService, BaseValidator, BaseMedicalAnalyzer, MediGemOrchestrator, orchestrator
 from backend.exceptions import (
     ApplicationError,
     ConfigurationError,
@@ -181,28 +181,28 @@ def run_health_check() -> bool:
     if not ai_ok:
         overall_pass = False
 
-    # 11. Pipeline & Services Base Interfaces
-    interfaces_ok = False
+    # 11. End-to-End Master Orchestrator Check
+    orch_ok = False
+    orch_details = "Orchestrator test failed"
     try:
-        assert issubclass(BasePipeline, object)
-        assert issubclass(BaseService, object)
-        assert issubclass(BaseAnalyzer, object)
-        assert issubclass(BaseValidator, object)
-        assert issubclass(BaseMedicalAnalyzer, object)
-        interfaces_ok = True
-        interfaces_details = "BasePipeline, BaseService, BaseAnalyzer, BaseMedicalAnalyzer verified"
+        pt_emg = PatientInput(patient_id="P-DIAG", age=60, gender="Male", symptoms=["Severe crushing chest pain"])
+        req_emg = AnalysisRequest(request_id="REQ-DIAG-01", patient=pt_emg)
+        resp_emg = orchestrator.process_analysis_request(req_emg)
+        if resp_emg.status == "EMERGENCY_INTERCEPTED":
+            orch_ok = True
+            orch_details = f"Orchestrator ready. Intercepted emergency in {resp_emg.duration_ms}ms (Gemma blocked)."
     except Exception as e:
-        interfaces_details = f"Interface check failed: {e}"
+        orch_details = f"Orchestrator failure: {e}"
 
-    table.add_row("Service & Pipeline Base", "[green]PASS[/green]" if interfaces_ok else "[red]FAIL[/red]", interfaces_details)
-    if not interfaces_ok:
+    table.add_row("Master Orchestrator", "[green]PASS[/green]" if orch_ok else "[red]FAIL[/red]", orch_details)
+    if not orch_ok:
         overall_pass = False
 
     # Render structured diagnostic report
     console.print(table)
 
     if overall_pass:
-        console.print("[bold green]OVERALL STATUS: PASS (Backend, Emergency Engine & AI Inference Layer operational)[/bold green]")
+        console.print("[bold green]OVERALL STATUS: PASS (Backend, Emergency Gate, AI Inference & Orchestrator operational)[/bold green]")
     else:
         console.print("[bold red]OVERALL STATUS: FAIL (Some backend diagnostics failed)[/bold red]")
 
