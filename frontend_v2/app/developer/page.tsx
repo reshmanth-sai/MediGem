@@ -1,20 +1,23 @@
+import React from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { DashboardTemplate } from "@/components/templates/Templates";
-import { CodeBlock } from "@/components/ui/Typography";
+import { PipelineInspector } from "@/components/developer/PipelineInspector";
+import { PromptExplorer } from "@/components/developer/PromptExplorer";
+import { LogsViewer } from "@/components/developer/LogsViewer";
+import { SystemHealthDashboard } from "@/components/health/SystemHealthDashboard";
 
 export default function DeveloperPage() {
-  const mockConfig = {
-    model: "gemma3:4b",
-    backend: "FastAPI REST Gateway",
-    emergencyGate: "Active (< 0.3ms)",
-    contextFusion: "Immutable ReasoningContext",
-    safetyGuard: "Non-Diagnostic Safety Contract",
-  };
-
   return (
     <AppShell>
-      <DashboardTemplate title="Developer & System Inspector" subtitle="Raw JSON state, token provenance, and pipeline diagnostics">
-        <CodeBlock>{JSON.stringify(mockConfig, null, 2)}</CodeBlock>
+      <DashboardTemplate title="Developer Workspace & Pipeline Inspector" subtitle="8-Stage AI pipeline inspection, system logs & live telemetry">
+        <div className="space-y-6 max-w-7xl mx-auto pb-8">
+          <SystemHealthDashboard />
+          <PipelineInspector />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <PromptExplorer />
+            <LogsViewer />
+          </div>
+        </div>
       </DashboardTemplate>
     </AppShell>
   );

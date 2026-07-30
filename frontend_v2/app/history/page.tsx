@@ -3,6 +3,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { HistoryTemplate } from "@/components/templates/Templates";
 import { ClinicalInsightsDashboard } from "@/components/history/ClinicalInsightsDashboard";
 import { CaseHistoryTable } from "@/components/history/CaseHistoryTable";
+import { ExportCenter } from "@/components/history/ExportCenter";
 
 export default function HistoryPage() {
   return (
@@ -14,6 +15,9 @@ export default function HistoryPage() {
 
           {/* Searchable & Filterable Case History Table */}
           <CaseHistoryTable />
+
+          {/* Batch Export Center */}
+          <ExportCenter />
         </div>
       </HistoryTemplate>
     </AppShell>

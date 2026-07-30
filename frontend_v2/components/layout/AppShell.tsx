@@ -1,22 +1,23 @@
 "use client";
 
 import React from "react";
-import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import { CommandPalette } from "./CommandPalette";
-import { Breadcrumbs } from "./Breadcrumbs";
+import { Header } from "./Header";
+import { CommandPalette } from "@/components/search/CommandPalette";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <Header />
-      <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1 p-6 space-y-4 overflow-y-auto">
-          <Breadcrumbs />
-          {children}
-        </main>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex">
+      {/* Sidebar Navigation */}
+      <Sidebar />
+
+      {/* Main Workspace Layout */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header />
+        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
       </div>
+
+      {/* Global Command Palette */}
       <CommandPalette />
     </div>
   );

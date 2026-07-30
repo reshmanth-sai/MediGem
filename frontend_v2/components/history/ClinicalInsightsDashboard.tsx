@@ -1,6 +1,9 @@
+"use client";
+
 import React from "react";
 import { Folder, ShieldAlert, Brain, Zap, BarChart2 } from "lucide-react";
 import { StatCard } from "@/components/ui/Card";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export function ClinicalInsightsDashboard({
   totalCases = 128,
@@ -17,8 +20,15 @@ export function ClinicalInsightsDashboard({
 }) {
   const emergencyPercent = ((emergencyCases / totalCases) * 100).toFixed(1);
 
+  const riskChartData = [
+    { risk: "Low", count: 31, fill: "#10B981" },
+    { risk: "Moderate", count: 51, fill: "#EAB308" },
+    { risk: "High", count: 32, fill: "#F97316" },
+    { risk: "Emergency", count: 14, fill: "#EF4444" },
+  ];
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
           <span>📊 Clinical Insights & Case History Dashboard</span>
@@ -60,6 +70,24 @@ export function ClinicalInsightsDashboard({
           subtitle="Most Common Input"
           icon={<BarChart2 />}
         />
+      </div>
+
+      {/* Recharts Risk Distribution Chart */}
+      <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+        <h4 className="text-xs font-bold uppercase text-slate-500 tracking-wider">
+          Risk Distribution Across All Processed Cases
+        </h4>
+        <div className="w-full h-44">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={riskChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+              <XAxis dataKey="risk" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ backgroundColor: "#0F172A", color: "#FFF", borderRadius: 8 }} />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

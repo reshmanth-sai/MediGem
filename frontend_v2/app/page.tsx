@@ -2,6 +2,7 @@ import React from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { HeroHeader } from "@/components/dashboard/HeroHeader";
 import { WhyMediGem } from "@/components/dashboard/WhyMediGem";
+import { JudgeDashboard } from "@/components/judge/JudgeDashboard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentCasesPanel } from "@/components/dashboard/RecentCasesPanel";
 import { SystemOverview } from "@/components/dashboard/SystemOverview";
@@ -18,8 +19,11 @@ export default function HomePage() {
         {/* Section 1: Hero Header Banner */}
         <HeroHeader />
 
-        {/* MANDATORY BONUS: Why MediGem Feature Cards */}
+        {/* Why MediGem Feature Cards */}
         <WhyMediGem />
+
+        {/* MANDATORY BONUS: Hackathon Judge Executive Summary */}
+        <JudgeDashboard />
 
         {/* Section 2: Quick Action Cards */}
         <QuickActions />

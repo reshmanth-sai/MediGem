@@ -1,6 +1,10 @@
-# MediGem Advanced Search & Multi-Factor Filtering Guide
+# MediGem Global Command Palette & Keyboard Navigator Guide
 
-> **Patient ID, Symptom, and Risk Filter Rules**
+> **Ctrl + K Command Palette Shortcuts & Navigation Reference**
 
-- **Search Attributes**: Patient ID, Case ID, Chief Complaint, Presenting Symptoms, Diagnosis text.
-- **Filter Categories**: ALL, EMERGENCY, HIGH, MODERATE, LOW.
+- **Keyboard Shortcuts**:
+  - `Ctrl + K`: Command Palette modal
+  - `Ctrl + N`: Start New Case
+  - `Ctrl + H`: Clinical History
+  - `Ctrl + D`: Demo Gallery
+  - `Ctrl + E`: System Evaluation
