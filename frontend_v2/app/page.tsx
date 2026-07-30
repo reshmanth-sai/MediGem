@@ -1,22 +1,46 @@
+import React from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { DashboardTemplate } from "@/components/templates/Templates";
-import { StatCard } from "@/components/ui/Card";
-import { Activity, ShieldCheck, Zap, History } from "lucide-react";
+import { HeroHeader } from "@/components/dashboard/HeroHeader";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { RecentCasesPanel } from "@/components/dashboard/RecentCasesPanel";
+import { SystemOverview } from "@/components/dashboard/SystemOverview";
+import { AnalysisTypesGrid } from "@/components/dashboard/AnalysisTypesGrid";
+import { PipelineWorkflow } from "@/components/dashboard/PipelineWorkflow";
+import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
+import { EducationalTips } from "@/components/dashboard/EducationalTips";
+import { Footer } from "@/components/dashboard/Footer";
 
 export default function HomePage() {
   return (
     <AppShell>
-      <DashboardTemplate
-        title="MediGem Clinical Co-Pilot Dashboard"
-        subtitle="Offline multimodal AI co-pilot for rural healthcare workers"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard title="Total Cases Processed" value="128" icon={<Activity />} subtitle="+12 this week" />
-          <StatCard title="Safety Interceptions" value="100%" icon={<ShieldCheck />} subtitle="0 Emergency Bypasses" />
-          <StatCard title="Avg Reasoning Speed" value="5.4s" icon={<Zap />} subtitle="Gemma 3 4B Local" />
-          <StatCard title="Active Session" value="Offline Edge" icon={<History />} subtitle="100% Local Inference" />
+      <div className="space-y-8 max-w-7xl mx-auto pb-6">
+        {/* Section 1: Hero Header Banner */}
+        <HeroHeader />
+
+        {/* Section 2: Quick Action Cards */}
+        <QuickActions />
+
+        {/* Section 3: Recent Patient Cases Panel */}
+        <RecentCasesPanel />
+
+        {/* Section 4: System Overview Metrics */}
+        <SystemOverview />
+
+        {/* Section 5: Supported Analysis Types Grid */}
+        <AnalysisTypesGrid />
+
+        {/* Section 6: AI Pipeline Workflow Visualization */}
+        <PipelineWorkflow />
+
+        {/* Section 7 & 8: Recent Activity & Tips */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ActivityTimeline />
+          <EducationalTips />
         </div>
-      </DashboardTemplate>
+
+        {/* Section 9: Clinical SaaS Footer */}
+        <Footer />
+      </div>
     </AppShell>
   );
 }
