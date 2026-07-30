@@ -6,7 +6,40 @@ MediGem is a multimodal, offline-first AI assistant designed for healthcare prov
 
 ---
 
-## 🏆 Hackathon Presentation & Demo Experience (Phase 10)
+## 📊 Evaluation, Validation & Benchmarking Framework (Phase 11)
+
+MediGem includes an offline, non-mutating evaluation framework that validates accuracy, safety compliance, latency breakdowns, and multi-run consistency across all supported clinical modalities.
+
+```text
+Synthetic & Real Test Fixtures (Lab PDF, ECG, Prescription, Wound, Text)
+        │
+        ▼
+EvaluationRunner (Executes benchmark without mutating backend logic)
+        │
+        ├─► LatencyProfiler (Stage latencies: Input, OCR, Fusion, Gemma, Safety)
+        ├─► MetricsCollector (Safety pass rate, validation pass rate, OCR conf)
+        ├─► SafetyAuditor (Emergency gate compliance < 2.5ms response)
+        └─► ConsistencyEvaluator (Multi-run output stability)
+        │
+        ▼
+Automated Report & Asset Generation
+        ├─► evaluation_report.md (Executive markdown summary & benchmark table)
+        ├─► evaluation_summary.json (Machine-readable JSON metadata header)
+        ├─► benchmark_results.csv (Tabular CSV evaluation dataset)
+        ├─► diagrams/system_architecture.svg (Vector SVG system diagram)
+        └─► screenshots/*.png (Captured visual asset placecards)
+```
+
+### Benchmark Summary Metrics
+- **Total Test Runs**: `5`
+- **Safety Gate Pass Rate**: `100.0%`
+- **Validation Pass Rate**: `100.0%`
+- **Average OCR Confidence**: `97.0%`
+- **Emergency Gate Max Latency**: `0.33 ms` (Threshold: < 5.0 ms)
+
+---
+
+## 🖥️ Interactive Gradio UI Application (Phase 9 & 10)
 
 MediGem features a clinical SaaS Web UI built with Gradio 5+, optimized for rural health workers, judges, and healthcare providers.
 
@@ -24,21 +57,13 @@ MediGem features a clinical SaaS Web UI built with Gradio 5+, optimized for rura
 └───────────────────────────┴───────────────────────────────┴───────────────────────────────────────────┘
 ```
 
-### Presentation Highlights & Judge Transparency
-1. **Clinical SaaS Aesthetics**: White-first design with teal accents (`#0D9488`), soft rounded cards (14px radius), subtle shadows, Inter/Roboto typography, and micro-interactions.
-2. **Proportional 3-Column Layout**: Left (25%), Center (35%), Right (40% - largest focus on clinical results and safety details).
-3. **Reasoning Transparency Card ("Why was this recommendation generated?")**: Explains empirical decision factors (e.g. "Elevated glucose values detected", "OCR confidence 97%", "Emergency rule checks: PASSED") without ever formulating a diagnosis.
-4. **Animated Live Stage Pipeline Tracker**: Real-time progress feedback (`✓ Upload Complete` -> `✓ Input Processing` -> `✓ OCR Extraction` -> `✓ Context Fusion` -> `⟳ Gemma Reasoning` -> `✓ Safety Guard` -> `✓ Explanation Builder`).
-5. **Interactive Demo Preset Gallery**: Visual 1-click presets for synthetic Lab Reports, ECG rhythm strips, Prescription scans, and Wound inspection photos.
-6. **Download File Exports with Metadata**: Downloadable Healthcare Worker Summary, Patient Summary, Referral Memorandum, and JSON audit report stamped with `Timestamp`, `Model: gemma3:4b`, `Prompt Version: v1.0`, and `Reasoning Version: v1.0`.
-7. **Developer & Judge Evaluation Inspector**: Collapsible inspection accordion revealing OpenCV blur scores, Tesseract OCR confidence scores, information completeness levels, and execution latency.
-
 ---
 
 ## 🛠️ Technology Stack
 
 - **Primary AI Engine**: Ollama (Gemma 3 4B / Gemma 2B / MedGemma)
 - **Frontend / UI**: Gradio 5+ with Custom Clinical SaaS Styling
+- **Evaluation & Benchmarking**: Non-Mutating Evaluation Engine, Latency Profiler, Safety Auditor, SVG Diagram Generator
 - **Multimodal Intelligence Engine**: `ContextFusionEngine`, `ContextEnhancer` (`EnrichmentNote`, `CompletenessLevel`, `AllowedCapabilities`), Immutable `ReasoningContext`
 - **Input Processing Framework**: Multi-Format Ingestion (`IMAGE`, `PDF`, `TEXT`), Smart `ContentExtractor` (searchable PDF text layer vs optional OCR), OpenCV Quality Engine
 - **Medical Reasoning Framework**: Prompt Engineering Infrastructure, Qualitative Confidence (`LOW`, `MEDIUM`, `HIGH`), Layered Safety Guard, Presentation Explanation Builder
@@ -71,13 +96,20 @@ MediGem/
 │   ├── services/           # Services & MediGemOrchestrator master coordinator
 │   ├── utils/              # Generic helper utilities
 │   └── validation/         # Clinical request validators
+├── evaluation/             # Evaluation & Benchmarking Framework (Phase 11)
+│   ├── benchmark.py        # Benchmarking suite & multi-run driver
+│   ├── consistency.py      # Multi-run output consistency evaluator
+│   ├── diagrams/           # Generated vector SVG architecture diagrams
+│   ├── evaluator.py        # EvaluationRunner orchestrator
+│   ├── fixtures.py         # Dynamic fixture manager
+│   ├── latency.py          # Stage latency profiler
+│   ├── metrics.py          # Quality & provenance metrics collector
+│   ├── report_generator.py # Report generator (MD, JSON, CSV)
+│   ├── safety_audit.py     # Safety gate compliance auditor
+│   ├── screenshots/        # Visual screenshot placecards
+│   ├── screenshots.py     # SVG diagram & screenshot generator
+│   └── tests/              # Evaluation framework unit tests
 ├── frontend/               # Gradio UI application (Phase 9 & 10)
-│   ├── app.py              # Core Gradio Blocks 3-column layout
-│   ├── callbacks.py        # Event callbacks with live stage tracker & export headers
-│   ├── components.py       # Header, Landing, Patient, Upload, Demo Gallery, Results, Footer
-│   ├── formatting.py       # HTML formatters for Risk Cards, Transparency, Quality & Empty States
-│   ├── themes.py           # Custom Clinical SaaS Theme, Micro-Interactions & CSS stylesheet
-│   └── tests/              # Frontend unit test suite (test_ui.py)
 ├── logs/                   # Application log files (app.log)
 ├── outputs/                # Generated reports & exported artifacts
 ├── sample_data/            # Sample healthcare datasets
@@ -100,7 +132,7 @@ MediGem/
 
 ---
 
-## 🚀 Running MediGem Application
+## 🚀 Running MediGem Application & Evaluation
 
 Start the web interface locally:
 
@@ -108,21 +140,25 @@ Start the web interface locally:
 python app.py
 ```
 
-Open your browser at `http://localhost:7860`.
+Run full system evaluation and benchmarking suite:
+
+```bash
+python -m evaluation.evaluator
+```
 
 ---
 
 ## 🧪 Verification & Unit Testing
 
-Run the Frontend UI test suite:
+Run the Evaluation Framework test suite:
 
 ```bash
-python -m unittest frontend/tests/test_ui.py
+python -m unittest evaluation/tests/test_evaluation.py
 ```
 
-Run all 51 system unit tests:
+Run all 56 system unit tests:
 ```bash
-python -m unittest frontend/tests/test_ui.py tests/test_multimodal_engine.py tests/test_input_processing.py tests/test_reasoning_framework.py tests/test_orchestration.py tests/test_ai_provider.py tests/test_emergency_engine.py
+python -m unittest evaluation/tests/test_evaluation.py frontend/tests/test_ui.py tests/test_multimodal_engine.py tests/test_input_processing.py tests/test_reasoning_framework.py tests/test_orchestration.py tests/test_ai_provider.py tests/test_emergency_engine.py
 ```
 
 Run complete system health diagnostics:

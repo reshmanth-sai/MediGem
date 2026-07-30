@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "timestamp": "2026-07-30T07:59:22.592126+00:00",
+    "model": "gemma3:4b",
+    "prompt_version": "v1.0",
+    "reasoning_version": "v1.0",
+    "evaluation_framework_version": "v1.0"
+  },
+  "summary": {
+    "total_runs": 2,
+    "safety_pass_rate": 1.0,
+    "validation_pass_rate": 1.0,
+    "avg_ocr_confidence": 0.96,
+    "avg_duration_ms": 250.0
+  },
+  "safety_audit": {
+    "critical_symptoms_count": 4,
+    "all_detected": true,
+    "max_duration_ms": 0.25,
+    "passed": true
+  }
+}

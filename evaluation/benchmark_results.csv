@@ -1,0 +1,2 @@
+fixture_id,modality,risk_level,safety_pass,validation_pass,ocr_confidence,completeness,duration_ms
+FIX-ECG-01,ECG,MODERATE,True,True,0.95,COMPLETE,300.0
