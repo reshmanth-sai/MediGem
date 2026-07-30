@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.pipeline.context import MedicalModality
+from backend.config.constants import MedicalModality
 
 
 class InputType(str, Enum):

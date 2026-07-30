@@ -1,10 +1,12 @@
 """Base analysis strategy interface for medical content modalities."""
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from backend.ai.prompts import prompt_builder
-from backend.pipeline.context import AnalysisContext, MedicalModality
+from backend.config.constants import ALLOWED_IMAGE_EXTENSIONS, MedicalModality
+from backend.pipeline.context import AnalysisContext
 from backend.schemas.analysis import AnalysisRequest
 
 
@@ -32,7 +34,9 @@ class BaseAnalysisStrategy(ABC):
         pass
 
     def prepare_images(self, request: AnalysisRequest) -> list:
-        """Extract and prepare image file paths for multimodal processing."""
+        """Extract and prepare image file paths for multimodal processing (excluding PDFs)."""
         if request.image and request.image.file_path:
-            return [request.image.file_path]
+            ext = Path(request.image.file_path).suffix.lower()
+            if ext in ALLOWED_IMAGE_EXTENSIONS and ext != ".pdf":
+                return [request.image.file_path]
         return []

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Dict, Optional
+from backend.config.constants import MedicalModality
 from backend.input.exceptions import UnsupportedInputTypeError
 from backend.input.models import InputType, ProcessedMedicalInput
 from backend.input.processor import (
@@ -11,7 +12,6 @@ from backend.input.processor import (
     TextProcessor,
 )
 from backend.logging import logger
-from backend.pipeline.context import MedicalModality
 
 
 class InputRouter:

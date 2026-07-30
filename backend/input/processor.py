@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from backend.config.constants import MedicalModality
 from backend.input.extractors import content_extractor
 from backend.input.metadata import metadata_extractor
 from backend.input.models import (
@@ -12,7 +13,6 @@ from backend.input.models import (
     QualityLevel,
 )
 from backend.input.quality import quality_engine
-from backend.pipeline.context import MedicalModality
 from backend.utils import get_current_epoch_ms
 
 

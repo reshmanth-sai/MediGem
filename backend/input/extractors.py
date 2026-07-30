@@ -3,10 +3,10 @@
 from typing import Optional, Tuple
 import fitz  # PyMuPDF
 
+from backend.config.constants import MedicalModality
 from backend.input.models import ContentSource, ExtractedContent, InputType
 from backend.input.ocr import ocr_service
 from backend.logging import logger
-from backend.pipeline.context import MedicalModality
 
 
 class ContentExtractor:

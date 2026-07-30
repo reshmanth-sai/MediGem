@@ -5,16 +5,8 @@ from typing import Any, Dict, Optional
 import uuid
 from pydantic import BaseModel, Field
 
+from backend.config.constants import MedicalModality
 from backend.utils import get_current_epoch_ms
-
-
-class MedicalModality(str, Enum):
-    """Supported clinical content modalities."""
-    GENERAL = "GENERAL"
-    ECG = "ECG"
-    LAB_REPORT = "LAB_REPORT"
-    PRESCRIPTION = "PRESCRIPTION"
-    WOUND = "WOUND"
 
 
 class WorkflowState(str, Enum):

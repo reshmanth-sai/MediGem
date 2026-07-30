@@ -30,16 +30,24 @@ from backend.input import (
 from backend.logging import logger
 from backend.pipeline import BasePipeline, MedicalPipeline, AnalysisRouter, MedicalModality, WorkflowState, AnalysisContext
 from backend.reasoning import (
+    AllowedCapabilities,
     ClinicalContext,
     ClinicalReasoningOutput,
+    CompletenessLevel,
     ConfidenceLevel,
+    ContextEnhancer,
+    ContextFusionEngine,
+    EnrichmentNote,
     ExplanationBuilder,
     MedicalContextBuilder,
     OutputValidator,
     PromptComposer,
     PromptLibrary,
+    ReasoningContext,
     SafetyGuard,
     context_builder,
+    context_enhancer,
+    context_fusion_engine,
     explanation_builder,
     output_validator,
     prompt_composer,
@@ -220,21 +228,22 @@ def run_health_check() -> bool:
     if not ai_ok:
         overall_pass = False
 
-    # 12. Medical Reasoning Framework Check
+    # 12. Medical Reasoning & Context Fusion Check
     reasoning_ok = False
     reasoning_details = "Reasoning framework failed"
     try:
-        pt_r = PatientInput(patient_id="P-TEST-R", age=35, gender="Female", symptoms=["Fever"])
+        pt_r = PatientInput(patient_id="P-TEST-R", age=35, gender="Female", symptoms=["Fever"], vital_signs={"HR": 72})
         req_r = AnalysisRequest(request_id="REQ-R-01", patient=pt_r)
         c_ctx = context_builder.build_context(req_r)
+        r_ctx = context_fusion_engine.fuse_context(c_ctx, None)
         comp = prompt_composer.compose_prompt(c_ctx)
         if comp.system_prompt and comp.user_prompt:
             reasoning_ok = True
-            reasoning_details = f"ContextBuilder & PromptComposer ready. Fragments: 7 loaded | Schema: ClinicalReasoningOutput"
+            reasoning_details = f"ContextFusionEngine ready (Completeness: {r_ctx.completeness.value}). Schema: ClinicalReasoningOutput"
     except Exception as e:
         reasoning_details = f"Reasoning failure: {e}"
 
-    table.add_row("Medical Reasoning Framework", "[green]PASS[/green]" if reasoning_ok else "[red]FAIL[/red]", reasoning_details)
+    table.add_row("Multimodal Reasoning Framework", "[green]PASS[/green]" if reasoning_ok else "[red]FAIL[/red]", reasoning_details)
     if not reasoning_ok:
         overall_pass = False
 

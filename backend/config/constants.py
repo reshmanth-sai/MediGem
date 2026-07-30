@@ -20,6 +20,15 @@ class ImageType(str, Enum):
     WOUND = "WOUND"
 
 
+class MedicalModality(str, Enum):
+    """Supported clinical content modalities."""
+    GENERAL = "GENERAL"
+    ECG = "ECG"
+    LAB_REPORT = "LAB_REPORT"
+    PRESCRIPTION = "PRESCRIPTION"
+    WOUND = "WOUND"
+
+
 # Allowed File Extensions
 ALLOWED_IMAGE_EXTENSIONS: Set[str] = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff"}
 ALLOWED_DOCUMENT_EXTENSIONS: Set[str] = {".pdf", ".png", ".jpg", ".jpeg", ".txt"}

@@ -26,6 +26,10 @@ class PromptLibrary:
             key = md_file.stem.lower()
             self._fragments[key] = md_file.read_text(encoding="utf-8").strip()
 
+        # Add aliases
+        if "report" in self._fragments and "lab_report" not in self._fragments:
+            self._fragments["lab_report"] = self._fragments["report"]
+
         logger.info(f"PromptLibrary loaded {len(self._fragments)} prompt fragments from {self.directory}.")
 
     def get_fragment(self, name: str) -> str:

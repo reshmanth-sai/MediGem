@@ -1,9 +1,9 @@
 """Analysis router resolving modality-specific analysis strategies."""
 
 from typing import Dict, List, Optional, Union
+from backend.config.constants import MedicalModality
 from backend.exceptions import AppValidationError
 from backend.logging import logger
-from backend.pipeline.context import MedicalModality
 from backend.pipeline.strategies import (
     BaseAnalysisStrategy,
     EcgAnalysisStrategy,
