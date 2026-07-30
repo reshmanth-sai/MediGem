@@ -5,74 +5,112 @@
 @tailwind utilities;
 
 :root {
-  /* Brand Primary Teal Palette */
-  --teal-50: #F0FDFA;
-  --teal-100: #CCFBF1;
-  --teal-200: #99F6E4;
-  --teal-500: #14B8A6;
-  --teal-600: #0D9488;
-  --teal-700: #0F766E;
-
-  /* Neutral Slate Surface Palette */
-  --slate-50: #F8FAFC;
-  --slate-100: #F1F5F9;
-  --slate-200: #E2E8F0;
-  --slate-300: #CBD5E1;
-  --slate-500: #64748B;
-  --slate-700: #334155;
-  --slate-800: #1E293B;
-  --slate-900: #0F172A;
-
-  /* Medical Semantic Colors */
-  --emergency-bg: #FEE2E2;
-  --emergency-text: #B91C1C;
-  --emergency-border: #FCA5A5;
-
-  --high-bg: #FFEDD5;
-  --high-text: #C2410C;
-  --high-border: #FDBA74;
-
-  --warning-bg: #FEF9C3;
-  --warning-text: #A16207;
-  --warning-border: #FDE047;
-
-  --success-bg: #DCFCE7;
-  --success-text: #15803D;
-  --success-border: #86EFAC;
-
-  /* Global Layout Tokens */
-  --background: #F8FAFC;
-  --foreground: #0F172A;
-  --card-bg: #FFFFFF;
-  --card-border: #E2E8F0;
-  --radius-card: 14px;
+  /* Default Calm Dark Tokens */
+  --bg-main: #070A10;
+  --bg-card: #0F172A;
+  --bg-card-hover: #1E293B;
+  --border-card: #1E293B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #64748B;
+  --accent-primary: #14B8A6;
+  --accent-bg: rgba(20, 184, 166, 0.15);
 }
 
-.dark {
-  --background: #0F172A;
-  --foreground: #F8FAFC;
-  --card-bg: #1E293B;
-  --card-border: #334155;
+/* Light Theme Tokens */
+.light, html.light {
+  --bg-main: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F1F5F9;
+  --border-card: #E2E8F0;
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --accent-primary: #0284C7;
+  --accent-bg: rgba(2, 132, 199, 0.12);
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  margin: 0;
-  padding: 0;
+/* Midnight Sapphire Theme */
+.theme-sapphire, html.theme-sapphire {
+  --bg-main: #060B18;
+  --bg-card: #0B1329;
+  --bg-card-hover: #121F42;
+  --border-card: #1A2B5B;
+  --text-primary: #EEF2FF;
+  --text-secondary: #C7D2FE;
+  --text-muted: #818CF8;
+  --accent-primary: #6366F1;
+  --accent-bg: rgba(99, 102, 241, 0.2);
 }
 
-/* Custom Utilities */
-.medigem-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-card);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* Titanium Slate Theme (Apple Mac Studio style) */
+.theme-titanium, html.theme-titanium {
+  --bg-main: #0B0F17;
+  --bg-card: #111827;
+  --bg-card-hover: #1F2937;
+  --border-card: #374151;
+  --text-primary: #F9FAFB;
+  --text-secondary: #D1D5DB;
+  --text-muted: #9CA3AF;
+  --accent-primary: #10B981;
+  --accent-bg: rgba(16, 185, 129, 0.2);
 }
 
-.medigem-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -2px rgba(15, 23, 42, 0.08);
+/* Sunset Amber Theme */
+.theme-amber, html.theme-amber {
+  --bg-main: #0A0D14;
+  --bg-card: #0F172A;
+  --bg-card-hover: #1E293B;
+  --border-card: #334155;
+  --text-primary: #FEF3C7;
+  --text-secondary: #FDE68A;
+  --text-muted: #F59E0B;
+  --accent-primary: #F59E0B;
+  --accent-bg: rgba(245, 158, 11, 0.2);
+}
+
+html, body {
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme-Aware Utility Card Wrappers */
+.theme-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-card-hover:hover {
+  background-color: var(--bg-card-hover) !important;
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-card);
+  border-radius: 9999px;
+}
+
+/* Completely Hide Next.js Development Badge Overlay */
+nextjs-portal,
+div[data-nextjs-toast],
+.nextjs-toast-errors-parent,
+[class*="nextjs-portal"],
+[data-nextjs-dialog-overlay] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }

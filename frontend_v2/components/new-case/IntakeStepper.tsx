@@ -1,81 +1,89 @@
 "use client";
 
 import React from "react";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Check, Clock, ShieldCheck } from "lucide-react";
 
-export interface StepItem {
-  id: number;
-  label: string;
-  description: string;
+interface IntakeStepperProps {
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  progressPct: number;
 }
 
-export const INTAKE_STEPS: StepItem[] = [
-  { id: 1, label: "Patient Details", description: "Demographics & Vitals" },
-  { id: 2, label: "Symptoms", description: "Chief Complaint & Duration" },
-  { id: 3, label: "Medical History", description: "Illnesses, Meds & Allergies" },
-  { id: 4, label: "Medical Uploads", description: "Files, ECG & Reports" },
-  { id: 5, label: "Review Case", description: "Validation & Recap" },
-  { id: 6, label: "AI Analysis", description: "Execution & Results" },
-];
+export function IntakeStepper({ currentStep, setCurrentStep, progressPct }: IntakeStepperProps) {
+  const steps = [
+    { num: 1, label: "Patient Details", desc: "Demographics & Vitals" },
+    { num: 2, label: "Presenting Symptoms", desc: "Symptoms & Onset" },
+    { num: 3, label: "Medical History", desc: "Illnesses & Meds" },
+    { num: 4, label: "Clinical Uploads", desc: "ECG, Labs & Scans" },
+    { num: 5, label: "Review & AI Reasoning", desc: "Validation & Pipeline" },
+  ];
 
-export function IntakeStepper({
-  currentStep,
-  onStepClick,
-}: {
-  currentStep: number;
-  onStepClick?: (stepId: number) => void;
-}) {
   return (
-    <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm overflow-x-auto">
-      <div className="flex items-center justify-between min-w-[700px]">
-        {INTAKE_STEPS.map((stg, idx) => {
-          const isCompleted = stg.id < currentStep;
-          const isCurrent = stg.id === currentStep;
+    <div className="rounded-2xl bg-slate-900/95 border border-slate-800 p-4 shadow-xl space-y-3">
+      {/* Top Header & Progress Stats */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+        <div className="flex items-center space-x-2">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-teal-950 text-teal-300 border border-teal-500/30">
+            GUIDED CLINICAL INTAKE
+          </span>
+          <span className="text-xs font-mono text-slate-400 font-medium">
+            Step {currentStep} of 5 • <span className="text-teal-300 font-bold">{progressPct}% Complete</span>
+          </span>
+        </div>
+
+        <div className="flex items-center space-x-3 text-xs font-mono text-slate-400">
+          <span className="flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5 text-teal-400" /> ~2 mins remaining
+          </span>
+          <span>•</span>
+          <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+            <ShieldCheck className="h-3.5 w-3.5" /> 100% Offline Edge
+          </span>
+        </div>
+      </div>
+
+      {/* Modern Stepper Timeline Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
+        {steps.map((s) => {
+          const isCompleted = currentStep > s.num;
+          const isActive = currentStep === s.num;
+          const isClickable = isCompleted;
 
           return (
-            <React.Fragment key={stg.id}>
-              <div
-                onClick={() => isCompleted && onStepClick && onStepClick(stg.id)}
-                className={cn(
-                  "flex items-center space-x-3 cursor-pointer select-none transition-colors",
-                  isCompleted && "hover:opacity-80"
-                )}
-              >
-                <div
-                  className={cn(
-                    "h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0",
-                    isCompleted && "bg-teal-600 text-white",
-                    isCurrent && "bg-teal-600 text-white ring-4 ring-teal-100 dark:ring-teal-950",
-                    !isCompleted && !isCurrent && "bg-slate-100 text-slate-400 dark:bg-slate-800"
-                  )}
-                >
-                  {isCompleted ? <Check className="h-4 w-4" /> : stg.id}
-                </div>
-                <div>
-                  <p
-                    className={cn(
-                      "text-xs font-bold truncate",
-                      isCurrent && "text-teal-600 dark:text-teal-400",
-                      isCompleted && "text-slate-900 dark:text-white",
-                      !isCompleted && !isCurrent && "text-slate-400"
-                    )}
+            <div
+              key={s.num}
+              onClick={() => isClickable && setCurrentStep(s.num)}
+              className={`p-2.5 rounded-xl border text-xs transition-all ${
+                isClickable ? "cursor-pointer hover:border-teal-500/60" : "cursor-default"
+              } ${
+                isActive
+                  ? "bg-teal-950/60 border-teal-500 text-white shadow-md shadow-teal-950/40"
+                  : isCompleted
+                  ? "bg-slate-950 border-emerald-500/40 text-emerald-300"
+                  : "bg-slate-950/40 border-slate-800 text-slate-500"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-mono text-[10px] font-bold uppercase opacity-80">
+                  Step 0{s.num}
+                </span>
+                {isCompleted ? (
+                  <span className="h-4 w-4 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold">
+                    <Check className="h-3 w-3 stroke-[3]" />
+                  </span>
+                ) : (
+                  <span
+                    className={`h-4 w-4 rounded-full flex items-center justify-center font-mono text-[10px] font-bold ${
+                      isActive ? "bg-teal-400 text-slate-950" : "bg-slate-800 text-slate-400"
+                    }`}
                   >
-                    {stg.label}
-                  </p>
-                  <p className="text-[10px] text-slate-400 truncate">{stg.description}</p>
-                </div>
+                    {s.num}
+                  </span>
+                )}
               </div>
-
-              {idx < INTAKE_STEPS.length - 1 && (
-                <div
-                  className={cn(
-                    "flex-1 h-0.5 mx-3 transition-colors",
-                    stg.id < currentStep ? "bg-teal-600" : "bg-slate-200 dark:bg-slate-800"
-                  )}
-                />
-              )}
-            </React.Fragment>
+              <p className="font-bold text-xs truncate">{s.label}</p>
+              <p className="text-[10px] text-slate-400 truncate opacity-90">{s.desc}</p>
+            </div>
           );
         })}
       </div>

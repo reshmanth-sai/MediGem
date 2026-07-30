@@ -104,7 +104,7 @@ export function DemoGalleryGrid() {
 
             <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
               <span className="text-[11px] font-mono text-slate-400">Latency: {p.latency}</span>
-              <Link href="/results/CASE-8901">
+              <Link href={`/results/${p.id}`}>
                 <Button size="sm" variant="primary" leftIcon={<PlayCircle className="h-3.5 w-3.5" />}>
                   Load Preset
                 </Button>

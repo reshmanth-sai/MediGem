@@ -1,22 +1,47 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { DashboardTemplate } from "@/components/templates/Templates";
-import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
-import { AccessibilityCenter } from "@/components/settings/AccessibilityCenter";
-import { OfflineSettings } from "@/components/settings/OfflineSettings";
+import { ControlCenterHeader } from "@/components/settings/ControlCenterHeader";
+import { SettingsCategoryNav } from "@/components/settings/SettingsCategoryNav";
+import { AIClinicalConfig } from "@/components/settings/AIClinicalConfig";
+import { OfflineStorageAnalyzer } from "@/components/settings/OfflineStorageAnalyzer";
+import { AccessibilityHumanFactors } from "@/components/settings/AccessibilityHumanFactors";
+import { AppearanceThemes } from "@/components/settings/AppearanceThemes";
+import { PrivacySecurityCenter } from "@/components/settings/PrivacySecurityCenter";
+import { DeviceDiagnostics } from "@/components/settings/DeviceDiagnostics";
+import { AboutSystem } from "@/components/settings/AboutSystem";
+import { FloatingAIAssistant } from "@/components/ai/FloatingAIAssistant";
 
 export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState("ai");
+
   return (
     <AppShell>
-      <DashboardTemplate title="System Settings & Accessibility Center" subtitle="Appearance themes, WCAG AA accessibility & local cache controls">
-        <div className="space-y-6 max-w-4xl mx-auto pb-8">
-          <AppearanceSettings />
-          <AccessibilityCenter />
-          <OfflineSettings />
+      <div className="space-y-5 max-w-[1600px] mx-auto pb-16">
+        {/* Top Control Center & Telemetry Header */}
+        <ControlCenterHeader />
+
+        {/* Master Split-Panel Layout (Left 25% Category Nav / Right 75% Config Panel) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div className="lg:col-span-3">
+            <SettingsCategoryNav activeTab={activeTab} setActiveTab={setActiveTab} />
+          </div>
+
+          <div className="lg:col-span-9">
+            {activeTab === "ai" && <AIClinicalConfig />}
+            {activeTab === "storage" && <OfflineStorageAnalyzer />}
+            {activeTab === "accessibility" && <AccessibilityHumanFactors />}
+            {activeTab === "appearance" && <AppearanceThemes />}
+            {activeTab === "security" && <PrivacySecurityCenter />}
+            {activeTab === "diagnostics" && <DeviceDiagnostics />}
+            {activeTab === "about" && <AboutSystem />}
+          </div>
         </div>
-      </DashboardTemplate>
+      </div>
+
+      {/* Floating Offline AI Clinical Assistant */}
+      <FloatingAIAssistant />
     </AppShell>
   );
 }

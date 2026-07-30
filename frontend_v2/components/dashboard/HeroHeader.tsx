@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { PlusCircle, PlayCircle, ShieldCheck, Cpu } from "lucide-react";
+import { PlusCircle, PlayCircle, ShieldCheck, Cpu, BookOpen } from "lucide-react";
 import { OfflineBadge } from "@/components/ui/Badge";
 
 export function HeroHeader() {
@@ -38,6 +38,13 @@ export function HeroHeader() {
           <button className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-teal-400 via-emerald-400 to-teal-400 hover:from-teal-300 hover:to-emerald-300 text-slate-950 text-base font-extrabold shadow-xl shadow-teal-500/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 flex items-center justify-center space-x-3 group border border-emerald-300">
             <PlusCircle className="h-6 w-6 text-slate-950 group-hover:rotate-90 transition-transform duration-300" />
             <span>Start New Case</span>
+          </button>
+        </Link>
+
+        <Link href="/learning" className="block">
+          <button className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-teal-950/80 hover:bg-teal-900/90 text-teal-300 hover:text-teal-200 text-sm font-bold border border-teal-600/60 hover:border-teal-500 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-teal-950/40">
+            <BookOpen className="h-5 w-5 text-teal-400" />
+            <span>Explore Learning Hub</span>
           </button>
         </Link>
 

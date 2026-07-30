@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { PlusCircle, History, PlayCircle, Award, Terminal, Settings, ArrowRight } from "lucide-react";
+import { PlusCircle, History, PlayCircle, Award, Terminal, Settings, ArrowRight, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 
 export function QuickActions() {
@@ -15,11 +15,11 @@ export function QuickActions() {
       color: "border-l-4 border-l-teal-600",
     },
     {
-      title: "Recent Cases Timeline",
-      description: "Review prior patient clinical summaries and generated referral memorandums.",
-      href: "/history",
-      icon: <History className="h-6 w-6 text-teal-600 dark:text-teal-400" />,
-      color: "border-l-4 border-l-slate-600",
+      title: "Learning & Architecture Hub",
+      description: "Explore multimodal AI pipeline, clinical safety rules, and rural health guidance.",
+      href: "/learning",
+      icon: <BookOpen className="h-6 w-6 text-teal-600 dark:text-teal-400" />,
+      color: "border-l-4 border-l-teal-500",
     },
     {
       title: "Synthetic Demo Presets",
@@ -27,6 +27,13 @@ export function QuickActions() {
       href: "/demo",
       icon: <PlayCircle className="h-6 w-6 text-teal-600 dark:text-teal-400" />,
       color: "border-l-4 border-l-emerald-600",
+    },
+    {
+      title: "Recent Cases Timeline",
+      description: "Review prior patient clinical summaries and generated referral memorandums.",
+      href: "/history",
+      icon: <History className="h-6 w-6 text-teal-600 dark:text-teal-400" />,
+      color: "border-l-4 border-l-slate-600",
     },
     {
       title: "Evaluation Dashboard",
@@ -41,13 +48,6 @@ export function QuickActions() {
       href: "/developer",
       icon: <Terminal className="h-6 w-6 text-teal-600 dark:text-teal-400" />,
       color: "border-l-4 border-l-purple-600",
-    },
-    {
-      title: "Settings & Config",
-      description: "Configure local Ollama service endpoints, default models, and storage rules.",
-      href: "/settings",
-      icon: <Settings className="h-6 w-6 text-teal-600 dark:text-teal-400" />,
-      color: "border-l-4 border-l-slate-400",
     },
   ];
 
