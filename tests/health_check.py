@@ -19,6 +19,14 @@ from backend.emergency import (
     EmergencyRule,
     RulePriority,
 )
+from backend.input import (
+    InputType,
+    QualityLevel,
+    ContentSource,
+    ProcessedMedicalInput,
+    check_input_health,
+    input_router,
+)
 from backend.logging import logger
 from backend.pipeline import BasePipeline, MedicalPipeline, AnalysisRouter, MedicalModality, WorkflowState, AnalysisContext
 from backend.reasoning import (
@@ -183,7 +191,21 @@ def run_health_check() -> bool:
     if not emg_ok:
         overall_pass = False
 
-    # 10. AI Inference Layer Diagnostics
+    # 10. Input Processing Framework Diagnostics
+    input_ok = False
+    input_details = "Input framework check failed"
+    try:
+        input_ok = check_input_health()
+        if input_ok:
+            input_details = "InputRouter, ContentExtractor, Tesseract OCR, PyMuPDF & CV Quality Engine operational"
+    except Exception as e:
+        input_details = f"Input framework failure: {e}"
+
+    table.add_row("Input Processing Framework", "[green]PASS[/green]" if input_ok else "[red]FAIL[/red]", input_details)
+    if not input_ok:
+        overall_pass = False
+
+    # 11. AI Inference Layer Diagnostics
     ai_ok = False
     ai_details = "AI Layer check failed"
     try:
@@ -198,7 +220,7 @@ def run_health_check() -> bool:
     if not ai_ok:
         overall_pass = False
 
-    # 11. Prompt Engineering & Medical Reasoning Framework Check
+    # 12. Medical Reasoning Framework Check
     reasoning_ok = False
     reasoning_details = "Reasoning framework failed"
     try:
@@ -216,7 +238,7 @@ def run_health_check() -> bool:
     if not reasoning_ok:
         overall_pass = False
 
-    # 12. End-to-End Master Orchestrator Check
+    # 13. End-to-End Master Orchestrator Check
     orch_ok = False
     orch_details = "Orchestrator test failed"
     try:
@@ -237,7 +259,7 @@ def run_health_check() -> bool:
     console.print(table)
 
     if overall_pass:
-        console.print("[bold green]OVERALL STATUS: PASS (Backend, Emergency Gate, AI Inference, Reasoning Framework & Orchestrator operational)[/bold green]")
+        console.print("[bold green]OVERALL STATUS: PASS (Backend, Input Framework, Emergency Gate, AI Inference, Reasoning & Orchestrator operational)[/bold green]")
     else:
         console.print("[bold red]OVERALL STATUS: FAIL (Some backend diagnostics failed)[/bold red]")
 
