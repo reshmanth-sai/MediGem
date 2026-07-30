@@ -7,7 +7,7 @@ import { DialogProvider } from "./DialogProvider";
 
 export function RootProvider({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
       <ToastProvider>
         <DialogProvider>{children}</DialogProvider>
       </ToastProvider>
