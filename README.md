@@ -6,52 +6,48 @@ MediGem is a multimodal, offline-first AI assistant designed for healthcare prov
 
 ---
 
+## 🖥️ Interactive Gradio UI Application (Phase 9)
+
+MediGem features a clinical SaaS Web UI built with Gradio 5+, optimized for rural health workers and healthcare providers.
+
+```text
+┌───────────────────────────┬───────────────────────────────┬───────────────────────────────────────────┐
+│ 👤 LEFT SIDEBAR (25%)     │ 📁 CENTER WORKSPACE (35%)     │ 📋 RIGHT RESULTS PANEL (40% PRIMARY FOCUS) │
+├───────────────────────────┼───────────────────────────────┼───────────────────────────────────────────┤
+│ • Patient Demographics    │ • Image/PDF Upload Workspace  │ • Risk Assessment Badge Card              │
+│ • Presenting Symptoms     │ • Demo Preset Gallery (1-Click│ • Clinical Summary (Worker View)          │
+│ • Vital Signs Input       │   Lab, ECG, Rx, Wound)        │ • Reasoning Transparency Card             │
+│ • Healthcare Worker Notes │ • Execute Analysis Trigger    │ • Analysis Quality & Provenance Card      │
+│ • Session History Dropdown│ • Live Stage Progress Tracker │ • Supporting Observation Cards            │
+│                           │                               │ • Patient View & Referral Note            │
+│                           │                               │ • Download Exports (txt/json)             │
+└───────────────────────────┴───────────────────────────────┴───────────────────────────────────────────┘
+```
+
+### Key UI/UX Highlights
+1. **Clinical SaaS Aesthetics**: White-first design with teal accents (`#0D9488`), soft rounded cards (12–16px radius), subtle shadows, Inter/Roboto typography, and subtle micro-animations.
+2. **Proportional 3-Column Layout**: Left (25%), Center (35%), Right (40% - largest focus on clinical results and safety details).
+3. **Reasoning Transparency Card ("Why This Recommendation?")**: Explains AI reasoning rationale (e.g. "Elevated glucose values detected", "OCR confidence 97%", "Emergency gate status: PASSED") without ever formulating a diagnosis.
+4. **Demo Mode Preset Gallery**: One-click fixture loading for synthetic Lab Reports, ECG strips, Prescriptions, and Wound inspection photos.
+5. **Download File Exports**: One-click download triggers for Healthcare Worker Summary, Patient Summary, Referral Memorandum, and full JSON audit payload.
+6. **Developer & Judge Evaluation Inspector**: Collapsible inspection accordion revealing OpenCV blur scores, Tesseract OCR confidence scores, information completeness levels, and execution latency.
+
+---
+
 ## 🛠️ Technology Stack
 
 - **Primary AI Engine**: Ollama (Gemma 3 4B / Gemma 2B / MedGemma)
-- **Multimodal Medical Intelligence Engine**: `ContextFusionEngine`, `ContextEnhancer` (`EnrichmentNote`, `CompletenessLevel`, `AllowedCapabilities`), Immutable `ReasoningContext`
+- **Frontend / UI**: Gradio 5+ with Custom Clinical SaaS Styling
+- **Multimodal Intelligence Engine**: `ContextFusionEngine`, `ContextEnhancer` (`EnrichmentNote`, `CompletenessLevel`, `AllowedCapabilities`), Immutable `ReasoningContext`
 - **Input Processing Framework**: Multi-Format Ingestion (`IMAGE`, `PDF`, `TEXT`), Smart `ContentExtractor` (searchable PDF text layer vs optional OCR), OpenCV Quality Engine
 - **Medical Reasoning Framework**: Prompt Engineering Infrastructure, Qualitative Confidence (`LOW`, `MEDIUM`, `HIGH`), Layered Safety Guard, Presentation Explanation Builder
 - **Master Orchestrator**: Strategy-Pattern Workflow Coordinator with End-to-End Safety Gate Interception
 - **AI Infrastructure Layer**: Provider-Agnostic Architecture, Function-Calling Ready, Resilient JSON Parser
 - **Safety Gate**: Deterministic Rule-Based Emergency Safety Engine (No AI / Zero LLM Dependency)
 - **Backend Architecture**: Clean Architecture, Pydantic v2, Python 3.14+
-- **Frontend / UI**: Gradio
 - **Computer Vision & Image Processing**: OpenCV, Pillow (PIL), Scikit-Image
 - **Document & Data Processing**: PyMuPDF (`fitz`), PyTesseract, Pandas, NumPy
 - **Logging & Diagnostics**: Rich, Standard Logging
-
----
-
-## 🧠 Multimodal Medical Intelligence & Context Fusion Architecture (Phase 8)
-
-MediGem fuses clinical context, processed input data, image quality metrics, and OCR provenance into an immutable `ReasoningContext` prior to Gemma AI reasoning.
-
-```text
-ProcessedMedicalInput + ClinicalContext
-        │
-        ▼
-ContextEnhancer (Quality notes, OCR confidence, completeness evaluation)
-        │
-        ▼
-ContextFusionEngine (Fuses payload into immutable ReasoningContext)
-        │
-        ▼
-PromptComposer (Modality-aware markdown prompt fragments)
-        │
-        ▼
-AIManager / GemmaProvider (Multimodal Gemma inference execution)
-        │
-        ▼
-OutputValidator -> SafetyGuard -> ExplanationBuilder
-```
-
-### Key Multimodal Capabilities
-1. **Context Fusion Engine (`backend/reasoning/context_fusion.py`)**: Merges `ClinicalContext`, `ProcessedMedicalInput`, and context enrichments into an immutable `ReasoningContext`.
-2. **Structured Enrichment Notes (`EnrichmentNote`)**: Captures CV image quality warnings (e.g., OpenCV Laplacian blur scores), OCR confidence levels, and vitals completeness without inventing medical facts.
-3. **Completeness Evaluation (`CompletenessLevel`)**: Categorizes context payload completeness into `COMPLETE`, `PARTIAL`, or `MINIMAL` to guide Gemma reasoning bounds.
-4. **Allowed AI Capabilities (`AllowedCapabilities`)**: Explicitly declares allowed AI reasoning tasks (summarize observations, highlight red flags, recommend triage) vs prohibited actions (formulating diagnoses, prescribing drugs or dosages).
-5. **Direct Pipeline Integration**: Directly streams Gemma output through `OutputValidator` -> `SafetyGuard` -> `ExplanationBuilder` without unnecessary pipeline abstraction layers.
 
 ---
 
@@ -59,7 +55,7 @@ OutputValidator -> SafetyGuard -> ExplanationBuilder
 
 ```
 MediGem/
-├── app.py                  # Main application entry point (Placeholder)
+├── app.py                  # Main application launch entry point
 ├── backend/                # Modular backend package
 │   ├── ai/                 # AI Inference Layer (Phase 4)
 │   ├── config/             # Environment settings & constants
@@ -70,21 +66,17 @@ MediGem/
 │   ├── pipeline/           # Strategy-pattern pipeline package (Phase 5)
 │   ├── prompts/            # Markdown prompt templates (.md)
 │   ├── reasoning/          # Medical Reasoning Framework & Context Fusion (Phase 6 & 8)
-│   │   ├── context_builder.py     # MedicalContextBuilder
-│   │   ├── context_enhancers.py   # ContextEnhancer (Quality & OCR notes)
-│   │   ├── context_fusion.py      # ContextFusionEngine
-│   │   ├── explanation_builder.py # Presentation ExplanationBuilder
-│   │   ├── output_schema.py       # ClinicalReasoningOutput contract
-│   │   ├── prompt_composer.py     # Provider-agnostic PromptComposer
-│   │   ├── prompt_library.py      # PromptLibrary manager
-│   │   ├── reasoning_context.py   # Immutable ReasoningContext & models
-│   │   ├── safety.py              # Layered SafetyGuard
-│   │   └── validator.py           # OutputValidator
 │   ├── schemas/            # Modular Pydantic v2 schemas
 │   ├── services/           # Services & MediGemOrchestrator master coordinator
 │   ├── utils/              # Generic helper utilities
 │   └── validation/         # Clinical request validators
-├── frontend/               # Gradio UI components & layouts
+├── frontend/               # Gradio UI application (Phase 9)
+│   ├── app.py              # Core Gradio Blocks 3-column layout
+│   ├── callbacks.py        # Event callbacks delegating to MediGemOrchestrator
+│   ├── components.py       # Header, Landing, Patient, Upload, Results, Timeline, Footer
+│   ├── formatting.py       # HTML formatters for Risk Cards, Transparency & Quality Cards
+│   ├── themes.py           # Custom Clinical SaaS Theme & CSS stylesheet
+│   └── tests/              # Frontend unit test suite (test_ui.py)
 ├── logs/                   # Application log files (app.log)
 ├── outputs/                # Generated reports & exported artifacts
 ├── sample_data/            # Sample healthcare datasets
@@ -107,17 +99,29 @@ MediGem/
 
 ---
 
-## 🧪 Verification & Unit Testing
+## 🚀 Running MediGem Application
 
-Run the Multimodal Intelligence Engine test suite:
+Start the web interface locally:
 
 ```bash
-python -m unittest tests/test_multimodal_engine.py
+python app.py
 ```
 
-Run all 44 system unit tests:
+Open your browser at `http://localhost:7860`.
+
+---
+
+## 🧪 Verification & Unit Testing
+
+Run the Frontend UI test suite:
+
 ```bash
-python -m unittest tests/test_multimodal_engine.py tests/test_input_processing.py tests/test_reasoning_framework.py tests/test_orchestration.py tests/test_ai_provider.py tests/test_emergency_engine.py
+python -m unittest frontend/tests/test_ui.py
+```
+
+Run all 49 system unit tests:
+```bash
+python -m unittest frontend/tests/test_ui.py tests/test_multimodal_engine.py tests/test_input_processing.py tests/test_reasoning_framework.py tests/test_orchestration.py tests/test_ai_provider.py tests/test_emergency_engine.py
 ```
 
 Run complete system health diagnostics:
