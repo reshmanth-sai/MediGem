@@ -11,6 +11,13 @@ from rich.table import Table
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from backend.config import settings, RiskLevel, ImageType
+from backend.emergency import (
+    EmergencyEngine,
+    EmergencyCategory,
+    EmergencyResponse,
+    EmergencyRule,
+    RulePriority,
+)
 from backend.logging import logger
 from backend.pipeline import BasePipeline
 from backend.schemas import (
@@ -32,18 +39,12 @@ from backend.exceptions import (
     ImageProcessingError,
     EmergencyRuleError,
 )
-from backend.utils import (
-    ensure_directory_exists,
-    get_current_utc_timestamp,
-    get_file_size_bytes,
-    is_allowed_file,
-)
 
 
 def run_health_check() -> bool:
     """Execute complete backend diagnostic check."""
     console = Console()
-    table = Table(title="MediGem Backend Foundation Diagnostics", show_header=True, header_style="bold magenta")
+    table = Table(title="MediGem Backend Diagnostics", show_header=True, header_style="bold magenta")
     table.add_column("Diagnostic Check", style="cyan", width=35)
     table.add_column("Status", width=12, justify="center")
     table.add_column("Details", style="dim")
@@ -140,7 +141,7 @@ def run_health_check() -> bool:
         status = ApplicationStatus(is_healthy=True, loaded_model=settings.MODEL_NAME, ollama_connected=ollama_ok, ollama_host=settings.OLLAMA_HOST)
         err = SchemaValidationError(error_code="TEST_ERR", error_message="Test message")
         schemas_ok = True
-        schema_details = "All 8 Pydantic v2 schemas imported & instantiated successfully"
+        schema_details = "All 8 Pydantic v2 schemas verified"
     except Exception as e:
         schema_details = f"Schema instantiation error: {e}"
 
@@ -148,7 +149,23 @@ def run_health_check() -> bool:
     if not schemas_ok:
         overall_pass = False
 
-    # 9. Pipeline & Services Base Interfaces
+    # 9. Emergency Safety Engine Check
+    emg_ok = False
+    emg_details = "Emergency Engine test failed"
+    try:
+        engine = EmergencyEngine()
+        res = engine.evaluate(["chest pain"])
+        if res.emergency_detected and not res.safe_for_ai_processing and res.emergency_category == EmergencyCategory.CARDIAC:
+            emg_ok = True
+            emg_details = f"Rule DB: {len(engine.rules)} rules | Execution: {res.duration_ms}ms"
+    except Exception as e:
+        emg_details = str(e)
+
+    table.add_row("Emergency Safety Engine", "[green]PASS[/green]" if emg_ok else "[red]FAIL[/red]", emg_details)
+    if not emg_ok:
+        overall_pass = False
+
+    # 10. Pipeline & Services Base Interfaces
     interfaces_ok = False
     try:
         assert issubclass(BasePipeline, object)
@@ -168,7 +185,7 @@ def run_health_check() -> bool:
     console.print(table)
 
     if overall_pass:
-        console.print("[bold green]OVERALL STATUS: PASS (Backend foundation is 100% operational)[/bold green]")
+        console.print("[bold green]OVERALL STATUS: PASS (Backend foundation & Emergency Engine operational)[/bold green]")
     else:
         console.print("[bold red]OVERALL STATUS: FAIL (Some backend diagnostics failed)[/bold red]")
 

@@ -9,12 +9,40 @@ MediGem is a multimodal, offline-first AI assistant designed for healthcare prov
 ## 🛠️ Technology Stack
 
 - **Primary AI Engine**: Ollama (Gemma 3 4B / Gemma 2B / MedGemma)
+- **Safety Gate**: Deterministic Rule-Based Emergency Engine (No AI / Zero LLM Dependency)
 - **Backend Architecture**: Clean Architecture, Pydantic v2, Python 3.14+
 - **Frontend / UI**: Gradio
 - **Computer Vision & Image Processing**: OpenCV, Pillow (PIL), Scikit-Image
 - **Document & Data Processing**: PyMuPDF (`fitz`), PyTesseract, Pandas, NumPy
-- **API & Schemas**: Pydantic v2, Python-Dotenv, Requests
 - **Logging & Diagnostics**: Rich, Standard Logging
+
+---
+
+## 🚨 Emergency Safety Engine Architecture (Phase 3)
+
+The **Emergency Safety Engine** operates as an immediate, deterministic safety gate. It evaluates patient symptoms **BEFORE** any LLM or AI inference occurs.
+
+### Workflow Gate
+```text
+Patient Input (Symptoms)
+        ↓
+Text Normalization & Synonym Expansion
+        ↓
+Emergency Safety Engine (JSON Rule Database)
+        ↓
+Emergency Detected?
+  ├─► YES ──► Immediate Emergency Response (Ambulance / Referral)
+  │            safe_for_ai_processing = False (Gemma BLOCKED)
+  └─► NO  ──► Continue to Gemma AI Multimodal Analysis
+               safe_for_ai_processing = True
+```
+
+### Key Architectural Characteristics
+1. **100% Deterministic**: No AI, Ollama, or probabilistic reasoning.
+2. **Externalized JSON Rules**: Rules are stored separately in `backend/emergency/rules.json`.
+3. **Synonym Matching**: Synonym dictionary resolves colloquial expressions (e.g., `"passed out"` -> `"loss of consciousness"`, `"dyspnea"` -> `"shortness of breath"`).
+4. **Transparent Explanations**: Generates human-readable `matched_reason` for auditing.
+5. **Score & Priority**: Computes `rule_match_score` and resolves conflicts using priority hierarchy (`CRITICAL` > `HIGH` > `MEDIUM` > `LOW`).
 
 ---
 
@@ -25,51 +53,33 @@ MediGem/
 ├── app.py                  # Main application entry point (Placeholder)
 ├── backend/                # Modular backend package
 │   ├── config/             # Environment settings & constants
-│   │   ├── constants.py    # RiskLevel, ImageType, File extension & limit constants
-│   │   └── settings.py     # Pydantic environment configuration loader
+│   ├── emergency/          # Emergency Safety Engine
+│   │   ├── constants.py    # EmergencyCategory, RulePriority, RecommendedAction
+│   │   ├── engine.py       # Priority resolution engine & transparent explanation builder
+│   │   ├── evaluator.py    # Synonym-aware symptom evaluator & matching algorithm
+│   │   ├── exceptions.py   # EmergencyEngineError, InvalidRuleDefinitionError
+│   │   ├── models.py       # EmergencyRule, EmergencyResponse schemas
+│   │   ├── rules.json      # Externalized JSON rule database & synonym dictionary
+│   │   └── rules.py        # JSON rule loader & persistence manager
 │   ├── exceptions/         # Custom exception hierarchy
-│   │   └── __init__.py     # ApplicationError, ConfigurationError, AppValidationError, etc.
 │   ├── logging/            # Central logging infrastructure
-│   │   └── logger.py       # Rich colored console + rotating file logger (logs/app.log)
 │   ├── pipeline/           # Abstract pipeline workflow interfaces
-│   │   └── base_pipeline.py# BasePipeline(ABC) for ECG, Report, Prescription & Wound workflows
 │   ├── schemas/            # Modular Pydantic v2 schemas
-│   │   ├── patient.py          # PatientInput schema
-│   │   ├── medical_image.py    # MedicalImage schema
-│   │   ├── analysis.py         # AnalysisRequest & AnalysisResponse schemas
-│   │   ├── risk.py             # RiskAssessment schema
-│   │   ├── referral.py         # ReferralSummary schema
-│   │   ├── system.py           # ApplicationStatus schema
-│   │   └── validation_error.py # SchemaValidationError schema
 │   ├── services/           # Abstract Base Class interfaces
-│   │   └── __init__.py     # BaseService(ABC), BaseAnalyzer(ABC), BaseValidator(ABC)
-│   ├── utils/              # Generic helper utilities
-│   │   ├── file_utils.py       # Safe file reading/writing & path utilities
-│   │   ├── image_utils.py      # Image resolution & PIL format helpers
-│   │   ├── json_utils.py       # Safe JSON serialization
-│   │   ├── time_utils.py       # ISO-8601 UTC timestamp utilities
-│   │   └── validation_utils.py # Range validation & text sanitization
-│   └── (ai, emergency, prompts, models, validation...) # Domain modules
+│   └── utils/              # Generic helper utilities
 ├── frontend/               # Gradio UI components & layouts
-├── assets/                 # Static assets, branding, and test images
 ├── logs/                   # Application log files (app.log)
 ├── outputs/                # Generated reports & exported artifacts
-│   ├── analysis/           # Analysis outputs
-│   ├── referrals/          # Generated referral PDFs & documents
-│   └── reports/            # Summary clinical reports
 ├── sample_data/            # Sample healthcare datasets
-│   ├── ecg/                # Sample ECG wave images/data
-│   ├── prescriptions/      # Sample prescription scans
-│   ├── reports/            # Lab reports & clinical notes
-│   └── wounds/             # Wound visual inspection samples
 ├── tests/                  # Automated verification & test suite
-│   ├── health_check.py          # System diagnostic & health check suite
-│   ├── test_dependencies.py     # Package import verification
-│   ├── test_gradio.py           # Gradio interface verification
-│   ├── test_image_processing.py # Image loader verification
-│   └── test_offline_inference.py# Ollama Gemma inference test
+│   ├── health_check.py            # System diagnostic & health check suite
+│   ├── test_emergency_engine.py   # Emergency engine unit tests
+│   ├── test_dependencies.py       # Package import verification
+│   ├── test_gradio.py             # Gradio interface verification
+│   ├── test_image_processing.py   # Image loader verification
+│   └── test_offline_inference.py  # Ollama Gemma inference test
 ├── tmp/                    # Temporary working files
-├── .env.example            # Environment settings template
+├── .env.example            # Environment configuration template
 ├── .gitignore              # Git ignore configuration
 ├── README.md               # Project overview & guide
 └── requirements.txt        # Frozen Python dependencies
@@ -77,71 +87,53 @@ MediGem/
 
 ---
 
-## 🏗️ How Future Modules Plug Into This Architecture
+## 💡 How to Add New Emergency Rules
 
-MediGem's backend foundation enforces clean architecture separation:
+Rules are completely decoupled from Python code. To add a new emergency trigger rule:
 
-1. **Adding a New Analysis Workflow (e.g. ECG Analysis Pipeline)**:
-   - Inherit from `backend.pipeline.BasePipeline`:
-     ```python
-     from backend.pipeline import BasePipeline
-     from backend.schemas import AnalysisRequest, AnalysisResponse
+Add an entry to `backend/emergency/rules.json`:
 
-     class EcgPipeline(BasePipeline):
-         def preprocess(self, request: AnalysisRequest): ...
-         def process(self, preprocessed_data): ...
-         def postprocess(self, process_output, request: AnalysisRequest) -> AnalysisResponse: ...
-     ```
+```json
+{
+  "rule_id": "R-HEAT-01",
+  "rule_name": "Heat Stroke Emergency",
+  "description": "Triggers on high fever with absence of sweating during extreme heat.",
+  "symptoms_required": ["extreme heat fever", "no sweating"],
+  "min_match_count": 1,
+  "priority": 3,
+  "recommended_action": "IMMEDIATE_REFERRAL",
+  "emergency_category": "GENERAL_EMERGENCY",
+  "enabled": true
+}
+```
 
-2. **Creating Domain Analyzers**:
-   - Inherit from `backend.services.BaseAnalyzer`:
-     ```python
-     from backend.services import BaseAnalyzer
+Or add dynamically at runtime in Python:
+```python
+from backend.emergency import emergency_engine, EmergencyRule, RulePriority, EmergencyCategory
 
-     class WoundAnalyzer(BaseAnalyzer):
-         def analyze(self, input_data): ...
-     ```
-
-3. **Input & Data Validation**:
-   - Import schemas from `backend.schemas` and use `AppValidationError` from `backend.exceptions` for domain error handling:
-     ```python
-     from backend.schemas import PatientInput
-     from backend.exceptions import AppValidationError
-     ```
-
-4. **Logging Across Modules**:
-   - Always import logger from `backend.logging`:
-     ```python
-     from backend.logging import logger
-     logger.info("Clinical analysis initiated for patient P-10492")
-     ```
+custom_rule = EmergencyRule(
+    rule_id="R-HEAT-01",
+    rule_name="Heat Stroke Emergency",
+    description="Custom heat stroke trigger",
+    symptoms_required=["extreme heat fever"],
+    min_match_count=1,
+    priority=RulePriority.HIGH,
+    emergency_category=EmergencyCategory.GENERAL_EMERGENCY,
+)
+emergency_engine.add_rule(custom_rule)
+```
 
 ---
 
-## 🧪 Verification & Health Check
+## 🧪 Verification & Unit Testing
 
-Run the diagnostic health check to verify the entire foundation:
+Run the emergency engine test suite:
 
+```bash
+python -m unittest tests/test_emergency_engine.py
+```
+
+Run system health diagnostics:
 ```bash
 python tests/health_check.py
 ```
-
-Expected diagnostic output:
-- `✓ Python Version Check: PASS`
-- `✓ Virtual Environment: PASS`
-- `✓ Ollama Service Connection: PASS`
-- `✓ AI Model Existence: PASS`
-- `✓ Configuration Settings: PASS`
-- `✓ Directory Hierarchy: PASS`
-- `✓ Logging Infrastructure: PASS`
-- `✓ Pydantic Schemas Import: PASS`
-- `✓ Service & Pipeline Base: PASS`
-
----
-
-## 📜 Development Workflow & Coding Standards
-
-1. **Type Annotations**: All functions must include complete Python type hints (`str`, `int`, `Optional`, `Dict`, `List`).
-2. **Docstrings**: Use standard Google-style docstrings for all classes, methods, and modules.
-3. **No Hardcoded Constants**: Store configuration in `backend/config/settings.py` or `backend/config/constants.py`.
-4. **Exception Handling**: Raise domain-specific exceptions inheriting from `ApplicationError` (`backend/exceptions`).
