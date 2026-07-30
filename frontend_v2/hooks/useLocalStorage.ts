@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 /** Type-safe hook synchronizing state with window.localStorage */
-export function useLocalStorage<T>(key: str, initialValue: T): [T, (val: T | ((prev: T) => T)) => void] {
+export function useLocalStorage<T>(key: string, initialValue: T): [T, (val: T | ((prev: T) => T)) => void] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") return initialValue;
     try {

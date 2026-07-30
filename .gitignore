@@ -21,6 +21,14 @@ share/python-wheels/
 .installed.cfg
 *.egg
 
+# Node.js & Next.js
+node_modules/
+.next/
+frontend_v2/node_modules/
+frontend_v2/.next/
+out/
+build/
+
 # Virtual Environment
 .venv/
 venv/

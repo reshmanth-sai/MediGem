@@ -13,7 +13,8 @@ export interface AnalysisRequestPayload {
 /** Service interface for executing clinical analysis against FastAPI */
 export class AnalysisService extends BaseService {
   async executeAnalysis(payload: AnalysisRequestPayload): Promise<AnalysisResponse> {
-    return this.client.post<AnalysisResponse>("/analyze", payload);
+    const res = await this.client.post<AnalysisResponse>("/analyze", payload);
+    return res.data;
   }
 }
 
