@@ -10,7 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -29,37 +29,11 @@ frontend_v2/.next/
 out/
 build/
 
-# Virtual Environment
-.venv/
-venv/
-env/
-ENV/
-env.bak/
-venv.bak/
+# Un-ignore Next.js lib directory
+!frontend_v2/lib/
+!frontend_v2/lib/**
 
-# Environment Variables & Secrets
+# Environment & Local Secrets
 .env
-!.env.example
-
-# Outputs & Generated Artifacts
-outputs/*
-!outputs/.gitkeep
-logs/
+.env.local
 *.log
-
-# IDE & Editor Settings
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# OS Files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
