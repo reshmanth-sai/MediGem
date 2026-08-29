@@ -191,7 +191,11 @@ MediGem keeps a recognisable identity. It is confined to surfaces that carry no 
 
 ## 5. Typography
 
-**Public Sans** for all interface text. **JetBrains Mono** for measured values only: vitals, patient IDs, timings. Monospace is for data and measurement, never as a costume for looking technical.
+**Public Sans** for all interface text, as directed.
+
+**Atkinson Hyperlegible Mono** for measured values only: vitals, patient IDs, timings, blood pressure readings. Monospace is for data and measurement, never as a costume for looking technical.
+
+This replaces JetBrains Mono, which was my earlier choice rather than a requirement. Atkinson Hyperlegible was designed by the Braille Institute specifically to disambiguate characters that are easily confused at a glance: `0` from `O`, `1` from `l` from `I`, `5` from `S`, `6` from `b`, `8` from `B`. In a clinical tool the data layer is where a misread character becomes a misread dose, patient ID or blood pressure. A face engineered for exactly that disambiguation is the correct choice for the numerals, and it costs nothing. The mono variant ships a 200 to 800 variable weight axis. Interface text is unaffected.
 
 Both are loaded through `next/font/google`, replacing the render-blocking `@import` currently at the top of `globals.css`.
 
@@ -241,12 +245,22 @@ Healthcare software lives in tables. `PatientQueueTable`, `CaseHistoryTable` and
 | Zebra striping | Even rows `n-100` on an `n-50` surface |
 | Row separators | None. Zebra carries the separation, so rows do not also get borders. |
 | Header | Sticky, `n-200` fill, `n-700` ink, `label` type, 1px `n-300` bottom rule |
+| Focus clearance | `scroll-padding-top` equal to the sticky header height, on the scroll container |
 | Row hover | `n-200` fill |
 | Row selected | `action-50` fill with `aria-selected`, no side stripe |
 | Numeric columns | Right-aligned, `tabular-nums`, JetBrains Mono |
 | Text columns | Left-aligned |
 | Vertical rules | None |
 | Overflow | `overflow-x: auto` on the container. The page body never scrolls sideways. |
+
+### 7.1 Chips and compact labels
+
+`SmartSymptomSearch` and the queue filters render chip collections. Two rules apply, both severity High:
+
+- **Chips wrap, never clip.** The collection uses `flex-wrap`, not a fixed-height row with hidden overflow. Where overflow is genuinely unavoidable, the `+n` indicator is an operable disclosure that reveals the hidden values, not a decorative count.
+- **A compact label stays on one line.** Badges, risk pills and status chips use `nowrap` with a shrinkable label and `min-width: 0`. Where a value must truncate, the full text is reachable by keyboard, pointer and touch, never by a hover-only `title` attribute.
+
+### 7.2 Sorting and semantics
 
 Sortable headers carry a visible sort state and `aria-sort`. Every table has real `<th>` with `scope`, a `<caption>` (visually hidden where the heading already names it), plus defined loading, empty and error states. Row actions use `sm` buttons with a 44px hit area.
 
@@ -427,6 +441,8 @@ The hardcoded "Ramesh Kumar" default is removed. The form starts empty. `Load De
 
 Errors render below the field in `risk.emergency` text at 13px, with `aria-invalid` and `aria-describedby` wired. `Next Step` is blocked while the current step is invalid. Submission is blocked while any step is invalid.
 
+**Error summary.** Inline field errors alone are not sufficient. After a failed step advance or submit, a summary renders at the top of the step with `role="alert"` and `tabindex="-1"`, focus moves to it, and each entry is an anchor linking to its invalid field. Inline errors are retained, not replaced. Validation fires on blur, never on keystroke.
+
 ---
 
 ## 11. States
@@ -446,7 +462,7 @@ Every interactive surface ships the full cycle. Currently only the success state
 Restoring what `ACCESSIBILITY_AND_TERMINOLOGY.md` already requires.
 
 - Every text and background pair verified at WCAG AA by script, in both themes. Body and placeholder text at 4.5:1 minimum, large text and interactive boundaries at 3:1.
-- Interactive targets at least 44px by 44px, including `sm` buttons via hit-area padding.
+- Interactive targets at least 44px by 44px, including `sm` buttons via hit-area padding. Stated precisely: WCAG 2.2 AA for web requires 24 by 24 CSS px, not the 44pt figure from Apple HIG. MediGem adopts 44px as a stricter product floor because the primary device is a tablet handled with gloves, but the conformance claim is the 24px web criterion. The two are not interchangeable and the distinction is recorded so the stricter number is never mistaken for the standard.
 - `role="alert"` with `aria-live="assertive"` on emergency interception; `role="status"` with `aria-live="polite"` on the stage tracker.
 - Risk badges carry an `aria-label` spelling out the level.
 - Keyboard reachability through every route, with visible focus.
