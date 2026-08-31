@@ -1,27 +1,87 @@
-# Python Cache
+# ==============================
+# Python
+# ==============================
+
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+*.egg
+*.egg-info/
+.eggs/
+.installed.cfg
+
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
-/lib/
-lib64/
 parts/
 sdist/
 var/
 wheels/
 share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
-# Node.js & Next.js
+
+# ==============================
+# Virtual Environments
+# ==============================
+
+.venv/
+venv/
+env/
+ENV/
+
+
+# ==============================
+# Secrets / Environment
+# ==============================
+
+.env
+.env.local
+*.env.*
+!.env.example
+
+
+# ==============================
+# Testing / Coverage
+# ==============================
+
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+
+# ==============================
+# Ollama / Local Model Weights
+# ==============================
+
+*.gguf
+*.bin
+models/
+.ollama/
+
+
+# ==============================
+# Generated / Runtime Output
+# ==============================
+
+outputs/*
+!outputs/.gitkeep
+
+evaluation/reports/
+evaluation/**/*.json
+evaluation/**/*.csv
+!evaluation/tests/**
+
+
+# ==============================
+# Node.js / Next.js
+# ==============================
+
 node_modules/
 .next/
 frontend_v2/node_modules/
@@ -29,23 +89,35 @@ frontend_v2/.next/
 out/
 build/
 
-# Un-ignore Next.js lib directory
+# Keep frontend_v2/lib tracked
 !frontend_v2/lib/
 !frontend_v2/lib/**
 
-# Environment & Local Secrets
-.env
-.env.local
-*.log
 
-# Operating System
-.DS_Store
-*/.DS_Store
-**/.DS_Store
-Thumbs.db
-
+# ==============================
 # Agent / Tooling Runtime
+# ==============================
+
 .ijfw/
 **/.ijfw/
 ijfw/
 
+
+# ==============================
+# IDE / OS Junk
+# ==============================
+
+.DS_Store
+*/.DS_Store
+**/.DS_Store
+.vscode/
+.idea/
+Thumbs.db
+
+
+# ==============================
+# Logs
+# ==============================
+
+*.log
+logs/
