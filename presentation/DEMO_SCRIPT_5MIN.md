@@ -1,6 +1,6 @@
-# MediGem 5-Minute Live Judging Demonstration Script
+# MediGem 5-Minute Technical Demonstration Guide
 
-> **Comprehensive 300-Second Pitch & Feature Walkthrough Script**
+> **Comprehensive 300-Second System & Feature Walkthrough Guide**
 
 ---
 
@@ -9,7 +9,7 @@
 ### Minute 1: Problem & Architecture (0:00 - 1:00)
 - **Action**: Display MediGem Gradio UI landing dashboard.
 - **Spoken Script**:
-  > *"Good morning judges. Front-line health workers in rural clinics evaluate complex medical reports every day without internet access or specialist physicians. MediGem is an offline multimodal AI clinical co-pilot built on Google Gemma 3 4B running locally via Ollama. Notice our 3-column layout: Left sidebar for patient data, Center workspace for file ingestion, and Right panel for primary clinical results."*
+  > *"Good morning everyone. Front-line health workers in rural clinics evaluate complex medical reports every day without internet access or specialist physicians. MediGem is an offline multimodal AI clinical co-pilot built on Google Gemma 3 4B running locally via Ollama. Notice our 3-column layout: Left sidebar for patient data, Center workspace for file ingestion, and Right panel for primary clinical results."*
 
 ---
 
@@ -30,9 +30,9 @@
 ---
 
 ### Minute 4: Reasoning Transparency & Developer Inspector (3:00 - 4:00)
-- **Action**: Scroll to **Why was this recommendation generated?** card ➔ Expand **⚙️ Developer & Judge Evaluation Inspector**.
+- **Action**: Scroll to **Why was this recommendation generated?** card ➔ Expand **⚙️ Developer & Evaluation Inspector**.
 - **Spoken Script**:
-  > *"Judges, point your attention to our Reasoning Transparency Card. MediGem explicitly tells the health worker WHY this recommendation was generated, citiing PDF text extraction, OCR confidence, and rule checks. In our Developer Inspector, we reveal OpenCV blur variance scores and execution latencies."*
+  > *"Point your attention to our Reasoning Transparency Card. MediGem explicitly tells the health worker WHY this recommendation was generated, citing PDF text extraction, OCR confidence, and rule checks. In our Developer Inspector, we reveal OpenCV blur variance scores and execution latencies."*
 
 ---
 

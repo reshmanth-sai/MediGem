@@ -1,6 +1,6 @@
-# MediGem Live Hackathon Presentation Script & Speaker Notes
+# MediGem Demonstration Walkthrough & Speaker Notes
 
-> **5-7 Minute Live Demo Workflow for Hackathon Judges**
+> **5-7 Minute Live Demonstration Workflow & Feature Guide**
 
 ---
 

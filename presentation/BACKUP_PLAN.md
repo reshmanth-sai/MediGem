@@ -1,8 +1,8 @@
 # MediGem Failure Recovery & Contingency Plan
 
-> **Robust Protocols for Unexpected Technical Issues During Live Judging**
+> **Robust Protocols for Unexpected Technical Issues During Live Demonstrations**
 
-Live hackathon demonstrations carry inherent hardware and runtime risks. MediGem includes contingency protocols for every potential failure scenario.
+Live technical demonstrations carry inherent hardware and runtime risks. MediGem includes contingency protocols for every potential failure scenario.
 
 ---
 
@@ -15,4 +15,4 @@ Live hackathon demonstrations carry inherent hardware and runtime risks. MediGem
 | **Gradio Web App Fails to Render** | Port binding conflict | Relaunch app on port 7861: `python app.py --port 7861` | Present SVG system architecture diagram (`docs/diagrams/system_architecture.svg`) |
 | **Tesseract OCR Library Error** | Missing system binary | Upload PDF document fixture (`sample_report.pdf`), which bypasses OCR via PyMuPDF | Use plain text symptom presentation mode |
 | **Laptop Battery Low / Power Outage** | Unplugged charger | Connect power adapter immediately; system continues running 100% offline without network loss | Use backup tablet or presentation slides (`docs/PRESENTATION.md`) |
-| **Judge Asks Out-of-Scope Question** | Question on diagnostic claims | Reiterate MediGem's non-diagnostic boundary: *"MediGem strictly triages risk levels and prepares referral notes to assist healthcare providers."* | Refer to `docs/SAFETY.md` |
+| **Reviewer Asks Out-of-Scope Question** | Question on diagnostic claims | Reiterate MediGem's non-diagnostic boundary: *"MediGem strictly triages risk levels and prepares referral notes to assist healthcare providers."* | Refer to `docs/SAFETY.md` |

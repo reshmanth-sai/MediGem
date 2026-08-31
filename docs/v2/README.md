@@ -2,7 +2,7 @@
 
 Welcome to the **Version 2 Production Blueprint** for **MediGem - Offline AI Co-Pilot for Rural Healthcare Workers**.
 
-This documentation suite provides a complete engineering blueprint to evolve MediGem from its current Gradio hackathon prototype into a production-grade, API-first clinical SaaS platform powered by Next.js 14+ and FastAPI—**without rewriting a single line of the existing `MedicalPipeline` or safety rules**.
+This documentation suite provides a complete engineering blueprint to evolve MediGem from its current Gradio standalone prototype into a production-grade, API-first clinical SaaS platform powered by Next.js 14+ and FastAPI—**without rewriting a single line of the existing `MedicalPipeline` or safety rules**.
 
 ---
 

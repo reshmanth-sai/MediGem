@@ -1,16 +1,16 @@
-# MediGem Hackathon Pitch Deck & Presentation Kit
+# MediGem Project Overview & Presentation Guide
 
-> **Offline AI Co-Pilot for Rural Healthcare Workers** | Built for Build with Gemma
+> **Offline AI Co-Pilot for Rural Healthcare Workers** | Powered by Google Gemma 3 4B
 
 ---
 
-## 📽️ Slide Deck Structure & Speaker Notes
+## 📽️ Presentation Structure & Speaker Notes
 
 ### Slide 1: Title & Hook
 - **Visual**: MediGem logo, teal gradient background, tagline: *"Offline AI Co-Pilot for Rural Healthcare Workers"*.
 - **Key Message**: Empowering front-line health workers with offline multimodal AI assistance.
 - **Speaker Talking Points**:
-  > *"Good morning judges. Over half the world's rural healthcare facilities lack reliable internet access. When a rural nurse evaluates a complex lab report, an ECG strip, or a severe wound, they often work alone. Today, we are proud to introduce MediGem—a multimodal, offline-first AI co-pilot powered by Google Gemma 3 4B."*
+  > *"Welcome everyone. Over half the world's rural healthcare facilities lack reliable internet access. When a rural nurse evaluates a complex lab report, an ECG strip, or a severe wound, they often work alone. Today, we are proud to introduce MediGem—a multimodal, offline-first AI co-pilot powered by Google Gemma 3 4B."*
 
 ---
 
@@ -83,7 +83,7 @@
 ---
 
 ### Slide 8: Future Roadmap & Impact
-- **Visual**: Roadmap timeline (v1.0 Hackathon -> v2.0 Mobile Edge -> v3.0 DICOM & Federated Learning).
+- **Visual**: Roadmap timeline (v1.0 Core System -> v2.0 Mobile Edge -> v3.0 DICOM & Federated Learning).
 - **Key Points**:
   - v2.0: Android native mobile app using Gemma 2B TFLite/MediaPipe & offline voice transcription.
   - v3.0: DICOM X-Ray/Ultrasound ingestion & federated clinic networks.

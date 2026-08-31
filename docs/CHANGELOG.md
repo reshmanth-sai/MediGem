@@ -6,7 +6,7 @@ All notable changes to MediGem will be documented in this file.
 
 ## [1.0.0] - 2026-07-30
 
-### 🚀 Initial Hackathon Release for Build with Gemma
+### 🚀 Initial Release (v1.0.0 — originally built for Build with Gemma)
 
 #### Core AI & Multimodal Engine
 - **Multimodal Intelligence Engine**: Fuses clinical context, multi-format processed inputs (`IMAGE`, `PDF`, `TEXT`), OpenCV quality metrics, and OCR provenance into an immutable `ReasoningContext`.

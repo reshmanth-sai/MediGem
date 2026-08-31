@@ -1,4 +1,4 @@
-# MediGem Hackathon Judge FAQ
+# MediGem Architecture & Clinical FAQ
 
 Common questions and technical answers regarding MediGem's architecture, safety bounds, AI model selection, and clinical design.
 

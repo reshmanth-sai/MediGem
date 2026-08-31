@@ -2,7 +2,7 @@
 
 > **Production-Grade 3-Tier Architecture Specification**
 
-MediGem Version 2 evolves the current hackathon prototype into a scalable, API-first clinical SaaS platform while preserving **100% of the existing `MedicalPipeline` logic, Emergency Safety Engine rules, and Gemma AI Provider infrastructure**.
+MediGem Version 2 evolves the current standalone prototype into a scalable, API-first clinical SaaS platform while preserving **100% of the existing `MedicalPipeline` logic, Emergency Safety Engine rules, and Gemma AI Provider infrastructure**.
 
 ---
 

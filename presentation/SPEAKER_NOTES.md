@@ -1,12 +1,12 @@
-# MediGem Team Speaker Notes & Presentation Coordination
+# MediGem Team Presentation & Demonstration Coordination
 
-> **Role Assignments, Slide Cues, Click Triggers, and Timing Cues for Team Pitching**
+> **Role Assignments, Slide Cues, Click Triggers, and Timing Cues for Team Presentations**
 
 ---
 
 ## 👥 Presenter Role Assignments
 
-- **Speaker 1 (Pitch Lead)**: Storytelling, problem framing, clinical vision, wrap-up.
+- **Speaker 1 (Presentation Lead)**: Storytelling, problem framing, clinical vision, wrap-up.
 - **Speaker 2 (Technical & Demo Lead)**: Live UI driver, Emergency Safety Gate demo, multimodal pipeline execution.
 - **Speaker 3 (AI & Architecture Lead)**: Gemma 3 4B integration, Context Fusion, evaluation benchmarks, Q&A anchor.
 

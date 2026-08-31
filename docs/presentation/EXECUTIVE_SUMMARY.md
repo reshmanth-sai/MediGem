@@ -1,6 +1,6 @@
-# MediGem Executive Summary & Hackathon Presentation Kit
+# MediGem Executive Summary & Presentation Kit
 
-> **Offline AI Co-Pilot for Rural Healthcare Workers** | Built for Build with Gemma
+> **Offline AI Co-Pilot for Rural Healthcare Workers** | Powered by Google Gemma 3 4B
 
 ---
 
@@ -35,8 +35,8 @@
 - 🏗️ [**Technical Architecture (`docs/ARCHITECTURE.md`)**](../ARCHITECTURE.md)
 - 🛡️ [**Healthcare Safety Bounds (`docs/SAFETY.md`)**](../SAFETY.md)
 - 📊 [**Benchmark Evaluation Report (`docs/EVALUATION.md`)**](../EVALUATION.md)
-- 🎬 [**Live Demo Guide & Scripts (`docs/DEMO_GUIDE.md`)**](../DEMO_GUIDE.md)
-- 📽️ [**Pitch Deck & Speaker Notes (`docs/PRESENTATION.md`)**](../PRESENTATION.md)
-- ❓ [**Judge FAQ (`docs/FAQ.md`)**](../FAQ.md)
+- 🎬 [**System Demonstration Guide (`docs/DEMO_GUIDE.md`)**](../DEMO_GUIDE.md)
+- 📽️ [**Project Overview & Presentation (`docs/PRESENTATION.md`)**](../PRESENTATION.md)
+- ❓ [**Technical & Clinical FAQ (`docs/FAQ.md`)**](../FAQ.md)
 - 🗺️ [**Product Roadmap (`docs/ROADMAP.md`)**](../ROADMAP.md)
-- ✅ [**Submission Checklist (`docs/SUBMISSION_CHECKLIST.md`)**](../SUBMISSION_CHECKLIST.md)
+- ✅ [**Release Checklist (`docs/RELEASE_CHECKLIST.md`)**](../RELEASE_CHECKLIST.md)

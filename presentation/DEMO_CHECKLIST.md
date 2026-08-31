@@ -1,6 +1,6 @@
 # MediGem Pre-Demo Readiness Checklist
 
-> **Step-by-Step Verification Protocol Before Walking On Stage**
+> **Step-by-Step Verification Protocol Before Live Demonstration**
 
 Execute this checklist 15 minutes prior to live presentation.
 
@@ -29,5 +29,5 @@ Execute this checklist 15 minutes prior to live presentation.
   - `tests/fixtures/sample_prescription.png` present
   - `tests/fixtures/sample_wound.png` present
 - [ ] **Pre-Load Demo Gallery**: Click each Demo Gallery button once to warm up PyMuPDF and model caches.
-- [ ] **Browser Display**: Zoom browser to 110% for crisp visibility on judge screens.
+- [ ] **Browser Display**: Zoom browser to 110% for crisp visibility during demonstrations.
 - [ ] **Close Background Apps**: Close slack, email, and heavy browser tabs to maximize CPU/RAM for Ollama local inference.

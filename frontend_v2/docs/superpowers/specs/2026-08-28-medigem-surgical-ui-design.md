@@ -321,7 +321,7 @@ Rendered banding:
 
 ## 9. Dashboard
 
-The home dashboard is the first screen anyone sees, including judges. It must not read as a Tailwind admin template: a row of four equal stat cards, a chart, and a table.
+The home dashboard is the first screen anyone sees, including evaluators and reviewers. It must not read as a Tailwind admin template: a row of four equal stat cards, a chart, and a table.
 
 **Target composition:** Apple Health's calm hierarchy, Epic's density, Linear's precision.
 

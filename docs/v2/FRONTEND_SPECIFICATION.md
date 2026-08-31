@@ -30,7 +30,7 @@ frontend_v2/
 │   ├── history/
 │   │   └── page.tsx            # Session timeline & export archive
 │   ├── evaluation/
-│   │   └── page.tsx            # Benchmark & judge evaluation dashboard
+│   │   └── page.tsx            # Benchmark & system evaluation dashboard
 │   └── api/                    # Next.js route handlers
 ├── components/
 │   ├── ui/                     # shadcn/ui atomic primitives (Button, Card, Badge)

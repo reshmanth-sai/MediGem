@@ -1,123 +1,133 @@
-# ==============================
-# Python
-# ==============================
+# ==============================================================================
+# MediGem Hardened .gitignore
+# ==============================================================================
 
+# ------------------------------------------------------------------------------
+# 1. Python Cache & Build Artifacts
+# ------------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-
-*.egg
-*.egg-info/
-.eggs/
-.installed.cfg
-
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
+.eggs/
+/lib/
+lib64/
 parts/
 sdist/
 var/
 wheels/
 share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-
-# ==============================
-# Virtual Environments
-# ==============================
-
+# ------------------------------------------------------------------------------
+# 2. Virtual Environments
+# ------------------------------------------------------------------------------
 .venv/
 venv/
-env/
 ENV/
+env/
+ENV*/
 
-
-# ==============================
-# Secrets / Environment
-# ==============================
-
-.env
-.env.local
-*.env.*
-!.env.example
-
-
-# ==============================
-# Testing / Coverage
-# ==============================
-
+# ------------------------------------------------------------------------------
+# 3. Testing, Coverage & Quality Assurance
+# ------------------------------------------------------------------------------
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 .tox/
+.nox/
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
 
-
-# ==============================
-# Ollama / Local Model Weights
-# ==============================
-
+# ------------------------------------------------------------------------------
+# 4. Local AI Model Weights & Checkpoints (Ollama / GGUF / ONNX / PyTorch)
+# ------------------------------------------------------------------------------
 *.gguf
 *.bin
+*.onnx
+*.pt
+*.pth
+*.safetensors
 models/
 .ollama/
 
+# ------------------------------------------------------------------------------
+# 5. Environment & Local Secrets
+# ------------------------------------------------------------------------------
+.env
+.env.*
+.env.local
+.env*.local
+!.env.example
+!.env.*.example
 
-# ==============================
-# Generated / Runtime Output
-# ==============================
-
-outputs/*
-!outputs/.gitkeep
-
-evaluation/reports/
-evaluation/**/*.json
-evaluation/**/*.csv
-!evaluation/tests/**
-
-
-# ==============================
-# Node.js / Next.js
-# ==============================
-
+# ------------------------------------------------------------------------------
+# 6. Node.js & Next.js Build Outputs (frontend_v2)
+# ------------------------------------------------------------------------------
 node_modules/
-.next/
 frontend_v2/node_modules/
+.next/
 frontend_v2/.next/
 out/
-build/
+.vercel/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Keep frontend_v2/lib tracked
+# Explicitly preserve Next.js library directories
 !frontend_v2/lib/
 !frontend_v2/lib/**
 
+# ------------------------------------------------------------------------------
+# 7. Runtime Outputs, Logs & Temporary Files
+# ------------------------------------------------------------------------------
+outputs/**/*
+outputs/*
+!outputs/**/
+!outputs/**/.gitkeep
+!outputs/.gitkeep
+logs/**/*
+logs/*
+!logs/**/
+!logs/**/.gitkeep
+!logs/.gitkeep
+*.log
+tmp/**/*
+tmp/*
+!tmp/**/
+!tmp/**/.gitkeep
+!tmp/.gitkeep
 
-# ==============================
-# Agent / Tooling Runtime
-# ==============================
-
-.ijfw/
-**/.ijfw/
-ijfw/
-
-
-# ==============================
-# IDE / OS Junk
-# ==============================
-
+# ------------------------------------------------------------------------------
+# 8. Operating System & Editor Junk
+# ------------------------------------------------------------------------------
 .DS_Store
 */.DS_Store
 **/.DS_Store
+Thumbs.db
 .vscode/
 .idea/
-Thumbs.db
+*.swp
+*.swo
+*~
 
-
-# ==============================
-# Logs
-# ==============================
-
-*.log
-logs/
+# ------------------------------------------------------------------------------
+# 9. Agent & Tooling Runtime Scratchpad
+# ------------------------------------------------------------------------------
+.ijfw/
+**/.ijfw/
+ijfw/
+.claude/
+.superpowers/

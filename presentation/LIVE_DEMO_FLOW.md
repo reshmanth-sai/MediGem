@@ -6,7 +6,7 @@
 
 ## 🎯 Recommended Benchmark Fixture Datasets
 
-For maximum visual impact during judging, use these pre-loaded synthetic fixtures:
+For maximum visual impact during demonstrations, use these pre-loaded synthetic fixtures:
 
 1. **Emergency Demonstration**: Symptoms: `"Severe crushing chest pain, diaphoresis, radiation to left jaw"`.
    - *Why*: Triggers `R-CARDIAC-01` rule in `0.17ms`, blocking LLM inference and rendering a red emergency card.
@@ -44,7 +44,7 @@ Step 7: Highlight "MODERATE RISK" Badge & Clinical Summary Textbox
 Step 8: Point to "💡 Why was this recommendation generated?" Transparency Card
         │
         ▼
-Step 9: Expand "⚙️ Developer & Judge Evaluation Inspector" Accordion
+Step 9: Expand "⚙️ Developer & Evaluation Inspector" Accordion
         │
         ▼
 Step 10: Click "Referral Note" Export Download Button to output text file

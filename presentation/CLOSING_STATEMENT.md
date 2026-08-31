@@ -8,7 +8,7 @@ Select the closing statement variant that best fits your presentation format.
 
 ## 🎤 Closing Option A: Impact & Human-Centric (Recommended)
 
-> *"Judges, over two billion people worldwide rely on rural health clinics that operate without internet or doctors. MediGem proves that we don't need continuous cloud connectivity to deliver life-saving AI assistance. By combining Google Gemma 3 4B with a deterministic emergency safety gate, MediGem brings fast, transparent, non-diagnostic AI support directly to the front lines. Thank you, and we welcome your questions!"*
+> *"Over two billion people worldwide rely on rural health clinics that operate without internet or doctors. MediGem proves that we don't need continuous cloud connectivity to deliver life-saving AI assistance. By combining Google Gemma 3 4B with a deterministic emergency safety gate, MediGem brings fast, transparent, non-diagnostic AI support directly to the front lines. Thank you, and we welcome your questions!"*
 
 ---
 
@@ -18,6 +18,6 @@ Select the closing statement variant that best fits your presentation format.
 
 ---
 
-## 🎤 Closing Option C: Hackathon Vision & Future Scale
+## 🎤 Closing Option C: Project Vision & Future Scale
 
-> *"Build with Gemma gave us the opportunity to reimagining how multimodal AI serves underserved populations off the grid. MediGem is open-source, fully benchmarked, and ready for mobile edge deployment. Together, we can empower rural healthcare workers everywhere. Thank you!"*
+> *"MediGem demonstrates how multimodal AI can serve underserved populations off the grid. MediGem is open-source, fully benchmarked, and ready for mobile edge deployment. Together, we can empower rural healthcare workers everywhere. Thank you!"*

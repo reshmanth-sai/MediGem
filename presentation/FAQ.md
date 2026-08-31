@@ -1,6 +1,6 @@
-# MediGem Judge Q&A & Technical Defence Guide
+# MediGem Technical & Clinical FAQ Guide
 
-> **Confident Technical, Clinical, and Architectural Answers for Hackathon Judging**
+> **Technical, Clinical, and Architectural Answers & Design Rationale**
 
 ---
 

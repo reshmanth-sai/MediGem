@@ -6,7 +6,7 @@ MediGem's roadmap balances healthcare safety, edge performance, multimodal intel
 
 ---
 
-## 🎯 Phase 1: Hackathon Release (v1.0.0 - Current)
+## 🎯 Phase 1: Core System & Evaluation (v1.0.0 - Current)
 
 - [x] **Deterministic Emergency Safety Engine**: Rule-based safety gate intercepting critical acute symptoms in `< 0.3ms`.
 - [x] **Provider-Agnostic AI Infrastructure**: Gemma 3 4B integration via Ollama with resilient JSON extraction.

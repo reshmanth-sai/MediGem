@@ -1,12 +1,12 @@
-"""Live Demonstration Guide & Scripts for MediGem Hackathon Presentations."""
+"""Live Demonstration & Walkthrough Guide for MediGem."""
 
 # MediGem Live Demonstration Guide
 
-This guide provides timing scripts and step-by-step workflows for demonstrating MediGem live during hackathon judging rounds.
+This guide provides timing walkthroughs and step-by-step workflows for demonstrating MediGem live.
 
 ---
 
-## ⏱️ Demo Script 1: 2-Minute Elevator Pitch
+## ⏱️ Walkthrough 1: 2-Minute Overview
 
 **Goal**: High-level overview demonstrating emergency safety interception and multimodal lab report reasoning.
 
@@ -28,7 +28,7 @@ This guide provides timing scripts and step-by-step workflows for demonstrating 
 
 ---
 
-## ⏱️ Demo Script 2: 5-Minute Hackathon Judging Demo
+## ⏱️ Walkthrough 2: 5-Minute Core Features Walkthrough
 
 **Goal**: Full walkthrough of Emergency Gate, Multimodal Ingestion (Lab Report PDF & Wound Photo), Reasoning Transparency, Developer Inspector, and File Exports.
 
@@ -45,14 +45,14 @@ This guide provides timing scripts and step-by-step workflows for demonstrating 
    - Show Analysis Quality Card (displaying OpenCV Laplacian blur score and resolution metrics).
 4. **3:30 - 4:30 (Reasoning Transparency & File Exports)**:
    - Highlight the **Why was this recommendation generated?** card.
-   - Expand the **⚙️ Developer & Judge Evaluation Inspector** to show raw metrics.
+   - Expand the **⚙️ Developer & Evaluation Inspector** to show raw metrics.
    - Click **Referral Note** file download button to demonstrate printable text export.
 5. **4:30 - 5:00 (Q&A Wrap-up)**:
-   - Summarize 100% safety pass rate and invitation for judge questions.
+   - Summarize 100% safety pass rate and key system capabilities.
 
 ---
 
-## ⏱️ Demo Script 3: 10-Minute Deep-Dive Presentation
+## ⏱️ Walkthrough 3: 10-Minute Deep-Dive Technical Session
 
 **Goal**: Complete end-to-end technical, clinical, and evaluation deep-dive including code architecture review and evaluation benchmark execution.
 

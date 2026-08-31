@@ -28,7 +28,7 @@
 
 > *"Globally, millions of patients rely on rural health clinics where nurses and community health workers operate without on-site doctors or internet connectivity. When complex lab reports, ECGs, or severe wounds present, workers must make rapid triage decisions in isolation. Existing cloud AI solutions fail the moment the network drops.
 
-> We created **MediGem**—an offline-first multimodal AI clinical co-pilot built for the Build with Gemma Hackathon. 
+> We created **MediGem**—an offline-first multimodal AI clinical co-pilot powered by Google Gemma 3 4B.
 
 > Operating 100% locally on edge hardware via Ollama and **Google Gemma 3 4B**, MediGem normalizes lab report PDFs, prescription scans, ECG strips, and wound inspection photos.
 

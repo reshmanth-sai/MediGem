@@ -1,6 +1,6 @@
 # MediGem Narrative Storyline & Presentation Arc
 
-> **Crafting a Compelling Technical & Human Story for Hackathon Judging**
+> **Crafting a Compelling Technical & Human Story for MediGem**
 
 MediGem's presentation is anchored in a real-world human problem: supporting front-line health workers operating in low-resource, offline environments without specialist physicians.
 

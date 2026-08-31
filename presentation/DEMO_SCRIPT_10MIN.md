@@ -1,6 +1,6 @@
-# MediGem 10-Minute Keynote & Judging Deep-Dive Script
+# MediGem 10-Minute Technical Keynote & Deep-Dive Guide
 
-> **Comprehensive 600-Second Full System Walkthrough & Code Review Script**
+> **Comprehensive 600-Second Full System Walkthrough & Code Review Guide**
 
 ---
 
@@ -14,4 +14,4 @@
    - Wound inspection photo OpenCV quality demo.
 4. **6:30 - 8:00 (Reasoning Transparency & Safety Framework)**: Non-diagnostic safety contract, `SafetyGuard`, `OutputValidator`, reasoning transparency cards.
 5. **8:00 - 9:00 (Evaluation Framework Execution)**: Demonstrating `python -m evaluation.evaluator`, `evaluation_report.md`, `benchmark_results.csv`, and SVG architecture diagrams.
-6. **9:00 - 10:00 (Product Roadmap & Q&A Transition)**: Phase 2 Android MediaPipe edge deployment, offline voice transcription, and invitation for judge questions.
+6. **9:00 - 10:00 (Product Roadmap & Open Discussion)**: Phase 2 Android MediaPipe edge deployment, offline voice transcription, and open Q&A.

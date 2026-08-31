@@ -2,7 +2,7 @@
 
 > **Multimodal, Offline-First AI Co-Pilot for Rural Healthcare Workers**
 
-[![Build with Gemma](https://img.shields.io/badge/Hackathon-Build_with_Gemma-0D9488?style=for-the-badge&logo=google)](https://gemma.dev)
+[![Built with Gemma](https://img.shields.io/badge/Built_with-Gemma_3_4B-0D9488?style=for-the-badge&logo=google)](https://gemma.dev)
 [![Model](https://img.shields.io/badge/Model-Gemma_3_4B-0F766E?style=for-the-badge&logo=google)](https://ollama.com/library/gemma3)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-56_Passed-success.svg?style=for-the-badge)](#-verification--unit-testing)
@@ -93,13 +93,14 @@ MediGem/
 │   ├── ARCHITECTURE.md     # Deep-dive technical architecture
 │   ├── SAFETY.md           # Healthcare safety & clinical bounds
 │   ├── EVALUATION.md       # Benchmark & quality metrics report
-│   ├── DEMO_GUIDE.md       # Live demo presentation scripts
-│   ├── PRESENTATION.md     # Pitch deck structure & speaker notes
-│   ├── FAQ.md              # Hackathon judge Q&A
+│   ├── DEMO_GUIDE.md       # System demonstration & walkthrough guide
+│   ├── PRESENTATION.md     # Project overview & presentation guide
+│   ├── FAQ.md              # Technical & clinical FAQ
 │   ├── ROADMAP.md          # Multi-phase project roadmap (v1.0 to v3.0)
 │   ├── CONTRIBUTING.md     # Open-source contributor guide
 │   ├── LICENSE.md          # Apache 2.0 License
 │   ├── CHANGELOG.md        # Release notes v1.0.0
+│   ├── RELEASE_CHECKLIST.md# Quality & release verification checklist
 │   ├── diagrams/           # Vector SVG architecture diagrams
 │   └── screenshots/        # Visual screenshot assets
 ├── evaluation/             # Evaluation & Benchmarking Framework (Phase 11)
@@ -163,9 +164,9 @@ python tests/health_check.py
 - 📘 [**Technical Architecture (`docs/ARCHITECTURE.md`)**](docs/ARCHITECTURE.md)
 - 🛡️ [**Healthcare Safety Architecture (`docs/SAFETY.md`)**](docs/SAFETY.md)
 - 📊 [**Benchmark Evaluation Report (`docs/EVALUATION.md`)**](docs/EVALUATION.md)
-- 🎬 [**Live Demo Guide & Scripts (`docs/DEMO_GUIDE.md`)**](docs/DEMO_GUIDE.md)
-- 📽️ [**Pitch Deck & Speaker Notes (`docs/PRESENTATION.md`)**](docs/PRESENTATION.md)
-- ❓ [**Hackathon Judge FAQ (`docs/FAQ.md`)**](docs/FAQ.md)
+- 🎬 [**System Demonstration Guide (`docs/DEMO_GUIDE.md`)**](docs/DEMO_GUIDE.md)
+- 📽️ [**Project Overview & Presentation (`docs/PRESENTATION.md`)**](docs/PRESENTATION.md)
+- ❓ [**Technical & Clinical FAQ (`docs/FAQ.md`)**](docs/FAQ.md)
 - 🗺️ [**Product Roadmap (`docs/ROADMAP.md`)**](docs/ROADMAP.md)
 - 🤝 [**Contributing Guide (`docs/CONTRIBUTING.md`)**](docs/CONTRIBUTING.md)
 
