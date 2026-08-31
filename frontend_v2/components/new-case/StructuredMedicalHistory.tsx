@@ -1,90 +1,103 @@
 "use client";
 
 import React from "react";
+import { Activity, ShieldAlert, Pill, FileText } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { TextField, Textarea } from "@/components/ui/Input";
+import { H3, BodySm } from "@/components/ui/Typography";
 import { MedicalHistoryData } from "./StepMedicalHistory";
-import { Activity, ShieldAlert, Pill, FileText, CheckCircle2 } from "lucide-react";
 
-interface StructuredMedicalHistoryProps {
+export type MedicalHistoryField = keyof MedicalHistoryData;
+
+export interface StructuredMedicalHistoryProps {
   historyData: MedicalHistoryData;
-  onChange: (field: keyof MedicalHistoryData, val: string) => void;
+  onChange: (field: MedicalHistoryField, val: string) => void;
+  errors?: Partial<Record<MedicalHistoryField, string>>;
+  onBlurField?: (field: MedicalHistoryField) => void;
 }
 
-export function StructuredMedicalHistory({ historyData, onChange }: StructuredMedicalHistoryProps) {
-  const commonConditions = ["Hypertension", "Type 2 Diabetes", "Asthma / COPD", "Chronic Kidney Disease", "Coronary Artery Disease"];
+export function StructuredMedicalHistory({
+  historyData,
+  onChange,
+  errors,
+  onBlurField,
+}: StructuredMedicalHistoryProps) {
+  const bind = (field: MedicalHistoryField) => ({
+    id: field,
+    value: historyData[field],
+    onChange: (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => onChange(field, e.target.value),
+    onBlur: () => onBlurField?.(field),
+    error: errors?.[field],
+  });
 
   return (
-    <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-6 space-y-5 shadow-xl">
-      <div className="flex items-center space-x-3 pb-3 border-b border-slate-800">
-        <div className="p-2.5 rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/30">
-          <Activity className="h-6 w-6" />
-        </div>
-        <div>
-          <h2 className="text-base font-extrabold text-white">Past Medical History & Medications</h2>
-          <p className="text-xs text-slate-400">Document chronic illnesses, active prescription medications, and drug allergies.</p>
+    <Card className="space-y-5">
+      <div className="flex items-center gap-3 pb-3 border-b border-rule">
+        <span className="p-2.5 rounded-control bg-action-subtle text-action border border-rule">
+          <Activity className="h-6 w-6" aria-hidden="true" />
+        </span>
+        <div className="space-y-1">
+          <H3>Step 3: Past medical history and medications</H3>
+          <BodySm className="text-ink-muted">
+            Record chronic illnesses, active prescriptions, and known allergies.
+            Every field on this step is optional.
+          </BodySm>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Known Allergies Card */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-          <label className="text-xs font-bold text-rose-300 flex items-center gap-1.5 font-mono">
-            <ShieldAlert className="h-4 w-4 text-rose-400" />
-            <span>Drug & Food Allergies</span>
-          </label>
-          <input
-            type="text"
-            value={historyData.allergies}
-            onChange={(e) => onChange("allergies", e.target.value)}
-            placeholder="e.g. Penicillin, Sulfa drugs, None known"
-            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-          />
-        </div>
-
-        {/* Current Medications Card */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-          <label className="text-xs font-bold text-teal-300 flex items-center gap-1.5 font-mono">
-            <Pill className="h-4 w-4 text-teal-400" />
-            <span>Current Active Medications</span>
-          </label>
-          <input
-            type="text"
-            value={historyData.medications}
-            onChange={(e) => onChange("medications", e.target.value)}
-            placeholder="e.g. Amlodipine 5mg OD, Metformin 500mg BD"
-            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-          />
-        </div>
-
-        {/* Chronic Conditions */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-          <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5 font-mono">
-            <Activity className="h-4 w-4 text-amber-400" />
-            <span>Chronic Conditions</span>
-          </label>
-          <input
-            type="text"
-            value={historyData.chronicConditions}
-            onChange={(e) => onChange("chronicConditions", e.target.value)}
-            placeholder="e.g. Hypertension (3 yrs), Diabetes"
-            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-          />
-        </div>
-
-        {/* Surgeries & Major Illnesses */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-          <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5 font-mono">
-            <FileText className="h-4 w-4 text-slate-400" />
-            <span>Prior Surgeries / Hospitalizations</span>
-          </label>
-          <input
-            type="text"
-            value={historyData.surgeries}
-            onChange={(e) => onChange("surgeries", e.target.value)}
-            placeholder="e.g. Appendectomy (2020), None"
-            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-          />
-        </div>
+        <TextField
+          label="Drug and food allergies"
+          helperText="Write None known when the patient reports no allergies."
+          {...bind("allergies")}
+        />
+        <TextField
+          label="Current active medications"
+          helperText="Include the dose and frequency where known."
+          {...bind("medications")}
+        />
+        <TextField
+          label="Chronic conditions"
+          helperText="Include how long each condition has been diagnosed."
+          {...bind("chronicConditions")}
+        />
+        <TextField
+          label="Prior surgeries or hospitalisations"
+          helperText="Include the year where known."
+          {...bind("surgeries")}
+        />
       </div>
-    </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <TextField
+          label="Past illnesses"
+          helperText="Significant illnesses that are no longer active."
+          {...bind("pastIllnesses")}
+        />
+        <Textarea
+          label="Lifestyle and environmental factors"
+          rows={2}
+          helperText="Tobacco or alcohol use, occupation, exposures."
+          {...bind("lifestyleNotes")}
+        />
+      </div>
+
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 list-none p-0 m-0">
+        <li className="flex items-center gap-2 text-body-sm text-ink-muted">
+          <ShieldAlert className="h-4 w-4 text-risk-emergency" aria-hidden="true" />
+          <span>Allergies drive the safety gate before any recommendation.</span>
+        </li>
+        <li className="flex items-center gap-2 text-body-sm text-ink-muted">
+          <Pill className="h-4 w-4 text-action" aria-hidden="true" />
+          <span>Active medications are checked for interactions.</span>
+        </li>
+        <li className="flex items-center gap-2 text-body-sm text-ink-muted">
+          <FileText className="h-4 w-4 text-ink-muted" aria-hidden="true" />
+          <span>History is stored locally with the rest of the case.</span>
+        </li>
+      </ul>
+    </Card>
   );
 }

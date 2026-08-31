@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Cpu, Zap, Activity, RefreshCw, CheckCircle2 } from "lucide-react";
+import { Cpu, RefreshCw } from "lucide-react";
+import { H2, BodySm, Label, DataLg } from "@/components/ui/Typography";
+import { Button } from "@/components/ui/Button";
 
 export function DeviceDiagnostics() {
   const [running, setRunning] = useState(false);
@@ -17,60 +19,80 @@ export function DeviceDiagnostics() {
   };
 
   return (
-    <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-6 space-y-6 shadow-xl">
-      <div className="flex items-center space-x-3 pb-3 border-b border-slate-800">
-        <div className="p-2.5 rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/30">
-          <Cpu className="h-6 w-6" />
+    <div className="rounded-card bg-surface border border-rule p-6 space-y-6">
+      <div className="flex items-center space-x-3 pb-3 border-b border-rule">
+        <div className="p-2.5 rounded-control bg-action-subtle text-action border border-rule">
+          <Cpu className="h-6 w-6" aria-hidden="true" />
         </div>
         <div>
-          <h2 className="text-base font-extrabold text-white">Device Diagnostics & System Telemetry</h2>
-          <p className="text-xs text-slate-400">Live hardware monitoring, model inference latency, and SQLite DB integrity.</p>
+          <H2>Device Diagnostics & System Telemetry</H2>
+          <BodySm className="text-ink-muted">
+            Live hardware monitoring, model inference latency, and SQLite DB integrity.
+          </BodySm>
         </div>
       </div>
 
       {/* Diagnostics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 font-mono">
-          <div className="flex justify-between text-xs">
-            <span className="text-slate-400">CPU Usage:</span>
-            <span className="text-teal-300 font-bold">18% Active</span>
+        <div className="p-4 rounded-control bg-ground border border-rule space-y-2 font-mono">
+          <div className="flex justify-between text-body-sm">
+            <span className="text-ink-muted">CPU Usage:</span>
+            <span className="text-action font-semibold">18% Active</span>
           </div>
-          <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-            <div className="bg-teal-400 h-full rounded-full" style={{ width: "18%" }} />
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 font-mono">
-          <div className="flex justify-between text-xs">
-            <span className="text-slate-400">Model VRAM Usage:</span>
-            <span className="text-teal-300 font-bold">3.8 GB / 8.0 GB</span>
-          </div>
-          <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-            <div className="bg-teal-400 h-full rounded-full" style={{ width: "47%" }} />
+          <div
+            className="w-full bg-surface-raised h-2 rounded-chip overflow-hidden"
+            role="progressbar"
+            aria-label="CPU usage"
+            aria-valuenow={18}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div className="bg-action h-full rounded-chip" style={{ width: "18%" }} />
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 font-mono">
-          <p className="text-[10px] text-slate-500 uppercase">Avg Gemma Inference Speed</p>
-          <p className="text-lg font-black text-white">3.45s / query</p>
+        <div className="p-4 rounded-control bg-ground border border-rule space-y-2 font-mono">
+          <div className="flex justify-between text-body-sm">
+            <span className="text-ink-muted">Model VRAM Usage:</span>
+            <span className="text-action font-semibold">3.8 GB / 8.0 GB</span>
+          </div>
+          <div
+            className="w-full bg-surface-raised h-2 rounded-chip overflow-hidden"
+            role="progressbar"
+            aria-label="Model VRAM usage"
+            aria-valuenow={47}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div className="bg-action h-full rounded-chip" style={{ width: "47%" }} />
+          </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 font-mono">
-          <p className="text-[10px] text-slate-500 uppercase">Emergency Rule Gate Speed</p>
-          <p className="text-lg font-black text-emerald-400">&lt; 0.28ms</p>
+        <div className="p-4 rounded-control bg-ground border border-rule space-y-1 font-mono">
+          <Label>Avg Gemma Inference Speed</Label>
+          <DataLg>3.45s / query</DataLg>
+        </div>
+
+        <div className="p-4 rounded-control bg-ground border border-rule space-y-1 font-mono">
+          <Label>Emergency Rule Gate Speed</Label>
+          <DataLg className="text-risk-low">&lt; 0.28ms</DataLg>
         </div>
       </div>
 
       {/* Maintenance Diagnostic Runner Button */}
       <div className="pt-2">
-        <button
+        <Button
           onClick={runDiagnostics}
           disabled={running}
-          className="w-full p-3 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-extrabold text-xs transition-all flex items-center justify-center space-x-2 border border-teal-300 shadow-lg"
+          className="w-full"
+          leftIcon={<RefreshCw className={running ? "h-4 w-4 motion-safe:animate-spin" : "h-4 w-4"} aria-hidden="true" />}
         >
-          <RefreshCw className={`h-4 w-4 ${running ? "animate-spin" : ""}`} />
-          <span>{running ? "Running Diagnostics Suite..." : done ? "Diagnostics Passed Cleanly! (Run Again)" : "Run Full System Diagnostics Suite"}</span>
-        </button>
+          {running
+            ? "Running Diagnostics Suite..."
+            : done
+              ? "Diagnostics Passed Cleanly! (Run Again)"
+              : "Run Full System Diagnostics Suite"}
+        </Button>
       </div>
     </div>
   );

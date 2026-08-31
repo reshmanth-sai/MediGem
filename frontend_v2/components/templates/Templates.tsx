@@ -1,5 +1,5 @@
 import React from "react";
-import { PageTitle, Subtitle } from "@/components/ui/Typography";
+import { H1, Body } from "@/components/ui/Typography";
 
 export function DashboardTemplate({
   title,
@@ -12,9 +12,9 @@ export function DashboardTemplate({
 }) {
   return (
     <div className="space-y-6">
-      <div>
-        <PageTitle>{title}</PageTitle>
-        {subtitle && <Subtitle>{subtitle}</Subtitle>}
+      <div className="space-y-1">
+        <H1>{title}</H1>
+        {subtitle && <Body className="text-ink-muted">{subtitle}</Body>}
       </div>
       <div className="space-y-6">{children}</div>
     </div>
@@ -50,9 +50,9 @@ export function ResultsTemplate({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <PageTitle>{title}</PageTitle>
-        {actions && <div className="flex items-center space-x-2">{actions}</div>}
+      <div className="flex items-center justify-between gap-4">
+        <H1>{title}</H1>
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
       <div className="space-y-6">{children}</div>
     </div>
@@ -68,7 +68,7 @@ export function HistoryTemplate({
 }) {
   return (
     <div className="space-y-6">
-      <PageTitle>{title}</PageTitle>
+      <H1>{title}</H1>
       <div className="space-y-4">{children}</div>
     </div>
   );

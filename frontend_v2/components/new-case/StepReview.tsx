@@ -2,9 +2,72 @@ import React from "react";
 import { Edit2, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { PatientDetailsFormData } from "./StepPatientDetails";
+import { H3, BodySm, Label } from "@/components/ui/Typography";
+import { PatientDetailsFormValues } from "./StepPatientDetails";
 import { MedicalHistoryData } from "./StepMedicalHistory";
 import { UploadedFileItem } from "./StepUploads";
+
+export interface StepReviewProps {
+  patientData: PatientDetailsFormValues;
+  symptoms: string[];
+  symptomDuration: string;
+  symptomSeverity: string;
+  historyData: MedicalHistoryData;
+  uploadedFiles: UploadedFileItem[];
+  onEditStep: (stepId: number) => void;
+}
+
+/** Blank, zero-like and NaN values all mean the same thing: nothing recorded. */
+function recorded(value: string | number | null | undefined, unit = ""): string {
+  if (value === null || value === undefined) return "Not recorded";
+  if (typeof value === "number" && !Number.isFinite(value)) return "Not recorded";
+  const text = String(value).trim();
+  if (text === "") return "Not recorded";
+  return unit ? `${text} ${unit}` : text;
+}
+
+function ReviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-0.5">
+      <Label as="p">{label}</Label>
+      <p className="text-body-sm text-ink">{value}</p>
+    </div>
+  );
+}
+
+function ReviewSection({
+  index,
+  title,
+  step,
+  onEditStep,
+  children,
+}: {
+  index: number;
+  title: string;
+  step: number;
+  onEditStep: (stepId: number) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="p-4 rounded-card bg-surface-raised border border-rule space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <h4 className="text-h3 text-ink">
+          {index}. {title}
+        </h4>
+        <Button
+          size="sm"
+          variant="ghost"
+          leftIcon={<Edit2 className="h-4 w-4" aria-hidden="true" />}
+          aria-label={`Edit ${title}`}
+          onClick={() => onEditStep(step)}
+        >
+          Edit
+        </Button>
+      </div>
+      {children}
+    </section>
+  );
+}
 
 export function StepReview({
   patientData,
@@ -14,93 +77,123 @@ export function StepReview({
   historyData,
   uploadedFiles,
   onEditStep,
-}: {
-  patientData: PatientDetailsFormData;
-  symptoms: string[];
-  symptomDuration: string;
-  symptomSeverity: string;
-  historyData: MedicalHistoryData;
-  uploadedFiles: UploadedFileItem[];
-  onEditStep: (stepId: number) => void;
-}) {
+}: StepReviewProps) {
   return (
     <Card className="space-y-6">
-      <div>
-        <h3 className="text-base font-bold text-slate-900 dark:text-white">
-          Step 5: Case Review & Validation Summary
-        </h3>
-        <p className="text-xs text-slate-500">
-          Review all entered patient demographics, vitals, symptoms, and attached files before starting AI reasoning
-        </p>
+      <div className="space-y-1">
+        <H3>Step 5: Case review and validation summary</H3>
+        <BodySm className="text-ink-muted">
+          Check every recorded value before starting the clinical reasoning run.
+          Anything shown as not recorded will be analysed as missing, not as
+          zero.
+        </BodySm>
       </div>
 
-      {/* Section 1: Demographics */}
-      <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 space-y-2 border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold uppercase text-slate-500">1. Patient Demographics & Vitals</h4>
-          <Button size="sm" variant="ghost" leftIcon={<Edit2 className="h-3.5 w-3.5" />} onClick={() => onEditStep(1)}>
-            Edit
-          </Button>
+      <ReviewSection
+        index={1}
+        title="Patient demographics and vitals"
+        step={1}
+        onEditStep={onEditStep}
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <ReviewRow label="Name" value={recorded(patientData.patientName)} />
+          <ReviewRow label="Patient ID" value={recorded(patientData.patientId)} />
+          <ReviewRow label="Age" value={recorded(patientData.age, "years")} />
+          <ReviewRow label="Gender" value={recorded(patientData.gender)} />
+          <ReviewRow label="Location" value={recorded(patientData.location)} />
+          <ReviewRow label="Heart rate" value={recorded(patientData.hrBpm, "bpm")} />
+          <ReviewRow
+            label="Blood pressure"
+            value={
+              patientData.systolicBp === undefined ||
+              patientData.diastolicBp === undefined
+                ? "Not recorded"
+                : `${patientData.systolicBp}/${patientData.diastolicBp} mmHg`
+            }
+          />
+          <ReviewRow
+            label="Temperature"
+            value={recorded(patientData.tempCelsius, "Celsius")}
+          />
+          <ReviewRow
+            label="Oxygen saturation"
+            value={recorded(patientData.spO2Percent, "percent")}
+          />
+          <ReviewRow label="Weight" value={recorded(patientData.weightKg, "kg")} />
+          <ReviewRow label="Height" value={recorded(patientData.heightCm, "cm")} />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-          <p><span className="text-slate-500">Name:</span> <strong>{patientData.patientName || "Not specified"}</strong></p>
-          <p><span className="text-slate-500">ID:</span> <strong>{patientData.patientId || "P-101"}</strong></p>
-          <p><span className="text-slate-500">Age/Gender:</span> <strong>{patientData.age}y/o {patientData.gender}</strong></p>
-          <p><span className="text-slate-500">Location:</span> <strong>{patientData.location || "Clinic A"}</strong></p>
-          <p><span className="text-slate-500">HR / BP:</span> <strong>{patientData.hrBpm || "--"} bpm | {patientData.systolicBp || "--"}/{patientData.diastolicBp || "--"} mmHg</strong></p>
-          <p><span className="text-slate-500">Temp / SpO2:</span> <strong>{patientData.tempCelsius || "--"}°C | {patientData.spO2Percent || "--"}%</strong></p>
+        <div className="space-y-0.5">
+          <Label as="p">Chief complaint</Label>
+          <p className="text-body-sm text-ink">
+            {recorded(patientData.chiefComplaint)}
+          </p>
         </div>
-      </div>
+      </ReviewSection>
 
-      {/* Section 2: Symptoms */}
-      <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 space-y-2 border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold uppercase text-slate-500">2. Symptoms & Onset</h4>
-          <Button size="sm" variant="ghost" leftIcon={<Edit2 className="h-3.5 w-3.5" />} onClick={() => onEditStep(2)}>
-            Edit
-          </Button>
+      <ReviewSection
+        index={2}
+        title="Symptoms and onset"
+        step={2}
+        onEditStep={onEditStep}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <ReviewRow
+            label="Presenting symptoms"
+            value={symptoms.length > 0 ? symptoms.join(", ") : "Not recorded"}
+          />
+          <ReviewRow label="Duration" value={recorded(symptomDuration)} />
+          <ReviewRow label="Severity" value={recorded(symptomSeverity)} />
         </div>
-        <div className="space-y-1 text-xs">
-          <p><span className="text-slate-500">Presenting Symptoms:</span> <strong>{symptoms.length > 0 ? symptoms.join(", ") : "None specified"}</strong></p>
-          <p><span className="text-slate-500">Duration & Severity:</span> <strong>{symptomDuration || "Not specified"} ({symptomSeverity})</strong></p>
-        </div>
-      </div>
+      </ReviewSection>
 
-      {/* Section 3: History */}
-      <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 space-y-2 border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold uppercase text-slate-500">3. Past Medical History</h4>
-          <Button size="sm" variant="ghost" leftIcon={<Edit2 className="h-3.5 w-3.5" />} onClick={() => onEditStep(3)}>
-            Edit
-          </Button>
+      <ReviewSection
+        index={3}
+        title="Past medical history"
+        step={3}
+        onEditStep={onEditStep}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <ReviewRow label="Allergies" value={recorded(historyData.allergies)} />
+          <ReviewRow label="Medications" value={recorded(historyData.medications)} />
+          <ReviewRow
+            label="Chronic conditions"
+            value={recorded(historyData.chronicConditions)}
+          />
+          <ReviewRow label="Prior surgeries" value={recorded(historyData.surgeries)} />
+          <ReviewRow label="Past illnesses" value={recorded(historyData.pastIllnesses)} />
+          <ReviewRow label="Lifestyle notes" value={recorded(historyData.lifestyleNotes)} />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          <p><span className="text-slate-500">Allergies:</span> <strong>{historyData.allergies || "None reported"}</strong></p>
-          <p><span className="text-slate-500">Medications:</span> <strong>{historyData.medications || "None reported"}</strong></p>
-          <p><span className="text-slate-500">Chronic Conditions:</span> <strong>{historyData.chronicConditions || "None reported"}</strong></p>
-          <p><span className="text-slate-500">Prior Surgeries:</span> <strong>{historyData.surgeries || "None reported"}</strong></p>
-        </div>
-      </div>
+      </ReviewSection>
 
-      {/* Section 4: Uploads */}
-      <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 space-y-2 border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold uppercase text-slate-500">4. Attached Medical Files</h4>
-          <Button size="sm" variant="ghost" leftIcon={<Edit2 className="h-3.5 w-3.5" />} onClick={() => onEditStep(4)}>
-            Edit
-          </Button>
-        </div>
-        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+      <ReviewSection
+        index={4}
+        title="Attached medical files"
+        step={4}
+        onEditStep={onEditStep}
+      >
+        <p className="text-body-sm text-ink">
           {uploadedFiles.length > 0
-            ? `${uploadedFiles.length} file(s) attached: ${uploadedFiles.map((f) => f.file.name).join(", ")}`
-            : "No files attached (Proceeding with text & vitals analysis only)"}
+            ? `${uploadedFiles.length} attached: ${uploadedFiles
+                .map((f) => f.file.name)
+                .join(", ")}`
+            : "No files attached. Analysis proceeds on text and vitals only."}
         </p>
-      </div>
+      </ReviewSection>
 
       {symptoms.length === 0 && (
-        <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg flex items-center space-x-2 text-xs text-amber-800 dark:text-amber-300">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>Notice: No specific symptoms selected. Analysis will proceed on chief complaint text.</span>
+        <div
+          role="note"
+          className="p-3 rounded-card border border-risk-high bg-surface-raised flex items-start gap-2"
+        >
+          <AlertCircle
+            className="h-4 w-4 shrink-0 mt-0.5 text-risk-high"
+            aria-hidden="true"
+          />
+          <p className="text-body-sm text-ink">
+            <span className="font-semibold">Notice: </span>
+            no specific symptoms are recorded. Reasoning will run on the chief
+            complaint text alone.
+          </p>
         </div>
       )}
     </Card>

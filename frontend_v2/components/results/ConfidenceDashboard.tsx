@@ -1,59 +1,58 @@
 import React from "react";
-import { Stethoscope, FileText, Zap, ShieldCheck } from "lucide-react";
-import { StatCard } from "@/components/ui/Card";
+import { ShieldCheck, Zap } from "lucide-react";
+import { Section } from "@/components/ui/Card";
+import { Label } from "@/components/ui/Typography";
+import { MetricStat } from "@/components/ui/MetricStat";
+import { ConfidenceBadge, type ConfidenceLevel } from "@/components/ui/ConfidenceBadge";
 
-export function ConfidenceDashboard({
-  clinicalConfidence = 95.2,
-  evidenceCoverage = 98.5,
-  processingTimeMs = 5420,
-  safetyPassRate = 100,
-}: {
-  clinicalConfidence?: number;
-  evidenceCoverage?: number;
+export interface ConfidenceDashboardProps {
+  confidenceLevel?: ConfidenceLevel;
+  requiresHumanReview?: boolean;
   processingTimeMs?: number;
-  safetyPassRate?: number;
-}) {
+  safetyChecksPassed?: boolean;
+}
+
+/**
+ * Model execution summary.
+ *
+ * The two headline percentages this panel used to lead with, a "Clinical
+ * Confidence" figure and an "Evidence Coverage" figure, were frontend
+ * inventions carrying one decimal place of false precision. The backend
+ * emits confidence as a qualitative LOW / MEDIUM / HIGH enum and emits no
+ * coverage figure at all, so both are gone: certainty is now shown as a band
+ * through ConfidenceBadge. What remains are measured runtime facts (elapsed
+ * time, whether the deterministic safety checks passed), not model self-report.
+ */
+export function ConfidenceDashboard({
+  confidenceLevel = "HIGH",
+  requiresHumanReview = true,
+  processingTimeMs = 5420,
+  safetyChecksPassed = true,
+}: ConfidenceDashboardProps) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-          <span>📊 AI Clinical Confidence & Validation Dashboard</span>
-        </h2>
-        <span className="text-xs text-teal-600 dark:text-teal-400 font-mono font-semibold">
-          GEMMA 3 4B INFERS LOCAL
-        </span>
+    <Section
+      heading="Model execution summary"
+      headingAdornment={<Label>Gemma 3 4B, local inference</Label>}
+    >
+      <div className="space-y-1">
+        <Label>Assessment confidence</Label>
+        <ConfidenceBadge level={confidenceLevel} needsReview={requiresHumanReview} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="🩺 Clinical Confidence"
-          value={`${clinicalConfidence.toFixed(1)}%`}
-          subtitle="High Alignment Score"
-          icon={<Stethoscope />}
-          className="border-l-4 border-l-teal-600 bg-gradient-to-br from-teal-50/50 to-white dark:from-slate-800 dark:to-slate-900"
-        />
-        <StatCard
-          title="📄 Evidence Coverage"
-          value={`${evidenceCoverage.toFixed(1)}%`}
-          subtitle="Multimodal File Contribution"
-          icon={<FileText />}
-          className="border-l-4 border-l-emerald-600 bg-gradient-to-br from-emerald-50/50 to-white dark:from-slate-800 dark:to-slate-900"
-        />
-        <StatCard
-          title="⚡ Processing Time"
+      <div className="grid grid-cols-1 gap-x-6 gap-y-4 divide-y divide-rule sm:grid-cols-2 sm:divide-y-0">
+        <MetricStat
+          icon={Zap}
+          label="Processing time"
           value={`${(processingTimeMs / 1000).toFixed(2)}s`}
-          subtitle="End-to-End Local Latency"
-          icon={<Zap />}
-          className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-white dark:from-slate-800 dark:to-slate-900"
+          subtitle="End to end, on device"
         />
-        <StatCard
-          title="🛡️ Safety Validation"
-          value={`${safetyPassRate}% PASSED`}
-          subtitle="Emergency Engine & Guard"
-          icon={<ShieldCheck />}
-          className="border-l-4 border-l-purple-600 bg-gradient-to-br from-purple-50/50 to-white dark:from-slate-800 dark:to-slate-900"
+        <MetricStat
+          icon={ShieldCheck}
+          label="Safety checks"
+          value={safetyChecksPassed ? "Passed" : "Flagged"}
+          subtitle="Deterministic rule evaluation"
         />
       </div>
-    </div>
+    </Section>
   );
 }

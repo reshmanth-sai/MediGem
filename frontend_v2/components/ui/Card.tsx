@@ -1,17 +1,22 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import { H2, H3 } from "@/components/ui/Typography";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
+/**
+ * Card: border-only elevation. No shadow, no hover shadow, and no
+ * light or dark mode specific override; theming runs entirely through tokens.
+ * Elevation is declared once. Use Card only when the content is a discrete,
+ * separately actionable object such as a patient case. Prefer Section for
+ * grouping, sequence and related fields.
+ */
 export function Card({ children, className, ...props }: CardProps) {
   return (
     <div
-      className={cn(
-        "medigem-card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 shadow-sm transition-all hover:shadow-md",
-        className
-      )}
+      className={cn("bg-surface border border-rule rounded-card p-5", className)}
       {...props}
     >
       {children}
@@ -19,31 +24,50 @@ export function Card({ children, className, ...props }: CardProps) {
   );
 }
 
-export function StatCard({
-  title,
-  value,
-  subtitle,
-  icon,
+export interface SectionProps extends React.HTMLAttributes<HTMLElement> {
+  children: React.ReactNode;
+  /**
+   * Heading text. Phrasing content only (a string or inline elements) since
+   * this renders inside an h2/h3 and becomes part of its accessible name.
+   * Never pass block content or unrelated metadata here.
+   */
+  heading?: React.ReactNode;
+  /**
+   * Optional trailing adornment (a badge, a timestamp, a tag) shown beside
+   * the heading. Rendered as the heading's sibling, never nested inside the
+   * h2/h3, so it never becomes part of the heading's accessible name.
+   */
+  headingAdornment?: React.ReactNode;
+  headingAs?: "h2" | "h3";
+}
+
+/**
+ * Section: heading plus content, no border, no background. The grouping
+ * mechanism preferred over Card wherever elevation would not communicate
+ * real hierarchy (see spec section 6, "prefer sections over cards").
+ */
+export function Section({
+  children,
   className,
-}: {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon?: React.ReactNode;
-  className?: string;
-}) {
+  heading,
+  headingAdornment,
+  headingAs = "h2",
+  ...props
+}: SectionProps) {
+  const HeadingTag = headingAs === "h3" ? H3 : H2;
+  const headingNode = heading != null ? <HeadingTag>{heading}</HeadingTag> : null;
+
   return (
-    <Card className={cn("flex flex-col justify-between", className)}>
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          {title}
-        </span>
-        {icon && <span className="text-teal-600 dark:text-teal-400 text-lg">{icon}</span>}
-      </div>
-      <div className="mt-2">
-        <div className="text-2xl font-bold text-slate-900 dark:text-white">{value}</div>
-        {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{subtitle}</p>}
-      </div>
-    </Card>
+    <section className={cn("space-y-4", className)} {...props}>
+      {headingAdornment
+        ? (headingNode || headingAdornment) && (
+            <div className="flex items-center justify-between gap-4">
+              {headingNode}
+              {headingAdornment}
+            </div>
+          )
+        : headingNode}
+      {children}
+    </section>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
-import { CodeBlock } from "@/components/ui/Typography";
-import { Card } from "@/components/ui/Card";
+import { Section } from "@/components/ui/Card";
+import { BodySm } from "@/components/ui/Typography";
 
 export function PromptExplorer() {
   const promptMeta = {
@@ -11,14 +11,16 @@ export function PromptExplorer() {
   };
 
   return (
-    <Card className="space-y-3">
-      <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-        System Prompt & Instruction Context Explorer
-      </h3>
-      <p className="text-xs text-slate-500">
-        System instruction configuration and schema guidelines for Gemma 3 4B reasoning:
-      </p>
-      <CodeBlock>{JSON.stringify(promptMeta, null, 2)}</CodeBlock>
-    </Card>
+    <Section heading="System Prompt & Instruction Context" headingAs="h3">
+      <BodySm className="text-ink-muted">
+        System instruction configuration and schema guidelines for Gemma 3 4B reasoning.
+      </BodySm>
+      <pre
+        aria-label="System prompt configuration"
+        className="font-mono text-body-sm p-3 bg-surface-raised text-ink border border-rule rounded-control overflow-x-auto whitespace-pre"
+      >
+        <code>{JSON.stringify(promptMeta, null, 2)}</code>
+      </pre>
+    </Section>
   );
 }

@@ -13,6 +13,7 @@ import { ClinicalSummaryCard } from "@/components/results/ClinicalSummaryCard";
 import { ClinicalInsightsDashboard } from "@/components/history/ClinicalInsightsDashboard";
 import { EvaluationMetricsCharts } from "@/components/evaluation/EvaluationMetricsCharts";
 import { Card } from "@/components/ui/Card";
+import { H1, H2, Body, BodySm } from "@/components/ui/Typography";
 import { Award, CheckCircle2 } from "lucide-react";
 
 export function PresentationFlow() {
@@ -23,66 +24,68 @@ export function PresentationFlow() {
   const handlePrev = () => setCurrentStep((prev) => Math.max(1, prev - 1));
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-8 flex flex-col justify-between max-w-7xl mx-auto space-y-6">
-      {/* Top Slide Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-xl bg-teal-600/30 text-teal-400 border border-teal-500/40">
-            <Award className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-white tracking-tight">
-              MediGem Hackathon Presentation Flow
-            </h1>
-            <p className="text-xs text-slate-400">
-              Offline AI Clinical Co-Pilot for Rural Healthcare Workers
-            </p>
+    <div className="min-h-screen bg-ground text-ink p-8 flex flex-col justify-between max-w-7xl mx-auto space-y-6">
+      {/* Slide header */}
+      <div className="flex items-center justify-between gap-4 border-b border-rule pb-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <Award className="h-6 w-6 text-action shrink-0" aria-hidden="true" />
+          <div className="space-y-0.5 min-w-0">
+            <H1>MediGem Hackathon Presentation Flow</H1>
+            <BodySm className="text-ink-muted">
+              Offline AI clinical co-pilot for rural healthcare workers
+            </BodySm>
           </div>
         </div>
 
-        <div className="flex space-x-1">
-          {Array.from({ length: totalSteps }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentStep(i + 1)}
-              className={`h-2 w-6 rounded-full transition-all ${
-                i + 1 === currentStep
-                  ? "bg-teal-400 w-10"
-                  : i + 1 < currentStep
-                  ? "bg-teal-700"
-                  : "bg-slate-800"
-              }`}
-            />
-          ))}
-        </div>
+        <nav aria-label="Slides" className="flex gap-1 shrink-0">
+          {Array.from({ length: totalSteps }).map((_, i) => {
+            const step = i + 1;
+            const isCurrent = step === currentStep;
+            return (
+              <button
+                key={step}
+                onClick={() => setCurrentStep(step)}
+                aria-label={`Go to slide ${step} of ${totalSteps}`}
+                aria-current={isCurrent ? "step" : undefined}
+                className={`h-2 rounded-full transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
+                  isCurrent
+                    ? "w-10 bg-action"
+                    : step < currentStep
+                    ? "w-6 bg-action/50"
+                    : "w-6 bg-surface-raised border border-rule"
+                }`}
+              />
+            );
+          })}
+        </nav>
       </div>
 
-      {/* Dynamic Slide Content Container */}
+      {/* Slide content */}
       <div className="flex-1 py-4">
         {currentStep === 1 && (
-          <div className="space-y-6 animate-in fade-in">
+          <div className="space-y-6">
             <HeroHeader />
             <JudgeDashboard />
           </div>
         )}
 
         {currentStep === 2 && (
-          <div className="space-y-6 animate-in fade-in">
+          <div className="space-y-6">
             <WhyMediGem />
           </div>
         )}
 
         {currentStep === 3 && (
-          <Card className="p-8 text-center space-y-4 bg-slate-900 border-slate-800">
-            <h2 className="text-2xl font-bold text-teal-400">Step 3: New Case Launcher</h2>
-            <p className="text-xs text-slate-300 max-w-md mx-auto">
+          <Card className="text-center space-y-4 p-8">
+            <H2>Step 3: New Case Launcher</H2>
+            <Body className="text-ink-muted mx-auto">
               Primary intake workspace designed for low-resource clinics and mobile health units.
-            </p>
+            </Body>
           </Card>
         )}
 
         {currentStep === 4 && (
-          <div className="space-y-4 animate-in fade-in">
+          <div className="space-y-4">
             <StepPatientDetails
               formData={{
                 patientName: "Ramesh Kumar",
@@ -97,52 +100,51 @@ export function PresentationFlow() {
         )}
 
         {currentStep === 5 && (
-          <div className="space-y-4 animate-in fade-in">
+          <div className="space-y-4">
             <StepUploads uploadedFiles={[]} onAddFile={() => {}} onRemoveFile={() => {}} />
           </div>
         )}
 
         {currentStep === 6 && (
-          <div className="space-y-4 animate-in fade-in">
+          <div className="space-y-4">
             <LoadingTransition />
           </div>
         )}
 
         {currentStep === 7 && (
-          <div className="space-y-6 animate-in fade-in">
+          <div className="space-y-6">
             <ConfidenceDashboard />
             <ClinicalSummaryCard />
           </div>
         )}
 
         {currentStep === 8 && (
-          <div className="space-y-4 animate-in fade-in">
+          <div className="space-y-4">
             <ClinicalInsightsDashboard />
           </div>
         )}
 
         {currentStep === 9 && (
-          <div className="space-y-4 animate-in fade-in">
+          <div className="space-y-4">
             <EvaluationMetricsCharts />
           </div>
         )}
 
         {currentStep === 10 && (
-          <Card className="p-10 text-center space-y-6 bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 border-teal-800">
-            <div className="mx-auto w-16 h-16 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center border border-teal-500/30">
-              <CheckCircle2 className="h-8 w-8" />
-            </div>
+          <Card className="text-center space-y-6 p-10">
+            <CheckCircle2 className="h-12 w-12 text-action mx-auto" strokeWidth={1.75} aria-hidden="true" />
             <div className="space-y-2">
-              <h2 className="text-3xl font-extrabold text-white">Thank You & Open Q&A</h2>
-              <p className="text-sm text-slate-300 max-w-lg mx-auto">
-                MediGem delivers 100% offline, explainable, emergency-first AI decision support to healthcare workers where it matters most.
-              </p>
+              <H2>Thank You and Open Q&amp;A</H2>
+              <Body className="text-ink-muted mx-auto">
+                MediGem delivers 100% offline, explainable, emergency-first AI decision support to
+                healthcare workers where it matters most.
+              </Body>
             </div>
           </Card>
         )}
       </div>
 
-      {/* Floating Presenter Controls */}
+      {/* Presenter controls */}
       <PresenterControls
         currentStep={currentStep}
         totalSteps={totalSteps}

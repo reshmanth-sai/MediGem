@@ -1,46 +1,44 @@
-"use client";
-
-import React, { useState } from "react";
-import { Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+import React from "react";
+import { Lightbulb, ChevronDown } from "lucide-react";
+import { BodySm } from "@/components/ui/Typography";
 
 export function EducationalTips() {
-  const [isOpen, setIsOpen] = useState(false);
-
   const tips = [
-    { title: "Capture Clear Images", text: "Ensure decent lighting and focus so OpenCV image quality evaluation passes blur checks." },
-    { title: "Enter Full Symptoms", text: "Include chest tightness, fever, or onset duration to trigger safety checks immediately." },
-    { title: "Check Emergency Engine", text: "Acute presentations trigger immediate referral guidelines without waiting for LLM inference." },
+    {
+      title: "Capture Clear Images",
+      text: "Ensure decent lighting and focus so OpenCV image quality evaluation passes blur checks.",
+    },
+    {
+      title: "Enter Full Symptoms",
+      text: "Include chest tightness, fever, or onset duration to trigger safety checks immediately.",
+    },
+    {
+      title: "Check Emergency Engine",
+      text: "Acute presentations trigger immediate referral guidelines without waiting for LLM inference.",
+    },
   ];
 
   return (
-    <Card className="space-y-3">
-      <div
-        className="flex items-center justify-between cursor-pointer select-none"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div className="flex items-center space-x-2">
-          <Lightbulb className="h-4 w-4 text-amber-500" />
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            Clinical Co-Pilot Tips & Best Practices
-          </h3>
-        </div>
-        <button className="text-xs text-slate-400 font-semibold flex items-center gap-1 hover:text-slate-200">
-          <span>{isOpen ? "Collapse" : "Expand"}</span>
-          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-      </div>
+    <details className="rounded-card border border-rule bg-surface px-4 py-3 group">
+      <summary className="flex items-center justify-between gap-3 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
+        <span className="flex items-center gap-2 text-body-sm font-semibold text-ink">
+          <Lightbulb className="h-4 w-4 text-action" aria-hidden="true" />
+          Clinical Co-Pilot Tips &amp; Best Practices
+        </span>
+        <span className="flex items-center gap-1 text-label text-ink-muted">
+          Details
+          <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+        </span>
+      </summary>
 
-      {isOpen && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs animate-in fade-in duration-200">
-          {tips.map((t) => (
-            <div key={t.title} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-1">
-              <p className="font-bold text-slate-900 dark:text-white">{t.title}</p>
-              <p className="text-slate-500 text-[11px] leading-relaxed">{t.text}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-3 mt-3 border-t border-rule">
+        {tips.map((t) => (
+          <div key={t.title} className="p-2.5 rounded-control bg-surface-raised border border-rule space-y-1">
+            <p className="text-body-sm font-semibold text-ink">{t.title}</p>
+            <BodySm className="text-ink-muted">{t.text}</BodySm>
+          </div>
+        ))}
+      </div>
+    </details>
   );
 }

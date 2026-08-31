@@ -45,8 +45,11 @@ export function MedicalUploadDropzone({
         }
       }}
       className={cn(
-        "relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-teal-600 hover:bg-teal-50/50 dark:hover:bg-slate-800",
-        dragActive && "border-teal-600 bg-teal-50 dark:bg-slate-800",
+        "relative cursor-pointer rounded-card border-2 border-dashed border-rule-strong bg-surface p-6 text-center transition-colors hover:border-action hover:bg-action-subtle",
+        // Drag-active reads as a distinct state, not a stronger hover: the
+        // dashed border goes solid as well as changing colour, so the cue
+        // survives for anyone who cannot separate the two hues.
+        dragActive && "border-solid border-action bg-action-subtle",
         className
       )}
     >
@@ -62,33 +65,35 @@ export function MedicalUploadDropzone({
       />
 
       {selectedFile ? (
-        <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+        <div className="flex items-center justify-between rounded-control border border-rule bg-surface-raised p-3">
           <div className="flex items-center space-x-3">
-            <FileText className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+            <FileText className="h-6 w-6 shrink-0 text-action" aria-hidden="true" />
             <div className="text-left">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[200px]">
+              <p className="max-w-[200px] truncate text-body-sm font-semibold text-ink">
                 {selectedFile.name}
               </p>
-              <p className="text-xs text-slate-500">{formatFileSize(selectedFile.size)}</p>
+              <p className="text-body-sm text-ink-muted">{formatFileSize(selectedFile.size)}</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setSelectedFile(null);
             }}
-            className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+            aria-label={`Remove ${selectedFile.name}`}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-rule hover:text-risk-emergency"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       ) : (
         <div className="flex flex-col items-center space-y-2">
-          <UploadCloud className="h-10 w-10 text-teal-600 dark:text-teal-400 mb-1" />
-          <p className="text-sm font-semibold text-slate-900 dark:text-white">
+          <UploadCloud className="mb-1 h-10 w-10 text-action" aria-hidden="true" />
+          <p className="text-body-sm font-semibold text-ink">
             Click to upload or drag medical report / image here
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-body-sm text-ink-muted">
             Supports PDF, PNG, JPG (Up to {maxSizeMb}MB)
           </p>
         </div>

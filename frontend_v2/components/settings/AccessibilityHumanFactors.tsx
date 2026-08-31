@@ -1,92 +1,111 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, CheckCircle2, Sparkles, Volume2 } from "lucide-react";
+import { Eye, Volume2 } from "lucide-react";
+import { Field } from "@/components/ui/Field";
+import { H2, BodySm } from "@/components/ui/Typography";
+import { useAccessibility } from "@/hooks/useAccessibility";
 
+/**
+ * Real, app-wide accessibility preferences (reduced motion, high contrast,
+ * large text), backed by providers/AccessibilityProvider.tsx: toggling one
+ * sets a data attribute on <html>, which styles/globals.css keys off of, and
+ * persists to localStorage so the choice survives a reload. This replaces a
+ * prior version of this panel where these three toggles were pure local
+ * useState with no effect anywhere else in the app.
+ *
+ * Offline audio triage assistance (text-to-speech) is out of scope for this
+ * task: no audio engine exists yet to wire it to, so it stays local state
+ * with its helper text saying so plainly, rather than presenting a fake
+ * "on" state as if it did something.
+ */
 export function AccessibilityHumanFactors() {
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [highContrast, setHighContrast] = useState(false);
-  const [largeText, setLargeText] = useState(false);
+  const { reducedMotion, setReducedMotion, highContrast, setHighContrast, largeText, setLargeText } =
+    useAccessibility();
   const [voiceAssistance, setVoiceAssistance] = useState(false);
 
   return (
-    <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-6 space-y-6 shadow-xl">
-      <div className="flex items-center space-x-3 pb-3 border-b border-slate-800">
-        <div className="p-2.5 rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/30">
-          <Eye className="h-6 w-6" />
+    <div className="rounded-card bg-surface border border-rule p-6 space-y-6">
+      <div className="flex items-center space-x-3 pb-3 border-b border-rule">
+        <div className="p-2.5 rounded-control bg-action-subtle text-action border border-rule">
+          <Eye className="h-6 w-6" aria-hidden="true" />
         </div>
         <div>
-          <h2 className="text-base font-extrabold text-white">Accessibility & Clinical Human Factors (WCAG 2.2 AA)</h2>
-          <p className="text-xs text-slate-400">Tailored UI readability preferences for long clinical shifts and low-resource environments.</p>
+          <H2>Accessibility & Clinical Human Factors (WCAG 2.2 AA)</H2>
+          <BodySm className="text-ink-muted">
+            Tailored UI readability preferences for long clinical shifts and low-resource environments.
+          </BodySm>
         </div>
       </div>
 
       <div className="space-y-3">
-        {/* Item 1: Reduced Motion */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-          <div className="space-y-0.5 max-w-xl">
-            <h4 className="text-xs font-bold text-white">Reduce Screen Animations</h4>
-            <p className="text-xs text-slate-400">
-              Disables non-essential transition animations. Recommended for clinicians sensitive to motion or operating low-spec hardware.
-            </p>
-          </div>
-          <input
-            type="checkbox"
-            checked={reducedMotion}
-            onChange={(e) => setReducedMotion(e.target.checked)}
-            className="h-5 w-5 rounded bg-slate-900 border-slate-700 text-teal-400 focus:ring-teal-500 cursor-pointer"
-          />
+        <div className="p-4 rounded-control bg-ground border border-rule">
+          <Field
+            id="reduced-motion"
+            label="Reduce screen animations"
+            helper="Disables non-essential transition and animation effects app-wide. Recommended for clinicians sensitive to motion or operating low-spec hardware. Applies immediately and survives reload."
+          >
+            <input
+              type="checkbox"
+              role="switch"
+              className="ui-switch"
+              checked={reducedMotion}
+              onChange={(e) => setReducedMotion(e.target.checked)}
+            />
+          </Field>
         </div>
 
-        {/* Item 2: High Contrast */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-          <div className="space-y-0.5 max-w-xl">
-            <h4 className="text-xs font-bold text-white">High Contrast & Outdoor Visibility Mode</h4>
-            <p className="text-xs text-slate-400">
-              Increases border contrast ratios (7:1 WCAG AAA). Improves screen readability under direct sunlight in field health camps.
-            </p>
-          </div>
-          <input
-            type="checkbox"
-            checked={highContrast}
-            onChange={(e) => setHighContrast(e.target.checked)}
-            className="h-5 w-5 rounded bg-slate-900 border-slate-700 text-teal-400 focus:ring-teal-500 cursor-pointer"
-          />
+        <div className="p-4 rounded-control bg-ground border border-rule">
+          <Field
+            id="high-contrast"
+            label="High contrast & outdoor visibility mode"
+            helper="Increases border and muted-text contrast app-wide. Improves screen readability under direct sunlight in field health camps. Applies immediately and survives reload."
+          >
+            <input
+              type="checkbox"
+              role="switch"
+              className="ui-switch"
+              checked={highContrast}
+              onChange={(e) => setHighContrast(e.target.checked)}
+            />
+          </Field>
         </div>
 
-        {/* Item 3: Large Text */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-          <div className="space-y-0.5 max-w-xl">
-            <h4 className="text-xs font-bold text-white">Large Text & High-Legibility Type Scale</h4>
-            <p className="text-xs text-slate-400">
-              Scales default font size up by 15% and enforces bold font weights for rapid scanning during high-volume triage shifts.
-            </p>
-          </div>
-          <input
-            type="checkbox"
-            checked={largeText}
-            onChange={(e) => setLargeText(e.target.checked)}
-            className="h-5 w-5 rounded bg-slate-900 border-slate-700 text-teal-400 focus:ring-teal-500 cursor-pointer"
-          />
+        <div className="p-4 rounded-control bg-ground border border-rule">
+          <Field
+            id="large-text"
+            label="Large text & high-legibility type scale"
+            helper="Scales the root font size up app-wide for rapid scanning during high-volume triage shifts. Applies immediately and survives reload."
+          >
+            <input
+              type="checkbox"
+              role="switch"
+              className="ui-switch"
+              checked={largeText}
+              onChange={(e) => setLargeText(e.target.checked)}
+            />
+          </Field>
         </div>
 
-        {/* Item 4: Offline Voice Assistance */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-          <div className="space-y-0.5 max-w-xl">
-            <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Volume2 className="h-4 w-4 text-teal-400" />
-              <span>Offline Audio Triage Assistance</span>
-            </h4>
-            <p className="text-xs text-slate-400">
-              Provides text-to-speech voice readouts for emergency alert intercepts and severe vitals warnings.
-            </p>
-          </div>
-          <input
-            type="checkbox"
-            checked={voiceAssistance}
-            onChange={(e) => setVoiceAssistance(e.target.checked)}
-            className="h-5 w-5 rounded bg-slate-900 border-slate-700 text-teal-400 focus:ring-teal-500 cursor-pointer"
-          />
+        <div className="p-4 rounded-control bg-ground border border-rule">
+          <Field
+            id="voice-assistance"
+            label={
+              <span className="flex items-center gap-1.5">
+                <Volume2 className="h-4 w-4 text-action" aria-hidden="true" />
+                <span>Offline audio triage assistance</span>
+              </span>
+            }
+            helper="Text-to-speech voice readouts for emergency alert intercepts and severe vitals warnings. Not yet wired to an audio engine; this preference does not do anything yet."
+          >
+            <input
+              type="checkbox"
+              role="switch"
+              className="ui-switch"
+              checked={voiceAssistance}
+              onChange={(e) => setVoiceAssistance(e.target.checked)}
+            />
+          </Field>
         </div>
       </div>
     </div>

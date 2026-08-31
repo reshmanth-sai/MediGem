@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Brain, X, Send, Sparkles } from "lucide-react";
+import { Brain, X, Send } from "lucide-react";
+import { Label } from "@/components/ui/Typography";
 
 export function FloatingAIAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,7 +10,7 @@ export function FloatingAIAssistant() {
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
     {
       role: "assistant",
-      text: "Hello Dr. Vikram! I am your offline Gemma 3 Clinical Assistant. Ask me about drug dosages, emergency guidelines, or rural triage protocols.",
+      text: "Hello Dr. Vikram. I am your offline Gemma 3 clinical assistant. Ask me about drug dosages, emergency guidelines, or rural triage protocols.",
     },
   ]);
 
@@ -23,14 +24,18 @@ export function FloatingAIAssistant() {
 
     // Simulated offline AI response
     setTimeout(() => {
-      let reply = "Based on offline clinical protocols: Please verify patient vitals and check for red flags like crushing chest pain or hypoxia.";
+      let reply =
+        "Based on offline clinical protocols: Please verify patient vitals and check for red flags like crushing chest pain or hypoxia.";
       const lower = userText.toLowerCase();
       if (lower.includes("aspirin") || lower.includes("dosage")) {
-        reply = "Aspirin Acute ACS Dosage Protocol: 325mg non-enteric coated chewable tablet STAT. Avoid if active GI bleed history.";
+        reply =
+          "Aspirin Acute ACS Dosage Protocol: 325mg non-enteric coated chewable tablet STAT. Avoid if active GI bleed history.";
       } else if (lower.includes("fever") || lower.includes("temp")) {
-        reply = "Rural Fever Protocol: Assess for rigors, cough, and rash. If Temp >38.5°C with WBC >12k, initiate empirical antibiotic review.";
+        reply =
+          "Rural Fever Protocol: Assess for rigors, cough, and rash. If Temp above 38.5C with WBC above 12k, initiate empirical antibiotic review.";
       } else if (lower.includes("snake") || lower.includes("bite")) {
-        reply = "EMERGENCY SNAKE BITE INTERCEPT: Keep patient calm, immobilize limb. Do NOT apply tourniquet. Transfer to referral center for ASV.";
+        reply =
+          "EMERGENCY SNAKE BITE INTERCEPT: Keep patient calm, immobilize limb. Do NOT apply tourniquet. Transfer to referral center for ASV.";
       }
 
       setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
@@ -39,78 +44,76 @@ export function FloatingAIAssistant() {
 
   return (
     <div className="fixed bottom-24 right-6 z-50">
-      {/* Drawer Dialog with Ultra-Glassmorphism Backdrop Blur */}
       {isOpen && (
-        <div className="mb-3 w-80 sm:w-96 rounded-2xl bg-slate-900/80 backdrop-blur-2xl border border-slate-700/80 shadow-2xl overflow-hidden flex flex-col h-[420px] animate-fadeIn">
-          {/* Drawer Header */}
-          <div className="p-3 bg-gradient-to-r from-slate-950/80 to-teal-950/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="h-7 w-7 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-300">
-                <Brain className="h-4 w-4" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-white flex items-center gap-1">
-                  Offline Clinical Assistant
-                  <Sparkles className="h-3 w-3 text-teal-400" />
-                </h4>
-                <p className="text-[10px] text-slate-400 font-mono">Gemma 3 4B • Local Edge</p>
+        <div className="mb-3 w-80 sm:w-96 rounded-card bg-surface border border-rule overflow-hidden flex flex-col h-[420px]">
+          {/* Drawer header */}
+          <div className="p-3 bg-surface-raised border-b border-rule flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Brain className="h-5 w-5 text-action shrink-0" aria-hidden="true" />
+              <div className="min-w-0">
+                <h2 className="text-h3 text-ink truncate">Offline Clinical Assistant</h2>
+                <Label>Gemma 3 4B, local edge</Label>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+              className="h-9 w-9 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-surface transition-colors shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              aria-label="Close clinical assistant"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
 
-          {/* Messages Container */}
-          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 text-xs">
+          {/* Messages */}
+          <div className="flex-1 p-3 overflow-y-auto space-y-2.5" aria-live="polite">
             {messages.map((m, idx) => (
               <div
                 key={idx}
                 className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div
-                  className={`max-w-[85%] p-2.5 rounded-xl text-xs leading-relaxed ${
+                <p
+                  className={`max-w-[85%] p-2.5 rounded-control text-body-sm leading-relaxed ${
                     m.role === "user"
-                      ? "bg-teal-500 text-slate-950 font-medium rounded-tr-none shadow-md"
-                      : "bg-slate-950/90 text-slate-200 border border-slate-800 rounded-tl-none shadow-md"
+                      ? "bg-action text-on-action rounded-tr-none"
+                      : "bg-surface-raised text-ink border border-rule rounded-tl-none"
                   }`}
                 >
+                  <span className="sr-only">{m.role === "user" ? "You: " : "Assistant: "}</span>
                   {m.text}
-                </div>
+                </p>
               </div>
             ))}
           </div>
 
-          {/* Input Form */}
-          <form onSubmit={handleSend} className="p-2.5 border-t border-slate-800/80 bg-slate-950/80 backdrop-blur-md flex gap-1.5">
+          {/* Input */}
+          <form onSubmit={handleSend} className="p-2.5 border-t border-rule bg-surface flex gap-2">
             <input
               type="text"
-              placeholder="Ask offline clinical AI..."
+              placeholder="Ask offline clinical AI"
+              aria-label="Ask the offline clinical assistant"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="flex-1 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
+              className="flex-1 h-11 px-3 rounded-control bg-surface border border-rule-strong text-body-sm text-ink placeholder:text-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus transition-colors"
             />
             <button
               type="submit"
-              className="p-2 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold transition-all shadow-md"
+              className="h-11 w-11 inline-flex items-center justify-center rounded-control bg-action text-on-action hover:bg-action-hover active:bg-action-active transition-colors shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              aria-label="Send question"
             >
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-4 w-4" aria-hidden="true" />
             </button>
           </form>
         </div>
       )}
 
-      {/* Glassmorphism Floating Assistant Button with High Transparency & Crisp Blur */}
+      {/* Launcher */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2.5 px-4 py-2.5 rounded-full bg-slate-900/50 hover:bg-slate-900/70 backdrop-blur-xl border border-teal-500/40 hover:border-teal-400/80 text-teal-300 shadow-2xl shadow-teal-950/50 transition-all duration-300 hover:scale-105 font-bold text-xs"
-        title="Ask Offline AI Clinical Assistant"
+        aria-expanded={isOpen}
+        className="flex items-center gap-2.5 h-11 px-4 rounded-full bg-surface border border-rule-strong text-ink hover:bg-surface-raised transition-colors font-semibold text-body-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
-        <Brain className="h-4 w-4 text-teal-400 animate-pulse" />
-        <span className="tracking-wide">Ask AI Assistant</span>
+        <Brain className="h-4 w-4 text-action shrink-0" aria-hidden="true" />
+        <span>Ask AI Assistant</span>
       </button>
     </div>
   );

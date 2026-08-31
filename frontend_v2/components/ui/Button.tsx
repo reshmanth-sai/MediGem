@@ -3,24 +3,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center font-semibold rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+export const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 rounded-control font-semibold transition-[background-color,color,transform] duration-150 ease-out active:translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:text-ink-disabled disabled:bg-surface-raised",
   {
     variants: {
       variant: {
-        primary: "bg-teal-600 text-white hover:bg-teal-700 shadow-sm",
-        secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700",
-        outline: "border border-slate-300 bg-transparent hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800",
-        ghost: "hover:bg-teal-50 text-teal-700 dark:hover:bg-slate-800 dark:text-teal-400",
-        danger: "bg-red-600 text-white hover:bg-red-700 shadow-sm",
-        emergency: "bg-red-600 text-white hover:bg-red-700 shadow-md animate-pulse",
-        success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm",
+        primary: "bg-action text-on-action hover:bg-action-hover active:bg-action-active",
+        secondary: "bg-surface-raised text-ink border border-rule hover:bg-rule",
+        outline: "border border-action text-action hover:bg-action-subtle",
+        ghost: "text-action hover:bg-action-subtle",
+        text: "text-action underline-offset-4 hover:underline",
+        danger: "bg-risk-emergency text-on-action hover:brightness-90",
       },
       size: {
-        sm: "h-8 px-3 text-xs",
-        md: "h-10 px-4 text-sm",
-        lg: "h-12 px-6 text-base",
-        icon: "h-10 w-10 p-0",
+        lg: "h-[52px] px-6 text-body",
+        md: "h-11 px-4 text-body-sm",
+        sm: "h-9 px-3 text-body-sm relative before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-[44px] before:content-['']",
       },
     },
     defaultVariants: {
@@ -44,16 +42,25 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || isLoading}
+        aria-busy={isLoading}
         className={cn(buttonVariants({ variant, size, className }))}
         {...props}
       >
         {isLoading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />
         ) : (
-          leftIcon && <span className="mr-2 inline-flex">{leftIcon}</span>
+          leftIcon && (
+            <span className="inline-flex" aria-hidden="true">
+              {leftIcon}
+            </span>
+          )
         )}
         {children}
-        {!isLoading && rightIcon && <span className="ml-2 inline-flex">{rightIcon}</span>}
+        {!isLoading && rightIcon && (
+          <span className="inline-flex" aria-hidden="true">
+            {rightIcon}
+          </span>
+        )}
       </button>
     );
   }

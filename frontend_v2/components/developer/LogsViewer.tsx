@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { Terminal, Search } from "lucide-react";
-import { Card } from "@/components/ui/Card";
-import { CodeBlock } from "@/components/ui/Typography";
+import { Section } from "@/components/ui/Card";
+import { BodySm } from "@/components/ui/Typography";
 
 export function LogsViewer() {
   const [filter, setFilter] = useState("");
@@ -20,25 +20,41 @@ export function LogsViewer() {
   const filtered = logs.filter((l) => l.toLowerCase().includes(filter.toLowerCase()));
 
   return (
-    <Card className="space-y-3 bg-slate-900 text-white border-slate-800">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 text-xs font-mono font-bold text-teal-400">
-          <Terminal className="h-4 w-4" />
-          <span>REAL-TIME SYSTEM LOGS & TELEMETRY</span>
-        </div>
+    <Section
+      heading={
+        <span className="inline-flex items-center gap-2">
+          <Terminal className="h-4 w-4 text-ink-muted shrink-0" aria-hidden="true" />
+          System Logs & Telemetry
+        </span>
+      }
+      headingAs="h3"
+      headingAdornment={
         <div className="relative">
-          <Search className="absolute left-2 top-2 h-3.5 w-3.5 text-slate-400" />
+          <Search
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted pointer-events-none"
+            aria-hidden="true"
+          />
           <input
             type="text"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            placeholder="Filter logs..."
-            className="pl-7 pr-2 py-1 text-[11px] bg-slate-800 border border-slate-700 rounded focus:outline-none text-white"
+            placeholder="Filter logs"
+            aria-label="Filter system logs"
+            className="h-9 pl-8 pr-3 text-body-sm bg-surface border border-rule-strong rounded-control text-ink placeholder:text-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus transition-colors"
           />
         </div>
-      </div>
-
-      <CodeBlock>{filtered.join("\n")}</CodeBlock>
-    </Card>
+      }
+    >
+      {filtered.length > 0 ? (
+        <pre
+          aria-label="System log output"
+          className="font-mono text-body-sm p-3 bg-surface-raised text-ink border border-rule rounded-control overflow-x-auto whitespace-pre"
+        >
+          <code>{filtered.join("\n")}</code>
+        </pre>
+      ) : (
+        <BodySm className="text-ink-muted">No log lines match that filter.</BodySm>
+      )}
+    </Section>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, CloudOff, ShieldCheck, Bell, Moon, Sun, MapPin } from "lucide-react";
+import { Search, CloudOff, Bell, Moon, Sun, MapPin } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
 export function Header() {
@@ -12,67 +12,69 @@ export function Header() {
   };
 
   return (
-    <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl sticky top-0 z-40 px-6 flex items-center justify-between shadow-sm">
+    <header className="h-16 border-b border-rule bg-surface sticky top-0 z-40 px-6 flex items-center justify-between">
       {/* Brand & Version */}
-      <div className="flex items-center space-x-3 shrink-0">
-        <span className="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-          💎 MediGem
-        </span>
-        <span className="text-[10px] text-teal-400 font-mono font-bold bg-teal-950/80 border border-teal-500/30 px-2 py-0.5 rounded">
+      <div className="flex items-center gap-3 shrink-0">
+        <span className="text-h2 text-ink">MediGem</span>
+        <span className="text-label font-mono text-ink-muted bg-surface-raised border border-rule px-2 py-0.5 rounded-chip">
           v3.3
         </span>
       </div>
 
-      {/* Center Interactive Cmd + K Search Trigger Bar */}
+      {/* Center Cmd + K search trigger */}
       <div className="hidden md:flex flex-1 max-w-xl mx-8">
         <button
           onClick={handleOpenCommand}
-          className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-teal-500/50 text-slate-400 hover:text-slate-200 transition-all text-xs shadow-inner group font-mono"
+          className="w-full flex items-center justify-between gap-3 px-3.5 h-11 rounded-control bg-surface-raised border border-rule text-ink-muted hover:text-ink hover:border-rule-strong transition-colors text-body-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
-          <div className="flex items-center space-x-2.5">
-            <Search className="h-4 w-4 text-slate-500 group-hover:text-teal-400 transition-colors" />
-            <span className="text-slate-400 group-hover:text-slate-200">Search patients, symptoms, IDs, protocols...</span>
-          </div>
-          <kbd className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-400">
-            ⌘K
+          <span className="flex items-center gap-2.5 min-w-0">
+            <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">Search patients, symptoms, IDs, protocols</span>
+          </span>
+          <kbd className="px-2 py-0.5 rounded-chip bg-surface border border-rule text-label font-mono text-ink-muted shrink-0">
+            Cmd K
           </kbd>
         </button>
       </div>
 
-      {/* Right Telemetry & Status Badges */}
-      <div className="flex items-center space-x-3 shrink-0 font-mono text-xs">
-        {/* Clinic Location Status */}
-        <div className="hidden xl:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-[11px]">
-          <MapPin className="h-3.5 w-3.5 text-teal-400" />
-          <span>Rampur Sub-Center</span>
-          <span className="text-slate-500">•</span>
-          <span className="text-emerald-400 font-bold">Shift Active</span>
+      {/* Right telemetry and status */}
+      <div className="flex items-center gap-3 shrink-0">
+        {/* Clinic location status */}
+        <div className="hidden xl:flex items-center gap-1.5 px-3 h-9 rounded-control bg-surface-raised border border-rule text-body-sm text-ink-muted">
+          <MapPin className="h-4 w-4 text-ink-muted shrink-0" aria-hidden="true" />
+          <span className="text-ink">Rampur Sub-Center</span>
+          <span aria-hidden="true">/</span>
+          <span className="text-risk-low font-semibold">Shift Active</span>
         </div>
 
-        {/* Offline Edge Status */}
-        <div className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold shadow-sm">
-          <CloudOff className="h-3.5 w-3.5 text-emerald-400" />
+        {/* Offline edge status */}
+        <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-control bg-risk-low/12 text-risk-low border border-risk-low/30 text-body-sm font-semibold">
+          <CloudOff className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>100% Edge Offline</span>
         </div>
 
-        {/* Emergency Alert Notification Bell */}
+        {/* Emergency alert notification */}
         <button
-          className="relative p-2 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
-          title="1 STAT Emergency Pending"
+          className="relative h-11 w-11 inline-flex items-center justify-center text-ink-muted hover:text-ink bg-surface-raised border border-rule rounded-control transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          aria-label="Notifications: 1 emergency case pending"
         >
-          <Bell className="h-4 w-4 text-rose-400" />
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-rose-500 text-slate-950 text-[9px] font-extrabold flex items-center justify-center">
+          <Bell className="h-4 w-4 text-risk-emergency" aria-hidden="true" />
+          <span className="absolute top-1 right-1 min-h-[18px] min-w-[18px] px-1 rounded-full bg-risk-emergency text-on-action text-body-sm font-semibold leading-none flex items-center justify-center">
             1
           </span>
         </button>
 
-        {/* Theme Toggle */}
+        {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
+          className="h-11 w-11 inline-flex items-center justify-center text-ink-muted hover:text-ink bg-surface-raised border border-rule rounded-control transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           aria-label="Toggle Theme"
         >
-          {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-teal-400" />}
+          {isDark ? (
+            <Sun className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Moon className="h-4 w-4" aria-hidden="true" />
+          )}
         </button>
       </div>
     </header>

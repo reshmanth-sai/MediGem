@@ -1,80 +1,96 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { H3, BodySm, Label } from "@/components/ui/Typography";
 
 const LOADING_STAGES = [
-  "Preparing Patient Clinical Context",
-  "Checking Emergency Indicators (< 0.3ms)",
-  "Organizing Multimodal File Inputs",
-  "Executing Local Gemma 3 4B Reasoning",
-  "Validating Output Safety Contract",
-  "Building Clinical Referral Summary",
+  "Preparing patient clinical context",
+  "Checking emergency indicators",
+  "Organising multimodal file inputs",
+  "Running local Gemma 3 4B reasoning",
+  "Validating the output safety contract",
+  "Building the clinical referral summary",
 ];
 
 export function LoadingTransition({ onComplete }: { onComplete?: () => void }) {
   const [activeIdx, setActiveIdx] = useState(0);
+  const isLastStage = activeIdx >= LOADING_STAGES.length - 1;
 
+  const onCompleteRef = useRef(onComplete);
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveIdx((prev) => {
-        if (prev < LOADING_STAGES.length - 1) {
-          return prev + 1;
-        } else {
-          clearInterval(timer);
-          if (onComplete) setTimeout(onComplete, 800);
-          return prev;
-        }
-      });
-    }, 900);
+    onCompleteRef.current = onComplete;
+  });
 
-    return () => clearInterval(timer);
-  }, [onComplete]);
+  // One timer per stage, scheduled from an effect rather than from inside a
+  // setState updater, so the completion callback fires exactly once.
+  useEffect(() => {
+    if (isLastStage) {
+      if (!onCompleteRef.current) return;
+      const done = setTimeout(() => onCompleteRef.current?.(), 800);
+      return () => clearTimeout(done);
+    }
+    const next = setTimeout(() => setActiveIdx((prev) => prev + 1), 900);
+    return () => clearTimeout(next);
+  }, [activeIdx, isLastStage]);
 
   return (
     <Card className="max-w-md mx-auto py-10 px-6 text-center space-y-6">
-      <div className="mx-auto w-14 h-14 rounded-full bg-teal-50 dark:bg-teal-950 flex items-center justify-center text-teal-600">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <span className="mx-auto w-14 h-14 rounded-full bg-action-subtle border border-rule flex items-center justify-center text-action">
+        <Loader2 className="h-8 w-8 motion-safe:animate-spin" aria-hidden="true" />
+      </span>
 
       <div className="space-y-1">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-          Executing Clinical AI Analysis
-        </h3>
-        <p className="text-xs text-slate-500">
-          Local Ollama Gemma 3 4B engine is reasoning over patient context...
-        </p>
+        <H3>Running clinical analysis</H3>
+        <BodySm className="text-ink-muted">
+          The local Gemma 3 4B engine is reasoning over the patient context.
+        </BodySm>
       </div>
 
-      <div className="space-y-2 text-left bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+      <ol
+        aria-live="polite"
+        className="space-y-2 text-left bg-surface-raised p-4 rounded-card border border-rule list-none m-0"
+      >
         {LOADING_STAGES.map((stg, idx) => {
           const isDone = idx < activeIdx;
           const isCurrent = idx === activeIdx;
 
           return (
-            <div
+            <li
               key={stg}
-              className={`flex items-center space-x-3 text-xs p-1.5 rounded transition-colors ${
+              className={`flex items-center gap-3 text-body-sm p-1.5 rounded-control ${
                 isCurrent
-                  ? "font-bold text-teal-600 dark:text-teal-400 bg-teal-50/80 dark:bg-teal-950/60"
+                  ? "font-semibold text-action bg-action-subtle"
                   : isDone
-                  ? "text-slate-500 line-through"
-                  : "text-slate-400 opacity-50"
+                  ? "text-ink-muted"
+                  : "text-ink-disabled"
               }`}
             >
               {isDone ? (
-                <CheckCircle2 className="h-4 w-4 text-teal-600 shrink-0" />
+                <CheckCircle2
+                  className="h-4 w-4 text-risk-low shrink-0"
+                  aria-hidden="true"
+                />
               ) : isCurrent ? (
-                <Loader2 className="h-4 w-4 text-teal-600 animate-spin shrink-0" />
+                <Loader2
+                  className="h-4 w-4 text-action motion-safe:animate-spin shrink-0"
+                  aria-hidden="true"
+                />
               ) : (
-                <span className="h-4 w-4 rounded-full border border-slate-300 dark:border-slate-700 shrink-0 inline-block" />
+                <span
+                  className="h-4 w-4 rounded-full border border-rule-strong shrink-0 inline-block"
+                  aria-hidden="true"
+                />
               )}
-              <span className="truncate">{stg}</span>
-            </div>
+              <span>{stg}</span>
+              <Label as="span" className="ml-auto shrink-0">
+                {isDone ? "Done" : isCurrent ? "Running" : "Waiting"}
+              </Label>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </Card>
   );
 }

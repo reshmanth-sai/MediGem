@@ -2,6 +2,8 @@
 
 import React from "react";
 import { Brain, HardDrive, Eye, Sun, ShieldCheck, Cpu, Info } from "lucide-react";
+import { Label, BodySm } from "@/components/ui/Typography";
+import { cn } from "@/lib/utils";
 
 interface SettingsCategoryNavProps {
   activeTab: string;
@@ -20,10 +22,8 @@ export function SettingsCategoryNav({ activeTab, setActiveTab }: SettingsCategor
   ];
 
   return (
-    <div className="rounded-2xl theme-card border p-3 space-y-2 shadow-xl">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono px-2 pt-1">
-        Control Center Categories
-      </p>
+    <div className="rounded-card bg-surface border border-rule p-3 space-y-2">
+      <Label className="px-2 pt-1 block">Control Center Categories</Label>
 
       <div className="space-y-1">
         {categories.map((cat) => {
@@ -33,21 +33,29 @@ export function SettingsCategoryNav({ activeTab, setActiveTab }: SettingsCategor
           return (
             <button
               key={cat.id}
+              type="button"
+              aria-current={isActive ? "true" : undefined}
               onClick={() => setActiveTab(cat.id)}
-              className={`w-full text-left p-2.5 rounded-xl transition-all flex items-start space-x-3 border ${
+              className={cn(
+                "w-full text-left p-2.5 rounded-control transition-all flex items-start space-x-3 border",
                 isActive
-                  ? "theme-card border-teal-500/60 shadow-md font-bold"
-                  : "theme-card border-transparent opacity-80 hover:opacity-100 hover:border-slate-400"
-              }`}
+                  ? "bg-action-subtle border-action"
+                  : "bg-surface border-transparent opacity-80 hover:opacity-100 hover:border-rule-strong"
+              )}
             >
-              <div className={`p-2 rounded-lg shrink-0 mt-0.5 ${isActive ? "bg-teal-500/20 text-teal-400" : "bg-slate-500/10 text-slate-400"}`}>
-                <Icon className="h-4 w-4" />
+              <div
+                className={cn(
+                  "p-2 rounded-control shrink-0 mt-0.5",
+                  isActive ? "bg-action text-on-action" : "bg-surface-raised text-ink-muted"
+                )}
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
               </div>
               <div className="space-y-0.5 truncate">
-                <p className={`text-xs font-bold truncate ${isActive ? "text-teal-400 font-black" : "text-slate-700 dark:text-slate-200"}`}>
+                <p className={cn("text-body-sm font-semibold truncate", isActive ? "text-action" : "text-ink")}>
                   {cat.label}
                 </p>
-                <p className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate leading-tight">{cat.desc}</p>
+                <BodySm className="text-ink-muted truncate leading-tight">{cat.desc}</BodySm>
               </div>
             </button>
           );

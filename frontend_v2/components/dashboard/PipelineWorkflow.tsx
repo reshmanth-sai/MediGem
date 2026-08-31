@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { User, ShieldAlert, FileText, Cpu, CheckCircle2, FileSpreadsheet, Info } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { H2, BodySm, Label, Data } from "@/components/ui/Typography";
+import { cn } from "@/lib/utils";
 
 export function PipelineWorkflow() {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(0);
@@ -14,7 +16,7 @@ export function PipelineWorkflow() {
       desc: "Demographics, vitals & medical uploads",
       tech: "React Hook Form + Zod",
       latency: "0.12ms",
-      icon: <User className="h-5 w-5 text-teal-600 dark:text-teal-400" />,
+      icon: <User className="h-5 w-5 text-action" aria-hidden="true" />,
       details: "Validates physical measurements, baseline vitals, and attached file formats.",
     },
     {
@@ -23,8 +25,8 @@ export function PipelineWorkflow() {
       desc: "Deterministic gate evaluation",
       tech: "Python Rule Engine",
       latency: "< 0.3ms",
-      icon: <ShieldAlert className="h-5 w-5 text-red-500" />,
-      details: "Evaluates 11 rule groups across cardiac, stroke & toxicity before calling AI models.",
+      icon: <ShieldAlert className="h-5 w-5 text-risk-emergency" aria-hidden="true" />,
+      details: "Evaluates 11 rule groups across cardiac, stroke and toxicity before calling AI models.",
     },
     {
       id: 3,
@@ -32,7 +34,7 @@ export function PipelineWorkflow() {
       desc: "PyMuPDF text & OpenCV quality merge",
       tech: "OpenCV + PyMuPDF",
       latency: "140ms",
-      icon: <FileText className="h-5 w-5 text-amber-500" />,
+      icon: <FileText className="h-5 w-5 text-risk-moderate" aria-hidden="true" />,
       details: "Bypasses OCR for PDF text layers and evaluates Laplacian image blur variance.",
     },
     {
@@ -41,8 +43,8 @@ export function PipelineWorkflow() {
       desc: "Ollama local LLM reasoning",
       tech: "Gemma 3 4B Local",
       latency: "5,200ms",
-      icon: <Cpu className="h-5 w-5 text-purple-500" />,
-      details: "Formulates clinical observation summaries & explainable reasoning factors 100% offline.",
+      icon: <Cpu className="h-5 w-5 text-ink-muted" aria-hidden="true" />,
+      details: "Formulates clinical observation summaries and explainable reasoning factors 100% offline.",
     },
     {
       id: 5,
@@ -50,7 +52,7 @@ export function PipelineWorkflow() {
       desc: "Strict Pydantic JSON guard",
       tech: "Pydantic v2",
       latency: "2.1ms",
-      icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
+      icon: <CheckCircle2 className="h-5 w-5 text-risk-low" aria-hidden="true" />,
       details: "Guarantees JSON output compliance without hallucinations or prohibited diagnoses.",
     },
     {
@@ -59,8 +61,8 @@ export function PipelineWorkflow() {
       desc: "Summary & referral memorandum",
       tech: "MediGem Template Engine",
       latency: "15ms",
-      icon: <FileSpreadsheet className="h-5 w-5 text-blue-500" />,
-      details: "Generates formatted clinical summaries, transparency factors & printable referral notes.",
+      icon: <FileSpreadsheet className="h-5 w-5 text-action" aria-hidden="true" />,
+      details: "Generates formatted clinical summaries, transparency factors and printable referral notes.",
     },
   ];
 
@@ -70,14 +72,14 @@ export function PipelineWorkflow() {
     <Card className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+          <h2 className="text-body font-bold text-ink tracking-tight">
             Multimodal AI Pipeline Architecture
           </h2>
-          <p className="text-xs text-slate-500">
-            Hover over any pipeline stage to inspect technology, latency & execution details
-          </p>
+          <BodySm className="text-ink-muted">
+            Hover over any pipeline stage to inspect technology, latency and execution details
+          </BodySm>
         </div>
-        <span className="text-[10px] font-mono font-bold bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 px-2.5 py-1 rounded-full">
+        <span className="font-mono font-bold bg-action-subtle text-action px-2.5 py-1 rounded-chip text-label">
           100% LOCAL PIPELINE
         </span>
       </div>
@@ -90,38 +92,39 @@ export function PipelineWorkflow() {
             <div
               key={stg.id}
               onMouseEnter={() => setHoveredIdx(idx)}
-              className={`p-3.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 space-y-2 ${
+              className={cn(
+                "p-3.5 rounded-card border text-left cursor-pointer transition-colors duration-300 space-y-2",
                 isHovered
-                  ? "bg-teal-50 dark:bg-teal-950/80 border-teal-500 shadow-md shadow-teal-500/10 scale-105"
-                  : "bg-slate-50 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 hover:border-slate-400"
-              }`}
+                  ? "bg-action-subtle border-action"
+                  : "bg-surface-raised border-rule hover:border-rule-strong"
+              )}
             >
-              <div className="p-2 rounded-xl bg-white dark:bg-slate-800 w-fit border border-slate-200 dark:border-slate-700">
+              <div className="p-2 rounded-control bg-surface w-fit border border-rule">
                 {stg.icon}
               </div>
               <div>
-                <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                <p className="text-body-sm font-bold text-ink truncate">
                   {stg.title}
                 </p>
-                <p className="text-[10px] text-slate-500 font-mono mt-0.5">{stg.latency}</p>
+                <Data className="text-ink-muted mt-0.5 text-body-sm">{stg.latency}</Data>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Interactive Detail Card ⭐⭐⭐⭐⭐ */}
-      <div className="p-4 rounded-2xl bg-slate-900 text-white border border-teal-800/80 space-y-1.5 animate-in fade-in duration-200">
-        <div className="flex items-center justify-between text-xs font-mono">
-          <span className="font-bold text-teal-400 flex items-center gap-1.5">
-            <Info className="h-4 w-4 text-teal-400" />
+      {/* Interactive Detail Panel */}
+      <div className="p-4 rounded-card bg-surface-raised text-ink border border-rule-strong space-y-1.5">
+        <div className="flex items-center justify-between font-mono text-body-sm">
+          <span className="font-bold text-action flex items-center gap-1.5">
+            <Info className="h-4 w-4 text-action" aria-hidden="true" />
             Stage Details: {activeStage.title}
           </span>
-          <span className="text-slate-400">Tech: {activeStage.tech} • Latency: {activeStage.latency}</span>
+          <span className="text-ink-muted">Tech: {activeStage.tech}. Latency: {activeStage.latency}</span>
         </div>
-        <p className="text-xs text-slate-300 leading-relaxed font-normal">
+        <BodySm className="text-ink-muted leading-relaxed font-normal">
           {activeStage.details}
-        </p>
+        </BodySm>
       </div>
     </Card>
   );

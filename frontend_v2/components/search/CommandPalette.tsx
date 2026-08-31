@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Home, PlusCircle, History, Award, Settings, Terminal, X } from "lucide-react";
+import { Search, Home, PlusCircle, History, Award, Settings, Terminal } from "lucide-react";
 import { ModalDialog } from "@/components/ui/Dialog";
+import { BodySm } from "@/components/ui/Typography";
 
 export function CommandPalette() {
   const router = useRouter();
@@ -22,52 +23,72 @@ export function CommandPalette() {
   }, []);
 
   const commands = [
-    { title: "Home Dashboard", route: "/", icon: <Home className="h-4 w-4" /> },
-    { title: "Start New Patient Case", route: "/new-case", icon: <PlusCircle className="h-4 w-4" /> },
-    { title: "Clinical Case History", route: "/history", icon: <History className="h-4 w-4" /> },
-    { title: "Demo Presets & Hackathon Mode", route: "/demo", icon: <Award className="h-4 w-4" /> },
-    { title: "Evaluation Analytics Dashboard", route: "/evaluation", icon: <Terminal className="h-4 w-4" /> },
-    { title: "Developer Workspace & Inspector", route: "/developer", icon: <Terminal className="h-4 w-4" /> },
-    { title: "Settings & Accessibility", route: "/settings", icon: <Settings className="h-4 w-4" /> },
+    { title: "Home Dashboard", route: "/", icon: Home },
+    { title: "Start New Patient Case", route: "/new-case", icon: PlusCircle },
+    { title: "Clinical Case History", route: "/history", icon: History },
+    { title: "Demo Presets & Hackathon Mode", route: "/demo", icon: Award },
+    { title: "Evaluation Analytics Dashboard", route: "/evaluation", icon: Terminal },
+    { title: "Developer Workspace & Inspector", route: "/developer", icon: Terminal },
+    { title: "Settings & Accessibility", route: "/settings", icon: Settings },
   ];
 
   const filtered = commands.filter((c) => c.title.toLowerCase().includes(query.toLowerCase()));
 
   const handleNavigate = (route: string) => {
     setIsOpen(false);
-    router.push(route);
+    router.push(route as any);
   };
 
   if (!isOpen) return null;
 
   return (
-    <ModalDialog isOpen={isOpen} onClose={() => setIsOpen(false)} title="⌘ Command Palette & Search" className="max-w-xl">
+    <ModalDialog
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
+      title="Command Palette"
+      className="max-w-xl"
+    >
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted pointer-events-none"
+            aria-hidden="true"
+          />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type a command or search page..."
-            className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 dark:text-white"
+            placeholder="Type a command or search page"
+            aria-label="Search commands and pages"
+            className="w-full h-11 pl-9 pr-3 text-body-sm bg-surface border border-rule-strong rounded-control text-ink placeholder:text-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus transition-colors"
             autoFocus
           />
         </div>
 
-        <div className="space-y-1 max-h-60 overflow-y-auto text-xs">
-          {filtered.map((cmd) => (
-            <div
-              key={cmd.title}
-              onClick={() => handleNavigate(cmd.route)}
-              className="flex items-center space-x-3 p-2.5 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-950/60 hover:text-teal-700 dark:hover:text-teal-300 cursor-pointer transition-colors"
-            >
-              <div className="text-slate-400">{cmd.icon}</div>
-              <span className="font-semibold text-slate-900 dark:text-white flex-1">{cmd.title}</span>
-              <span className="text-[10px] font-mono text-slate-400">{cmd.route}</span>
-            </div>
-          ))}
-        </div>
+        <ul className="space-y-1 max-h-60 overflow-y-auto" role="list">
+          {filtered.map((cmd) => {
+            const Icon = cmd.icon;
+            return (
+              <li key={cmd.title}>
+                <button
+                  type="button"
+                  onClick={() => handleNavigate(cmd.route)}
+                  className="w-full flex items-center gap-3 p-2.5 rounded-control text-left hover:bg-action-subtle hover:text-action transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
+                  <span className="flex-1 min-w-0 truncate text-body-sm font-semibold text-ink">
+                    {cmd.title}
+                  </span>
+                  <span className="text-label font-mono text-ink-muted shrink-0">{cmd.route}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        {filtered.length === 0 && (
+          <BodySm className="text-ink-muted py-2">No commands match that search.</BodySm>
+        )}
       </div>
     </ModalDialog>
   );

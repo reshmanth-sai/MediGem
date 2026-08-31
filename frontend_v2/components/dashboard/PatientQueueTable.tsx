@@ -2,15 +2,27 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PRESET_CASES, ClinicalCaseData } from "@/lib/casesData";
-import { RiskBadge } from "@/components/ui/Badge";
-import { Search, Filter, Stethoscope, FileText, Printer, ArrowRight, UserCheck, AlertTriangle } from "lucide-react";
+import { PRESET_CASES, ClinicalCaseData, CONFIDENCE_LABELS } from "@/lib/casesData";
+import { RiskIndicator } from "@/components/ui/RiskIndicator";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Button, buttonVariants } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/Input";
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/Table";
+import { Section } from "@/components/ui/Card";
+import { Label } from "@/components/ui/Typography";
+import { Search, ArrowRight, ClipboardList } from "lucide-react";
+
+const RISK_FILTERS = ["ALL", "EMERGENCY", "HIGH", "MODERATE", "LOW"] as const;
+
+function filterLabel(level: (typeof RISK_FILTERS)[number]) {
+  return level.charAt(0) + level.slice(1).toLowerCase();
+}
 
 export function PatientQueueTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRisk, setFilterRisk] = useState<string>("ALL");
 
-  // Convert preset cases to array sorted by risk priority: EMERGENCY -> HIGH -> MODERATE -> LOW
+  // Sort by risk priority: EMERGENCY -> HIGH -> MODERATE -> LOW
   const riskWeight: Record<string, number> = {
     EMERGENCY: 4,
     HIGH: 3,
@@ -34,151 +46,121 @@ export function PatientQueueTable() {
     return matchesSearch && matchesRisk;
   });
 
+  const clinicHasNoCases = casesList.length === 0;
+
   return (
-    <div className="rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl overflow-hidden space-y-0">
-      {/* Header & Controls Strip */}
-      <div className="p-4 border-b border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 bg-slate-950/40">
-        <div>
-          <h2 className="text-base font-extrabold text-white tracking-tight flex items-center gap-2">
-            <Stethoscope className="h-5 w-5 text-teal-400" />
-            <span>Today's Patient Intake & Queue</span>
-          </h2>
-          <p className="text-xs text-slate-400 font-normal">
-            Prioritized by emergency severity • Clinical decision queue
-          </p>
+    <Section
+      heading="Today's patient intake and queue"
+      headingAdornment={<Label className="normal-case">Prioritized by emergency severity</Label>}
+    >
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="relative w-full md:w-72">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted pointer-events-none"
+            aria-hidden="true"
+          />
+          <TextField
+            type="text"
+            placeholder="Search patient, ID, village"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+            aria-label="Search patient queue"
+          />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          {/* Search Box */}
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search patient, ID, village..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500 transition-colors"
-            />
-          </div>
-
-          {/* Risk Level Filter Chips */}
-          <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
-            {["ALL", "EMERGENCY", "HIGH", "MODERATE", "LOW"].map((lvl) => (
-              <button
-                key={lvl}
-                onClick={() => setFilterRisk(lvl)}
-                className={`px-2.5 py-1 rounded-lg transition-all text-[10.5px] uppercase tracking-wider ${
-                  filterRisk === lvl
-                    ? lvl === "EMERGENCY"
-                      ? "bg-rose-500 text-slate-950 font-bold"
-                      : "bg-teal-500 text-slate-950 font-bold"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                {lvl}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter by risk level">
+          {RISK_FILTERS.map((lvl) => (
+            <Button
+              key={lvl}
+              type="button"
+              size="sm"
+              variant={filterRisk === lvl ? "primary" : "secondary"}
+              onClick={() => setFilterRisk(lvl)}
+              aria-pressed={filterRisk === lvl}
+            >
+              {filterLabel(lvl)}
+            </Button>
+          ))}
         </div>
       </div>
 
-      {/* Patient Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-slate-950/80 text-slate-400 font-mono font-semibold uppercase text-[10px] tracking-wider border-b border-slate-800">
+      {clinicHasNoCases ? (
+        <EmptyState
+          icon={ClipboardList}
+          title="No active cases today"
+          description="New patient intakes will appear here as soon as they are logged."
+          action={{ label: "Start new patient intake", href: "/new-case" }}
+        />
+      ) : filteredCases.length === 0 ? (
+        <EmptyState
+          icon={Search}
+          title="No matching cases"
+          description="Try a different search term or clear the risk filter to see the full queue."
+          action={{
+            label: "Clear filters",
+            onClick: () => {
+              setSearchQuery("");
+              setFilterRisk("ALL");
+            },
+          }}
+        />
+      ) : (
+        <Table caption="Today's patient intake queue, sorted by emergency severity" captionHidden>
+          <THead>
             <tr>
-              <th className="py-3 px-4">Patient & Village</th>
-              <th className="py-3 px-4">Age / Sex</th>
-              <th className="py-3 px-4">Chief Complaint</th>
-              <th className="py-3 px-4">Risk Level</th>
-              <th className="py-3 px-4">AI Confidence</th>
-              <th className="py-3 px-4">Arrival</th>
-              <th className="py-3 px-4 text-right">Quick Action</th>
+              <TH>Patient and village</TH>
+              <TH>Age / sex</TH>
+              <TH>Chief complaint</TH>
+              <TH>Risk level</TH>
+              <TH>AI confidence</TH>
+              <TH>Arrival</TH>
+              <TH className="text-right">Action</TH>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60 font-medium">
+          </THead>
+          <TBody>
             {filteredCases.map((patient) => {
               const isEmergency = patient.riskLevel === "EMERGENCY";
               return (
-                <tr
-                  key={patient.caseId}
-                  className={`hover:bg-slate-800/40 transition-colors group ${
-                    isEmergency ? "bg-rose-950/20" : ""
-                  }`}
-                >
-                  {/* Patient Name & Village */}
-                  <td className="py-3.5 px-4">
-                    <div>
-                      <p className="font-bold text-white group-hover:text-teal-300 transition-colors flex items-center gap-1.5">
-                        {patient.patientName}
-                        <span className="text-[10px] font-mono text-slate-400 font-normal">
-                          ({patient.patientId})
-                        </span>
-                      </p>
-                      <p className="text-[11px] text-slate-400">{patient.village || "Rural Clinic"}</p>
+                <TR key={patient.caseId}>
+                  <TD>
+                    <div className="font-semibold text-ink flex items-center gap-1.5">
+                      {patient.patientName}
+                      <span className="text-label text-ink-muted normal-case">({patient.patientId})</span>
                     </div>
-                  </td>
-
-                  {/* Age / Sex */}
-                  <td className="py-3.5 px-4 text-slate-300 font-mono">
+                    <div className="text-body-sm text-ink-muted">{patient.village || "Rural clinic"}</div>
+                  </TD>
+                  <TD>
                     {patient.age}y / {patient.gender.charAt(0)}
-                  </td>
-
-                  {/* Chief Complaint */}
-                  <td className="py-3.5 px-4 text-slate-300 max-w-xs truncate" title={patient.chiefComplaint}>
+                  </TD>
+                  <TD className="max-w-xs truncate" title={patient.chiefComplaint}>
                     {patient.chiefComplaint}
-                  </td>
-
-                  {/* Risk Level Badge */}
-                  <td className="py-3.5 px-4">
-                    <RiskBadge level={patient.riskLevel} />
-                  </td>
-
-                  {/* AI Confidence Gauge */}
-                  <td className="py-3.5 px-4 font-mono">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-12 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${
-                            patient.aiConfidence && patient.aiConfidence > 95
-                              ? "bg-teal-400"
-                              : "bg-amber-400"
-                          }`}
-                          style={{ width: `${patient.aiConfidence || 90}%` }}
-                        />
-                      </div>
-                      <span className="text-[11px] text-slate-300 font-bold">
-                        {patient.aiConfidence || 94.0}%
+                  </TD>
+                  <TD>
+                    <RiskIndicator level={patient.riskLevel} variant="tint" showScore={patient.urgencyScore} />
+                  </TD>
+                  <TD>{CONFIDENCE_LABELS[patient.confidenceLevel]}</TD>
+                  <TD className="text-ink-muted">{patient.arrivalTime || "15 mins ago"}</TD>
+                  <TD className="text-right">
+                    <Link
+                      href={`/results/${patient.caseId}`}
+                      className={buttonVariants({
+                        size: "sm",
+                        variant: isEmergency ? "danger" : "secondary",
+                      })}
+                    >
+                      Open case
+                      <span className="inline-flex" aria-hidden="true">
+                        <ArrowRight className="h-3.5 w-3.5" />
                       </span>
-                    </div>
-                  </td>
-
-                  {/* Arrival Time */}
-                  <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
-                    {patient.arrivalTime || "15 mins ago"}
-                  </td>
-
-                  {/* Quick Action */}
-                  <td className="py-3.5 px-4 text-right">
-                    <Link href={`/results/${patient.caseId}`}>
-                      <button
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 ml-auto border ${
-                          isEmergency
-                            ? "bg-rose-500 hover:bg-rose-400 text-slate-950 border-rose-400"
-                            : "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 hover:border-slate-600"
-                        }`}
-                      >
-                        <span>Open Case</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </button>
                     </Link>
-                  </td>
-                </tr>
+                  </TD>
+                </TR>
               );
             })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TBody>
+        </Table>
+      )}
+    </Section>
   );
 }

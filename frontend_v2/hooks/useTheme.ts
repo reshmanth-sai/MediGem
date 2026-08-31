@@ -1,28 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useTheme as useNextTheme } from "next-themes";
+import { useThemeContext, type Theme } from "@/providers/ThemeProvider";
 
-/** Hook wrapping next-themes with typed light/dark mode helpers and hydration safety */
+export type { Theme };
+
+/**
+ * Hook exposing the shared Day/Night theme. Backed by a single React
+ * context provided by ThemeProvider (see providers/ThemeProvider.tsx), so
+ * every consumer reads and writes the same state: toggling the theme in
+ * one mounted consumer is reflected in every other mounted consumer
+ * without a remount. "day" applies no class to <html>; "night" applies
+ * theme-night, matching the token blocks in styles/globals.css.
+ */
 export function useTheme() {
-  const { theme, setTheme, systemTheme } = useNextTheme();
-  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useThemeContext();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isDark = theme === "night";
 
-  const isDark = mounted ? (theme === "dark" || (theme === "system" && systemTheme === "dark")) : true;
+  /** Kept for existing consumers (e.g. components/layout/Header.tsx) that toggle the theme with one control. */
+  const toggleTheme = () => setTheme(theme === "night" ? "day" : "night");
 
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
-  };
-
-  return {
-    theme,
-    setTheme,
-    isDark,
-    toggleTheme,
-    mounted,
-  };
+  return { theme, setTheme, isDark, toggleTheme };
 }

@@ -1,81 +1,196 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, Save, X, PlayCircle, Sparkles } from "lucide-react";
+
 import { AppShell } from "@/components/layout/AppShell";
+import { Button } from "@/components/ui/Button";
+import { ErrorSummary } from "@/components/ui/ErrorSummary";
+import { H1, BodySm } from "@/components/ui/Typography";
+
 import { IntakeStepper } from "@/components/new-case/IntakeStepper";
 import { StickyPatientContextSidebar } from "@/components/new-case/StickyPatientContextSidebar";
-import { StepPatientDetails, PatientDetailsFormData } from "@/components/new-case/StepPatientDetails";
+import {
+  StepPatientDetails,
+  type PatientDetailsField,
+  type PatientDetailsFormData,
+} from "@/components/new-case/StepPatientDetails";
 import { SmartSymptomSearch } from "@/components/new-case/SmartSymptomSearch";
-import { StructuredMedicalHistory } from "@/components/new-case/StructuredMedicalHistory";
+import {
+  StructuredMedicalHistory,
+  type MedicalHistoryField,
+} from "@/components/new-case/StructuredMedicalHistory";
 import { DocumentUploadWorkspace } from "@/components/new-case/DocumentUploadWorkspace";
 import { StepReview } from "@/components/new-case/StepReview";
 import { AIExecutionPipeline } from "@/components/new-case/AIExecutionPipeline";
-import { MedicalHistoryData } from "@/components/new-case/StepMedicalHistory";
-import { UploadedFileItem } from "@/components/new-case/StepUploads";
-import { calculateCustomUrgencyScore, ClinicalCaseData } from "@/lib/casesData";
+
+import { useCaseDraft, type IntakeStep } from "@/lib/store/caseDraft";
+import { stepSchemas } from "@/lib/schemas/patient";
+import { calculateCustomUrgencyScore, type ClinicalCaseData } from "@/lib/casesData";
+import {
+  AGE_NOT_RECORDED,
+  buildErrorSummary,
+  displayVital,
+  fieldError,
+  isAgeRecorded,
+  toFormValues,
+  type IntakeFieldName,
+  type IntakeFormValues,
+} from "./intakeForm";
+
+/**
+ * The exact object identity the draft store hands out for an untouched (or
+ * freshly reset) patient. Captured at module load, before any interaction can
+ * have written to the draft. updatePatient always allocates a new object and
+ * reset restores this one, so `patient === PRISTINE_PATIENT` is an exact test
+ * for "nothing has been entered yet" rather than a guess based on field
+ * contents. The wizard uses it once, on mount, to replace the store's
+ * ambiguous `age: 0` default with the NaN "not recorded" sentinel described in
+ * ./intakeForm.ts.
+ */
+const PRISTINE_PATIENT = useCaseDraft.getState().patient;
+
+const CASE_ID = "CASE-CUSTOM";
 
 export default function NewCasePage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+
+  const step = useCaseDraft((s) => s.step);
+  const patient = useCaseDraft((s) => s.patient);
+  const symptoms = useCaseDraft((s) => s.symptoms);
+  const history = useCaseDraft((s) => s.history);
+  const uploads = useCaseDraft((s) => s.uploads);
+  const setStep = useCaseDraft((s) => s.setStep);
+  const updatePatient = useCaseDraft((s) => s.updatePatient);
+  const updateSymptoms = useCaseDraft((s) => s.updateSymptoms);
+  const updateHistory = useCaseDraft((s) => s.updateHistory);
+  const addUpload = useCaseDraft((s) => s.addUpload);
+  const removeUpload = useCaseDraft((s) => s.removeUpload);
+  const setResult = useCaseDraft((s) => s.setResult);
+
+  // Whether the reasoning overlay is on screen. Not part of the draft, so it
+  // stays local: nothing about it needs to survive a route change.
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [summaryVisible, setSummaryVisible] = useState(false);
+  const [failedAdvances, setFailedAdvances] = useState(0);
+  const summaryRef = useRef<HTMLDivElement>(null);
 
-  // Form State
-  const [patientData, setPatientData] = useState<PatientDetailsFormData>({
-    patientName: "Ramesh Kumar",
-    patientId: "P-101",
-    age: 45,
-    gender: "Male",
-    weightKg: 70,
-    heightCm: 172,
-    hrBpm: 95,
-    systolicBp: 138,
-    diastolicBp: 88,
-    tempCelsius: 37.2,
-    spO2Percent: 98,
-    chiefComplaint: "Patient presents in rural clinic with chest tightness and palpitations.",
-    location: "Sub-Center Clinic A",
+  // Lift the store's `age: 0` default into the "not recorded" sentinel exactly
+  // once, so an untouched age can never pass validation as a literal zero.
+  useEffect(() => {
+    if (useCaseDraft.getState().patient === PRISTINE_PATIENT) {
+      useCaseDraft.getState().updatePatient({ age: AGE_NOT_RECORDED });
+    }
+  }, []);
+
+  const formValues = useMemo(
+    () => toFormValues(patient, symptoms, history),
+    [patient, symptoms, history]
+  );
+
+  // One resolver per step. react-hook-form reads _options on every render, so
+  // swapping the schema as the wizard advances takes effect immediately.
+  const resolver = useMemo(
+    () => zodResolver(stepSchemas[step]) as unknown as Resolver<IntakeFormValues>,
+    [step]
+  );
+
+  const {
+    trigger,
+    clearErrors,
+    formState: { errors },
+  } = useForm<IntakeFormValues>({
+    resolver,
+    mode: "onBlur",
+    values: formValues,
+    // The draft store owns the values; keep validation state across the
+    // re-syncs that every keystroke causes so a message does not flicker away
+    // while the clinician is still fixing the field it belongs to.
+    resetOptions: { keepErrors: true, keepTouched: true, keepIsSubmitted: true },
   });
 
-  const [symptoms, setSymptoms] = useState<string[]>(["Chest tightness", "Palpitations"]);
-  const [symptomDuration, setSymptomDuration] = useState("2 hours ago");
-  const [symptomSeverity, setSymptomSeverity] = useState("Moderate");
+  const summaryEntries = useMemo(
+    () => buildErrorSummary(errors, step),
+    [errors, step]
+  );
 
-  const [historyData, setHistoryData] = useState<MedicalHistoryData>({
-    pastIllnesses: "None reported",
-    medications: "Amlodipine 5mg OD",
-    allergies: "None known",
-    surgeries: "None",
-    chronicConditions: "Hypertension (3 years)",
-    lifestyleNotes: "Non-smoker",
-  });
+  // Move focus to the summary after a failed advance, once the errors it lists
+  // have actually rendered.
+  useEffect(() => {
+    if (failedAdvances > 0) {
+      summaryRef.current?.focus();
+    }
+  }, [failedAdvances]);
 
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
+  const revalidateField = useCallback(
+    (field: IntakeFieldName) => {
+      void trigger(field);
+    },
+    [trigger]
+  );
 
-  const handlePatientDataChange = (field: keyof PatientDetailsFormData, val: any) => {
-    setPatientData((prev) => ({ ...prev, [field]: val }));
-  };
+  const goToStep = useCallback(
+    (next: number) => {
+      setSummaryVisible(false);
+      clearErrors();
+      setStep(Math.min(5, Math.max(1, next)) as IntakeStep);
+    },
+    [clearErrors, setStep]
+  );
 
-  const handleHistoryDataChange = (field: keyof MedicalHistoryData, val: string) => {
-    setHistoryData((prev) => ({ ...prev, [field]: val }));
-  };
+  const handleNext = useCallback(async () => {
+    const valid = await trigger();
+    if (!valid) {
+      setSummaryVisible(true);
+      setFailedAdvances((n) => n + 1);
+      return;
+    }
+    goToStep(step + 1);
+  }, [trigger, goToStep, step]);
 
-  const handleAddFile = (file: File, type: string) => {
-    const newItem: UploadedFileItem = {
-      id: Math.random().toString(36).substring(2, 9),
-      file,
-      type,
-    };
-    setUploadedFiles((prev) => [...prev, newItem]);
-  };
+  const handlePatientChange = useCallback(
+    (field: PatientDetailsField, val: string | number | null | undefined) => {
+      if (field === "age") {
+        // The store types age as a number, so "not recorded" is the NaN
+        // sentinel rather than null or a dropped key.
+        updatePatient({
+          age: typeof val === "number" ? val : AGE_NOT_RECORDED,
+        });
+        return;
+      }
+      updatePatient({ [field]: val } as Partial<PatientDetailsFormData>);
+    },
+    [updatePatient]
+  );
 
-  const handleRemoveFile = (id: string) => {
-    setUploadedFiles((prev) => prev.filter((f) => f.id !== id));
-  };
+  const handleHistoryChange = useCallback(
+    (field: MedicalHistoryField, val: string) => {
+      updateHistory({ [field]: val });
+    },
+    [updateHistory]
+  );
 
-  const loadDemoCase = () => {
-    setPatientData({
+  const handleAddFile = useCallback(
+    (file: File, type: string) => {
+      addUpload({
+        id: Math.random().toString(36).substring(2, 9),
+        file,
+        type,
+      });
+    },
+    [addUpload]
+  );
+
+  /**
+   * A deliberate, clearly labelled demo affordance. It is not seeded state:
+   * nothing here runs unless a presenter clicks "Load demo case", and the
+   * values it writes go through the same store as typed input.
+   */
+  const loadDemoCase = useCallback(() => {
+    updatePatient({
       patientName: "Synthetic Demo Patient",
       patientId: "DEMO-9901",
       age: 62,
@@ -88,196 +203,266 @@ export default function NewCasePage() {
       chiefComplaint: "Acute onset substernal chest discomfort.",
       location: "Sub-Center Clinic A",
     });
-    setSymptoms(["Chest tightness", "Shortness of breath", "Diaphoresis"]);
-    setSymptomDuration("30 minutes ago");
-    setSymptomSeverity("Severe");
-    setCurrentStep(5);
-  };
+    updateSymptoms({
+      symptoms: ["Chest tightness", "Shortness of breath", "Diaphoresis"],
+      duration: "30 minutes ago",
+      severity: "Severe",
+    });
+    goToStep(5);
+  }, [updatePatient, updateSymptoms, goToStep]);
 
-  const handleStartAnalysis = () => {
-    setIsAnalyzing(true);
-  };
+  const handleAnalysisComplete = useCallback(() => {
+    const vitals: ClinicalCaseData["vitals"] = [
+      {
+        label: "HR",
+        value: displayVital(patient.hrBpm, "bpm"),
+        status: (patient.hrBpm ?? 0) > 100 ? "alert" : "normal",
+      },
+      {
+        label: "BP",
+        value:
+          patient.systolicBp === undefined || patient.diastolicBp === undefined
+            ? "Not recorded"
+            : `${patient.systolicBp}/${patient.diastolicBp} mmHg`,
+        status: (patient.systolicBp ?? 0) > 140 ? "warning" : "normal",
+      },
+      {
+        label: "Temp",
+        value: displayVital(patient.tempCelsius, "C"),
+        status: (patient.tempCelsius ?? 0) > 38.0 ? "warning" : "normal",
+      },
+      {
+        label: "SpO2",
+        value: displayVital(patient.spO2Percent, "percent"),
+        status: (patient.spO2Percent ?? 100) < 94 ? "alert" : "normal",
+      },
+    ];
 
-  const handleAnalysisComplete = () => {
     const calc = calculateCustomUrgencyScore(
-      [
-        { label: "HR", value: `${patientData.hrBpm} bpm`, status: (patientData.hrBpm ?? 0) > 100 ? "alert" : "normal" },
-        { label: "BP", value: `${patientData.systolicBp}/${patientData.diastolicBp} mmHg`, status: (patientData.systolicBp ?? 0) > 140 ? "warning" : "normal" },
-      ],
-      symptoms
+      vitals.slice(0, 2),
+      symptoms.symptoms
     );
 
+    const recordedAge = isAgeRecorded(patient.age) ? patient.age : 0;
+
     const customCase: ClinicalCaseData = {
-      caseId: "CASE-CUSTOM",
-      patientId: patientData.patientId || "P-CUSTOM",
-      patientName: patientData.patientName || "Current Patient Intake",
-      age: patientData.age || 45,
-      gender: patientData.gender || "Male",
+      caseId: CASE_ID,
+      patientId: patient.patientId || "P-CUSTOM",
+      patientName: patient.patientName || "Current patient intake",
+      age: recordedAge,
+      gender: patient.gender || "Not recorded",
       arrivalTime: "Arrived just now",
       assignedWorker: "Priya Sharma (ANM)",
       activeUser: "Dr. Vikram Patel (CHO)",
-      village: "Rampur Sub-Center",
+      village: patient.location || "Rampur Sub-Center",
       riskLevel: calc.riskLevel,
       urgencyScore: calc.urgencyScore,
       primaryFinding: calc.primaryFinding,
-      clinicalSummary: `Intake Assessment for ${patientData.patientName || "Patient"} (${patientData.age || 45}y/o ${patientData.gender || "Male"}). Chief complaint: ${patientData.chiefComplaint}. Vitals: HR ${patientData.hrBpm} bpm, BP ${patientData.systolicBp}/${patientData.diastolicBp} mmHg, SpO2 ${patientData.spO2Percent}%.`,
+      clinicalSummary: `Intake assessment for ${
+        patient.patientName || "this patient"
+      }, ${isAgeRecorded(patient.age) ? `${patient.age} years` : "age not recorded"}, ${
+        patient.gender || "gender not recorded"
+      }. Chief complaint: ${patient.chiefComplaint}. Vitals: HR ${displayVital(
+        patient.hrBpm,
+        "bpm"
+      )}, temperature ${displayVital(
+        patient.tempCelsius,
+        "C"
+      )}, oxygen saturation ${displayVital(patient.spO2Percent, "percent")}.`,
       recommendedAction: calc.recommendedAction,
-      aiConfidence: 96.4,
-      vitals: [
-        { label: "HR", value: `${patientData.hrBpm} bpm`, status: (patientData.hrBpm ?? 0) > 100 ? "alert" : "normal" },
-        { label: "BP", value: `${patientData.systolicBp}/${patientData.diastolicBp} mmHg`, status: (patientData.systolicBp ?? 0) > 140 ? "warning" : "normal" },
-        { label: "Temp", value: `${patientData.tempCelsius}°C`, status: (patientData.tempCelsius ?? 0) > 38.0 ? "warning" : "normal" },
-        { label: "SpO2", value: `${patientData.spO2Percent}%`, status: (patientData.spO2Percent ?? 100) < 94 ? "alert" : "normal" },
-      ],
-      chiefComplaint: patientData.chiefComplaint,
+      confidenceLevel: calc.confidenceLevel,
+      requiresHumanReview: calc.requiresHumanReview,
+      supportingFindings: calc.supportingFindings,
+      differentialConsiderations: calc.differentialConsiderations,
+      recommendedInvestigations: calc.recommendedInvestigations,
+      clinicalRationale: calc.clinicalRationale,
+      disposition: calc.disposition,
+      vitals,
+      chiefComplaint: patient.chiefComplaint,
+      symptoms: symptoms.symptoms,
+      documents: uploads.map((u) => u.file.name),
     };
 
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("medigem_custom_case", JSON.stringify(customCase));
-    }
+    // The completed case travels in the draft store. No sessionStorage, so
+    // nothing about the case is serialised into browser storage on the way to
+    // the results route.
+    setResult(customCase);
+    router.push(`/results/${CASE_ID}`);
+  }, [patient, symptoms, uploads, setResult, router]);
 
-    router.push("/results/CASE-CUSTOM");
-  };
-
-  const progressPct = Math.round((currentStep / 5) * 100);
+  const progressPct = Math.round((step / 5) * 100);
+  const showSummary = summaryVisible && summaryEntries.length > 0;
 
   return (
     <AppShell>
       <div className="space-y-4 max-w-[1600px] mx-auto pb-16">
-        {/* Workspace Landing Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-              Guided Clinical Patient Intake Workstation
-            </h1>
-            <p className="text-xs text-slate-400">
-              Offline clinical co-pilot intake • 100% Edge AI reasoning • Local SQLite storage
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-rule pb-3">
+          <div className="space-y-1">
+            <H1>Guided clinical patient intake</H1>
+            <BodySm className="text-ink-muted">
+              Offline clinical co-pilot intake, edge reasoning, local SQLite
+              storage.
+            </BodySm>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <button
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={loadDemoCase}
-              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors flex items-center space-x-1.5 border border-slate-700"
+              leftIcon={<PlayCircle className="h-4 w-4" aria-hidden="true" />}
             >
-              <PlayCircle className="h-4 w-4 text-teal-400" />
-              <span>Load Demo Case</span>
-            </button>
-            <button
+              Load demo case
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => router.push("/")}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs border border-slate-800 transition-colors flex items-center space-x-1"
+              leftIcon={<X className="h-4 w-4" aria-hidden="true" />}
             >
-              <X className="h-4 w-4" />
-              <span>Cancel</span>
-            </button>
+              Cancel
+            </Button>
           </div>
         </div>
 
-        {/* Linear/Apple Progress Timeline Stepper */}
-        <IntakeStepper currentStep={currentStep} setCurrentStep={setCurrentStep} progressPct={progressPct} />
+        <IntakeStepper
+          currentStep={step}
+          onSelectStep={goToStep}
+          progressPct={progressPct}
+        />
 
-        {/* 2-Column Master Layout (65% Intake Wizard / 35% Sticky Patient Context Sidebar) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* Left Column (65% Intake Wizard Step) */}
           <div className="lg:col-span-8 space-y-4">
-            {currentStep === 1 && (
-              <StepPatientDetails formData={patientData} onChange={handlePatientDataChange} />
+            {showSummary && (
+              <ErrorSummary ref={summaryRef} errors={summaryEntries} />
             )}
 
-            {currentStep === 2 && (
+            {step === 1 && (
+              <StepPatientDetails
+                formData={formValues}
+                onChange={handlePatientChange}
+                errors={{
+                  patientName: fieldError(errors, "patientName"),
+                  patientId: fieldError(errors, "patientId"),
+                  age: fieldError(errors, "age"),
+                  gender: fieldError(errors, "gender"),
+                  chiefComplaint: fieldError(errors, "chiefComplaint"),
+                  weightKg: fieldError(errors, "weightKg"),
+                  heightCm: fieldError(errors, "heightCm"),
+                  hrBpm: fieldError(errors, "hrBpm"),
+                  systolicBp: fieldError(errors, "systolicBp"),
+                  diastolicBp: fieldError(errors, "diastolicBp"),
+                  tempCelsius: fieldError(errors, "tempCelsius"),
+                  spO2Percent: fieldError(errors, "spO2Percent"),
+                  location: fieldError(errors, "location"),
+                }}
+                onBlurField={revalidateField}
+              />
+            )}
+
+            {step === 2 && (
               <SmartSymptomSearch
-                symptoms={symptoms}
-                setSymptoms={setSymptoms}
-                duration={symptomDuration}
-                setDuration={setSymptomDuration}
-                severity={symptomSeverity}
-                setSeverity={setSymptomSeverity}
+                symptoms={symptoms.symptoms}
+                onSymptomsChange={(next) => updateSymptoms({ symptoms: next })}
+                duration={symptoms.duration}
+                onDurationChange={(val) => updateSymptoms({ duration: val })}
+                severity={symptoms.severity}
+                onSeverityChange={(val) => updateSymptoms({ severity: val })}
+                errors={{
+                  symptoms: fieldError(errors, "symptoms"),
+                  duration: fieldError(errors, "duration"),
+                  severity: fieldError(errors, "severity"),
+                }}
+                onBlurField={revalidateField}
               />
             )}
 
-            {currentStep === 3 && (
-              <StructuredMedicalHistory historyData={historyData} onChange={handleHistoryDataChange} />
+            {step === 3 && (
+              <StructuredMedicalHistory
+                historyData={history}
+                onChange={handleHistoryChange}
+                errors={{
+                  pastIllnesses: fieldError(errors, "pastIllnesses"),
+                  medications: fieldError(errors, "medications"),
+                  allergies: fieldError(errors, "allergies"),
+                  surgeries: fieldError(errors, "surgeries"),
+                  chronicConditions: fieldError(errors, "chronicConditions"),
+                  lifestyleNotes: fieldError(errors, "lifestyleNotes"),
+                }}
+                onBlurField={revalidateField}
+              />
             )}
 
-            {currentStep === 4 && (
+            {step === 4 && (
               <DocumentUploadWorkspace
-                uploadedFiles={uploadedFiles}
+                uploadedFiles={uploads}
                 onAddFile={handleAddFile}
-                onRemoveFile={handleRemoveFile}
+                onRemoveFile={removeUpload}
               />
             )}
 
-            {currentStep === 5 && (
+            {step === 5 && (
               <StepReview
-                patientData={patientData}
-                symptoms={symptoms}
-                symptomDuration={symptomDuration}
-                symptomSeverity={symptomSeverity}
-                historyData={historyData}
-                uploadedFiles={uploadedFiles}
-                onEditStep={(s) => setCurrentStep(s)}
+                patientData={formValues}
+                symptoms={symptoms.symptoms}
+                symptomDuration={symptoms.duration}
+                symptomSeverity={symptoms.severity}
+                historyData={history}
+                uploadedFiles={uploads}
+                onEditStep={goToStep}
               />
             )}
 
-            {/* Navigation Controls Bar */}
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl">
-              <button
-                disabled={currentStep === 1}
-                onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 border ${
-                  currentStep === 1
-                    ? "bg-slate-950 border-slate-900 text-slate-600 cursor-not-allowed"
-                    : "bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
-                }`}
+            <div className="flex items-center justify-between gap-3 p-4 rounded-card bg-surface border border-rule">
+              <Button
+                variant="secondary"
+                disabled={step === 1}
+                onClick={() => goToStep(step - 1)}
+                leftIcon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}
               >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Previous Step</span>
-              </button>
+                Previous step
+              </Button>
 
-              <div className="flex items-center space-x-2">
-                <button
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
                   type="button"
-                  className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition-colors flex items-center space-x-1"
+                  leftIcon={<Save className="h-4 w-4" aria-hidden="true" />}
                 >
-                  <Save className="h-4 w-4 text-teal-400" />
-                  <span>Save Draft</span>
-                </button>
+                  Save draft
+                </Button>
 
-                {currentStep < 5 ? (
-                  <button
-                    onClick={() => setCurrentStep((prev) => Math.min(5, prev + 1))}
-                    className="px-5 py-2 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-extrabold text-xs transition-all flex items-center space-x-1.5 border border-teal-300 shadow-lg"
+                {step < 5 ? (
+                  <Button
+                    onClick={handleNext}
+                    rightIcon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
                   >
-                    <span>Next Step</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
+                    Next step
+                  </Button>
                 ) : (
-                  <button
-                    onClick={handleStartAnalysis}
-                    className="px-6 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs transition-all flex items-center space-x-2 border border-emerald-300 shadow-xl"
+                  <Button
+                    onClick={() => setIsAnalyzing(true)}
+                    leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
                   >
-                    <Sparkles className="h-4 w-4 text-slate-950" />
-                    <span>Run AI Clinical Reasoning</span>
-                  </button>
+                    Run clinical reasoning
+                  </Button>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Right Column (35% Sticky Patient Context Sidebar) */}
           <div className="lg:col-span-4">
             <StickyPatientContextSidebar
-              patientData={patientData}
-              symptoms={symptoms}
-              historyData={historyData}
-              uploadedFiles={uploadedFiles}
-              currentStep={currentStep}
+              patientData={formValues}
+              symptoms={symptoms.symptoms}
+              historyData={history}
+              uploadedFiles={uploads}
+              currentStep={step}
             />
           </div>
         </div>
       </div>
 
-      {/* Stage-by-Stage AI Reasoning Pipeline Overlay */}
       {isAnalyzing && <AIExecutionPipeline onComplete={handleAnalysisComplete} />}
     </AppShell>
   );

@@ -1,40 +1,45 @@
 import React from "react";
 import { Activity, CheckCircle2, Cpu, HardDrive, ShieldCheck, Clock } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+import { Section } from "@/components/ui/Card";
+import { Label, BodySm } from "@/components/ui/Typography";
 
 export function SystemHealthDashboard() {
   const telemetry = [
-    { label: "Pipeline Status", val: "HEALTHY", icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" /> },
-    { label: "Gemma Model Engine", val: "gemma3:4b ONLINE", icon: <Cpu className="h-4 w-4 text-teal-600 dark:text-teal-400" /> },
-    { label: "Emergency Safety Gate", val: "0.28ms Latency", icon: <ShieldCheck className="h-4 w-4 text-red-500" /> },
-    { label: "Local SQLite Cache", val: "4.2 MB / 50 MB", icon: <HardDrive className="h-4 w-4 text-purple-500" /> },
-    { label: "System Version", val: "v2.0.0-production", icon: <Activity className="h-4 w-4 text-amber-500" /> },
-    { label: "Last Analysis", val: "Just now (CASE-8901)", icon: <Clock className="h-4 w-4 text-blue-500" /> },
+    { label: "Pipeline Status", value: "Healthy", icon: CheckCircle2 },
+    { label: "Gemma Model Engine", value: "gemma3:4b online", icon: Cpu },
+    { label: "Emergency Safety Gate", value: "0.28ms latency", icon: ShieldCheck },
+    { label: "Local SQLite Cache", value: "4.2 MB / 50 MB", icon: HardDrive },
+    { label: "System Version", value: "v2.0.0-production", icon: Activity },
+    { label: "Last Analysis", value: "Just now (CASE-8901)", icon: Clock },
   ];
 
   return (
-    <Card className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Activity className="h-4 w-4 text-teal-600" />
-          <span>System Telemetry & Engine Health Monitor</span>
-        </h3>
-        <span className="text-xs text-emerald-700 dark:text-emerald-400 font-mono font-bold bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded">
-          ALL SYSTEMS OPERATIONAL
+    <Section
+      heading="System Telemetry & Engine Health"
+      headingAs="h3"
+      headingAdornment={
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-chip text-label bg-risk-low/12 text-risk-low border border-risk-low/30">
+          <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+          All systems operational
         </span>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {telemetry.map((t) => (
-          <div key={t.label} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1 text-xs">
-            <div className="flex items-center space-x-1.5 text-slate-400">
-              {t.icon}
-              <span className="text-[10px] font-semibold uppercase">{t.label}</span>
+      }
+    >
+      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 divide-y divide-rule sm:divide-y-0">
+        {telemetry.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className="flex flex-col gap-1 pt-4 sm:pt-0 first:pt-0">
+              <dt className="flex items-center gap-2">
+                <Icon className="h-4 w-4 text-ink-muted shrink-0" aria-hidden="true" />
+                <Label>{item.label}</Label>
+              </dt>
+              <dd>
+                <BodySm className="font-semibold text-ink truncate">{item.value}</BodySm>
+              </dd>
             </div>
-            <p className="font-bold text-slate-900 dark:text-white truncate">{t.val}</p>
-          </div>
-        ))}
-      </div>
-    </Card>
+          );
+        })}
+      </dl>
+    </Section>
   );
 }

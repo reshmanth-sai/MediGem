@@ -1,56 +1,53 @@
 "use client";
 
 import React from "react";
-import { Cpu, ShieldCheck, Database, HardDrive, BatteryCharging, Zap, WifiOff, Activity } from "lucide-react";
+import { Cpu, ShieldCheck, Database, HardDrive, BatteryCharging, WifiOff, ChevronDown } from "lucide-react";
 
 export function AIStatusRibbon() {
   return (
-    <div className="rounded-xl bg-slate-950 border border-slate-800/80 px-4 py-2.5 shadow-md flex flex-wrap items-center justify-between text-xs font-mono text-slate-300 gap-3">
-      {/* Offline Status */}
-      <div className="flex items-center space-x-1.5">
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+    <details className="rounded-card border border-rule bg-surface px-4 py-3 group">
+      <summary className="flex items-center justify-between gap-3 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
+        <span className="flex items-center gap-2 text-body-sm font-semibold text-risk-low">
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-risk-low opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-risk-low" />
+          </span>
+          <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
+          100% offline ready
         </span>
-        <span className="text-emerald-400 font-bold flex items-center gap-1">
-          <WifiOff className="h-3 w-3" /> 100% OFFLINE READY
+        <span className="flex items-center gap-1 text-label text-ink-muted">
+          System detail
+          <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
         </span>
-      </div>
+      </summary>
 
-      {/* Model Status */}
-      <div className="flex items-center space-x-1.5">
-        <Cpu className="h-3.5 w-3.5 text-teal-400" />
-        <span className="text-slate-400">Model:</span>
-        <span className="text-teal-300 font-bold">gemma3:4b (Ollama)</span>
+      <div className="pt-3 mt-3 border-t border-rule grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-body-sm">
+        <div className="flex items-center gap-1.5">
+          <Cpu className="h-3.5 w-3.5 text-action shrink-0" aria-hidden="true" />
+          <span className="text-ink-muted">Model:</span>
+          <span className="font-semibold text-ink">gemma3:4b (Ollama)</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <ShieldCheck className="h-3.5 w-3.5 text-risk-low shrink-0" aria-hidden="true" />
+          <span className="text-ink-muted">Safety gate:</span>
+          <span className="font-semibold text-ink">Under 0.28ms</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Database className="h-3.5 w-3.5 text-action shrink-0" aria-hidden="true" />
+          <span className="text-ink-muted">Edge DB:</span>
+          <span className="font-semibold text-risk-low">Connected</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <HardDrive className="h-3.5 w-3.5 text-ink-muted shrink-0" aria-hidden="true" />
+          <span className="text-ink-muted">Storage:</span>
+          <span className="text-ink">14.2 GB free</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <BatteryCharging className="h-3.5 w-3.5 text-risk-low shrink-0" aria-hidden="true" />
+          <span className="text-ink-muted">Battery:</span>
+          <span className="font-semibold text-ink">94% charged</span>
+        </div>
       </div>
-
-      {/* Safety Gate Latency */}
-      <div className="flex items-center space-x-1.5">
-        <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-        <span className="text-slate-400">Safety Gate:</span>
-        <span className="text-white font-bold">&lt; 0.28ms</span>
-      </div>
-
-      {/* Edge DB */}
-      <div className="flex items-center space-x-1.5">
-        <Database className="h-3.5 w-3.5 text-teal-400" />
-        <span className="text-slate-400">Edge DB:</span>
-        <span className="text-emerald-400 font-bold">Connected</span>
-      </div>
-
-      {/* Storage */}
-      <div className="flex items-center space-x-1.5">
-        <HardDrive className="h-3.5 w-3.5 text-slate-400" />
-        <span className="text-slate-400">Storage:</span>
-        <span className="text-slate-200">14.2 GB Free</span>
-      </div>
-
-      {/* Battery */}
-      <div className="flex items-center space-x-1.5">
-        <BatteryCharging className="h-3.5 w-3.5 text-emerald-400" />
-        <span className="text-slate-400">Battery:</span>
-        <span className="text-emerald-300 font-bold">94% Charged</span>
-      </div>
-    </div>
+    </details>
   );
 }

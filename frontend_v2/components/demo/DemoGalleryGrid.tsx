@@ -3,12 +3,28 @@
 import React from "react";
 import Link from "next/link";
 import { PlayCircle, FileText, Heart, Activity, Pill, Stethoscope, AlertTriangle } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { RiskLevel } from "@/types/analysis";
 import { Card } from "@/components/ui/Card";
-import { RiskBadge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { RiskIndicator } from "@/components/ui/RiskIndicator";
+import { buttonVariants } from "@/components/ui/Button";
+import { H2, Label, BodySm } from "@/components/ui/Typography";
+
+interface DemoPreset {
+  id: string;
+  title: string;
+  category: string;
+  risk: RiskLevel;
+  diagnosis: string;
+  desc: string;
+  latency: string;
+  icon: LucideIcon;
+  /** Icon tone. Only the emergency preset carries a risk colour; the rest stay neutral. */
+  iconClassName?: string;
+}
 
 export function DemoGalleryGrid() {
-  const presets = [
+  const presets: DemoPreset[] = [
     {
       id: "DEMO-ECG",
       title: "12-Lead ECG Tachycardia Strip",
@@ -17,7 +33,7 @@ export function DemoGalleryGrid() {
       diagnosis: "Sinus Tachycardia with elevated Heart Rate (95 bpm)",
       desc: "Simulated 12-lead rhythm strip from rural primary health center",
       latency: "5.42s",
-      icon: <Heart className="h-5 w-5 text-red-500" />,
+      icon: Heart,
     },
     {
       id: "DEMO-ACUTE-CARDIAC",
@@ -25,9 +41,10 @@ export function DemoGalleryGrid() {
       category: "EMERGENCY",
       risk: "EMERGENCY",
       diagnosis: "Severe crushing chest pain (Acute Cardiac Intercept)",
-      desc: "Emergency Safety Engine triggers acute cardiac gate in < 0.3ms",
+      desc: "Emergency Safety Engine triggers acute cardiac gate in under 0.3ms",
       latency: "0.18ms",
-      icon: <AlertTriangle className="h-5 w-5 text-red-600 animate-pulse" />,
+      icon: AlertTriangle,
+      iconClassName: "text-risk-emergency",
     },
     {
       id: "DEMO-LAB-CBC",
@@ -37,7 +54,7 @@ export function DemoGalleryGrid() {
       diagnosis: "Elevated WBC count (14.5 k/uL) indicating infection",
       desc: "PyMuPDF text layer extraction bypassing OCR with 100% confidence",
       latency: "4.15s",
-      icon: <Activity className="h-5 w-5 text-teal-600 dark:text-teal-400" />,
+      icon: Activity,
     },
     {
       id: "DEMO-PRESCRIPTION",
@@ -47,7 +64,7 @@ export function DemoGalleryGrid() {
       diagnosis: "Standard anti-hypertensive dosage memo",
       desc: "Handwritten memo text extraction & dosage formatting",
       latency: "4.90s",
-      icon: <Pill className="h-5 w-5 text-amber-500" />,
+      icon: Pill,
     },
     {
       id: "DEMO-WOUND",
@@ -57,7 +74,7 @@ export function DemoGalleryGrid() {
       diagnosis: "Surgical site monitoring with mild erythema",
       desc: "OpenCV quality variance evaluation (Laplacian score 245.2)",
       latency: "5.10s",
-      icon: <Stethoscope className="h-5 w-5 text-purple-500" />,
+      icon: Stethoscope,
     },
     {
       id: "DEMO-NORMAL",
@@ -67,51 +84,59 @@ export function DemoGalleryGrid() {
       diagnosis: "Normal physiological parameters & baseline vitals",
       desc: "Baseline health worker consultation memo",
       latency: "3.80s",
-      icon: <FileText className="h-5 w-5 text-blue-500" />,
+      icon: FileText,
     },
   ];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold text-slate-900 dark:text-white">
-          Curated Synthetic Demo Presets ({presets.length})
-        </h2>
-        <span className="text-xs text-slate-500 font-medium">1-Click Instant Loading</span>
+      <div className="flex items-center justify-between gap-4">
+        <H2>Curated Synthetic Demo Presets ({presets.length})</H2>
+        <Label>One-click instant loading</Label>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {presets.map((p) => (
-          <Card key={p.id} className="space-y-3 flex flex-col justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 rounded bg-slate-100 dark:bg-slate-900">{p.icon}</div>
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">{p.title}</h3>
+        {presets.map((preset) => {
+          const Icon = preset.icon;
+          return (
+            <Card key={preset.id} className="flex flex-col justify-between gap-4">
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex items-center gap-2 min-w-0">
+                    <Icon
+                      className={`h-5 w-5 shrink-0 ${preset.iconClassName ?? "text-ink-muted"}`}
+                      aria-hidden="true"
+                    />
+                    <h3 className="text-h3 text-ink">{preset.title}</h3>
+                  </span>
+                  <RiskIndicator level={preset.risk} variant="tint" className="shrink-0" />
                 </div>
-                <RiskBadge level={p.risk as any} />
+
+                <BodySm className="text-ink-muted leading-relaxed">{preset.desc}</BodySm>
+
+                <div className="space-y-1 pt-3 border-t border-rule">
+                  <Label>Expected diagnosis</Label>
+                  <BodySm className="font-semibold text-ink">{preset.diagnosis}</BodySm>
+                </div>
               </div>
 
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                {p.desc}
-              </p>
-
-              <div className="p-2 rounded bg-slate-50 dark:bg-slate-900 text-[11px] space-y-0.5">
-                <span className="text-slate-400 font-semibold block">Expected Diagnosis:</span>
-                <p className="font-semibold text-slate-800 dark:text-slate-200">{p.diagnosis}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-              <span className="text-[11px] font-mono text-slate-400">Latency: {p.latency}</span>
-              <Link href={`/results/${p.id}`}>
-                <Button size="sm" variant="primary" leftIcon={<PlayCircle className="h-3.5 w-3.5" />}>
+              <div className="flex items-center justify-between gap-3 pt-3 border-t border-rule">
+                <span className="font-mono tabular text-body-sm text-ink-muted">
+                  Latency: {preset.latency}
+                </span>
+                <Link
+                  href={`/results/${preset.id}` as any}
+                  className={buttonVariants({ size: "sm", variant: "primary" })}
+                >
+                  <span className="inline-flex" aria-hidden="true">
+                    <PlayCircle className="h-4 w-4" />
+                  </span>
                   Load Preset
-                </Button>
-              </Link>
-            </div>
-          </Card>
-        ))}
+                </Link>
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

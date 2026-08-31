@@ -2,7 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { Play, Pause, RotateCcw, Maximize2, Eye, ArrowLeft, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+
+/** Shared chrome for the small icon-only controls in the presenter bar. */
+const ICON_CONTROL =
+  "h-9 w-9 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-surface-raised transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
 export function PresenterControls({
   currentStep,
@@ -22,7 +27,7 @@ export function PresenterControls({
   const [focusMode, setFocusMode] = useState(false);
 
   useEffect(() => {
-    let timer: any;
+    let timer: ReturnType<typeof setInterval> | undefined;
     if (isTimerRunning && timeLeftSec > 0) {
       timer = setInterval(() => setTimeLeftSec((prev) => prev - 1), 1000);
     }
@@ -52,45 +57,90 @@ export function PresenterControls({
     }
   };
 
+  const isTimeCritical = timeLeftSec < 60;
+
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 text-white backdrop-blur border border-teal-800 rounded-full px-5 py-2.5 shadow-2xl flex items-center space-x-4 text-xs font-mono">
-      {/* Step Navigator */}
-      <div className="flex items-center space-x-2">
-        <Button size="sm" variant="ghost" className="text-white hover:text-teal-300 p-1" onClick={onPrev} disabled={currentStep === 1}>
-          <ArrowLeft className="h-4 w-4" />
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-surface border border-rule rounded-full px-4 py-2 flex items-center gap-4 text-body-sm">
+      {/* Step navigator */}
+      <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onPrev}
+          disabled={currentStep === 1}
+          aria-label="Previous slide"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </Button>
-        <span className="font-bold text-teal-400">
-          STEP {currentStep} / {totalSteps}
+        <span className="font-mono tabular font-semibold text-ink whitespace-nowrap">
+          Step {currentStep} / {totalSteps}
         </span>
-        <Button size="sm" variant="ghost" className="text-white hover:text-teal-300 p-1" onClick={onNext} disabled={currentStep === totalSteps}>
-          <ArrowRight className="h-4 w-4" />
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onNext}
+          disabled={currentStep === totalSteps}
+          aria-label="Next slide"
+        >
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
 
-      <div className="h-4 w-px bg-slate-700" />
+      <div className="h-5 w-px bg-rule" aria-hidden="true" />
 
-      {/* Countdown Timer */}
-      <div className="flex items-center space-x-2">
-        <button onClick={() => setIsTimerRunning(!isTimerRunning)} className="hover:text-teal-300">
-          {isTimerRunning ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+      {/* Countdown timer */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setIsTimerRunning(!isTimerRunning)}
+          className={ICON_CONTROL}
+          aria-label={isTimerRunning ? "Pause presentation timer" : "Resume presentation timer"}
+        >
+          {isTimerRunning ? (
+            <Pause className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Play className="h-4 w-4" aria-hidden="true" />
+          )}
         </button>
-        <span className={`font-bold ${timeLeftSec < 60 ? "text-red-400 animate-pulse" : "text-amber-400"}`}>
-          ⏱️ {formatTimer(timeLeftSec)}
+        <span
+          className={cn(
+            "font-mono tabular font-semibold whitespace-nowrap",
+            isTimeCritical ? "text-risk-emergency" : "text-ink"
+          )}
+        >
+          <span className="sr-only">Time remaining{isTimeCritical ? ", under one minute" : ""}: </span>
+          {formatTimer(timeLeftSec)}
         </span>
-        <button onClick={() => setTimeLeftSec(300)} className="hover:text-teal-300">
-          <RotateCcw className="h-3.5 w-3.5" />
+        <button
+          type="button"
+          onClick={() => setTimeLeftSec(300)}
+          className={ICON_CONTROL}
+          aria-label="Reset presentation timer"
+        >
+          <RotateCcw className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="h-4 w-px bg-slate-700" />
+      <div className="h-5 w-px bg-rule" aria-hidden="true" />
 
-      {/* Mode Controls */}
-      <div className="flex items-center space-x-2">
-        <button onClick={() => setFocusMode(!focusMode)} className={`p-1 rounded ${focusMode ? "text-teal-400" : "text-slate-400"}`}>
-          <Eye className="h-4 w-4" />
+      {/* Mode controls */}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setFocusMode(!focusMode)}
+          aria-pressed={focusMode}
+          className={cn(ICON_CONTROL, focusMode && "bg-action-subtle text-action")}
+          aria-label="Toggle focus mode"
+        >
+          <Eye className="h-4 w-4" aria-hidden="true" />
         </button>
-        <button onClick={toggleFullscreen} className="p-1 text-slate-400 hover:text-white">
-          <Maximize2 className="h-4 w-4" />
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className={ICON_CONTROL}
+          aria-label="Toggle fullscreen"
+        >
+          <Maximize2 className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
     </div>

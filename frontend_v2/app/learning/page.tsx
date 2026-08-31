@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { WhyMediGem } from "@/components/dashboard/WhyMediGem";
 import { JudgeDashboard } from "@/components/judge/JudgeDashboard";
@@ -9,10 +9,15 @@ import { PipelineWorkflow } from "@/components/dashboard/PipelineWorkflow";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { EducationalTips } from "@/components/dashboard/EducationalTips";
 import { Footer } from "@/components/dashboard/Footer";
-import { BookOpen, Cpu, ShieldCheck, Award, HeartPulse, Layers, Sparkles } from "lucide-react";
+import { H1, Body } from "@/components/ui/Typography";
+import { cn } from "@/lib/utils";
+import { BookOpen, ShieldCheck, Award, HeartPulse, Layers, WifiOff } from "lucide-react";
+
+type TabId = "architecture" | "principles" | "guidance" | "executive";
 
 export default function LearningPage() {
-  const [activeTab, setActiveTab] = useState<"architecture" | "principles" | "guidance" | "executive">("architecture");
+  const [activeTab, setActiveTab] = useState<TabId>("architecture");
+  const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement | null>>>({});
 
   const tabs = [
     { id: "architecture", label: "AI Architecture & Modalities", icon: Layers },
@@ -21,47 +26,84 @@ export default function LearningPage() {
     { id: "executive", label: "Hackathon Summary", icon: Award },
   ] as const;
 
+  /**
+   * The WAI-ARIA tabs pattern: Left and Right move between tabs and wrap at
+   * both ends, Home and End jump to the first and last. Selection follows
+   * focus, so the panel changes as the arrow keys move, and the roving
+   * tabIndex below keeps the tablist a single tab stop rather than four.
+   */
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number
+  ) => {
+    const lastIndex = tabs.length - 1;
+    let nextIndex: number;
+
+    if (event.key === "ArrowRight") nextIndex = index === lastIndex ? 0 : index + 1;
+    else if (event.key === "ArrowLeft") nextIndex = index === 0 ? lastIndex : index - 1;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = lastIndex;
+    else return;
+
+    event.preventDefault();
+    const nextTab = tabs[nextIndex];
+    setActiveTab(nextTab.id);
+    tabRefs.current[nextTab.id]?.focus();
+  };
+
   return (
     <AppShell>
       <div className="space-y-8 max-w-7xl mx-auto pb-12">
-        {/* Learning Hub Header */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 border border-teal-800/80 p-8 shadow-2xl space-y-4">
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
-          
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-teal-950/80 text-teal-300 border border-teal-500/40">
-              <BookOpen className="h-3.5 w-3.5" /> KNOWLEDGE & LEARNING HUB
+        {/* Learning hub header */}
+        <div className="rounded-card border border-rule bg-surface p-8 space-y-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-chip text-label bg-action-subtle text-action border border-action/30">
+              <BookOpen className="h-3.5 w-3.5" aria-hidden="true" /> Knowledge &amp; learning hub
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
-              <Sparkles className="h-3.5 w-3.5" /> Offline AI Guide
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-chip text-label bg-surface-raised text-ink-muted border border-rule">
+              <WifiOff className="h-3.5 w-3.5" aria-hidden="true" /> Offline AI guide
             </span>
           </div>
 
-          <div className="space-y-2 max-w-3xl">
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              MediGem <span className="bg-gradient-to-r from-teal-400 to-emerald-300 bg-clip-text text-transparent">Learning & Architecture</span> Hub
-            </h1>
-            <p className="text-sm text-slate-300 leading-relaxed font-normal">
-              Explore the technical architecture, offline multimodal AI pipeline, clinical safety rules, and operational guidelines behind MediGem Clinical Co-Pilot.
-            </p>
+          <div className="space-y-3 max-w-3xl">
+            <H1 className="text-display">MediGem Learning &amp; Architecture Hub</H1>
+            <Body className="text-ink-muted">
+              Explore the technical architecture, offline multimodal AI pipeline, clinical safety
+              rules, and operational guidelines behind MediGem Clinical Co-Pilot.
+            </Body>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-800/80">
-            {tabs.map((tab) => {
+          {/* Section tabs */}
+          <div
+            role="tablist"
+            aria-label="Learning hub sections"
+            className="flex flex-wrap gap-2 pt-4 border-t border-rule"
+          >
+            {tabs.map((tab, index) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
+                  ref={(node) => {
+                    tabRefs.current[tab.id] = node;
+                  }}
+                  role="tab"
+                  type="button"
+                  id={`tab-${tab.id}`}
+                  aria-selected={isActive}
+                  aria-controls={`panel-${tab.id}`}
+                  tabIndex={isActive ? 0 : -1}
+                  onKeyDown={(event) => handleTabKeyDown(event, index)}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
+                  className={cn(
+                    "h-11 px-4 rounded-control text-body-sm font-semibold transition-colors flex items-center gap-2 border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
                     isActive
-                      ? "bg-teal-500 text-slate-950 border-teal-400 shadow-lg shadow-teal-500/20"
-                      : "bg-slate-900/80 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-white"
-                  }`}
+                      ? "bg-action-subtle text-action border-action/40"
+                      : "bg-surface text-ink-muted border-rule hover:bg-surface-raised hover:text-ink"
+                  )}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -69,38 +111,53 @@ export default function LearningPage() {
           </div>
         </div>
 
-        {/* Tab Contents */}
+        {/* Tab panels */}
         {activeTab === "architecture" && (
-          <div className="space-y-8 animate-fadeIn">
-            {/* Interactive Multimodal AI Pipeline */}
+          <div
+            role="tabpanel"
+            id="panel-architecture"
+            aria-labelledby="tab-architecture"
+            className="space-y-8"
+          >
             <PipelineWorkflow />
-            {/* Supported Clinical Analysis Modalities */}
             <AnalysisTypesGrid />
           </div>
         )}
 
         {activeTab === "principles" && (
-          <div className="space-y-8 animate-fadeIn">
-            {/* Why MediGem Feature Cards */}
+          <div
+            role="tabpanel"
+            id="panel-principles"
+            aria-labelledby="tab-principles"
+            className="space-y-8"
+          >
             <WhyMediGem />
           </div>
         )}
 
         {activeTab === "guidance" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
+          <div
+            role="tabpanel"
+            id="panel-guidance"
+            aria-labelledby="tab-guidance"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          >
             <ActivityTimeline />
             <EducationalTips />
           </div>
         )}
 
         {activeTab === "executive" && (
-          <div className="space-y-8 animate-fadeIn">
-            {/* Hackathon Judge Executive Summary */}
+          <div
+            role="tabpanel"
+            id="panel-executive"
+            aria-labelledby="tab-executive"
+            className="space-y-8"
+          >
             <JudgeDashboard />
           </div>
         )}
 
-        {/* Footer */}
         <Footer />
       </div>
     </AppShell>

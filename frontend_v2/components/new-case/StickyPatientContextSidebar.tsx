@@ -1,17 +1,73 @@
 "use client";
 
 import React from "react";
-import { PatientDetailsFormData } from "./StepPatientDetails";
+import {
+  User,
+  ShieldCheck,
+  AlertCircle,
+  CheckCircle2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { Label, BodySm } from "@/components/ui/Typography";
+import { PatientDetailsFormValues } from "./StepPatientDetails";
 import { MedicalHistoryData } from "./StepMedicalHistory";
 import { UploadedFileItem } from "./StepUploads";
-import { User, HeartPulse, Layers, FileText, ShieldCheck, AlertCircle, CheckCircle2 } from "lucide-react";
 
-interface StickyPatientContextSidebarProps {
-  patientData: PatientDetailsFormData;
+export interface StickyPatientContextSidebarProps {
+  patientData: PatientDetailsFormValues;
   symptoms: string[];
   historyData: MedicalHistoryData;
   uploadedFiles: UploadedFileItem[];
   currentStep: number;
+}
+
+type VitalStatus = "high" | "low" | "normal" | "unrecorded";
+
+const STATUS_PRESENTATION: Record<
+  VitalStatus,
+  { label: string; tone: string; icon: React.ComponentType<{ className?: string }> }
+> = {
+  // Shape (icon) plus a written label plus colour. Never colour alone.
+  high: { label: "High", tone: "text-risk-high", icon: TrendingUp },
+  low: { label: "Low", tone: "text-risk-emergency", icon: TrendingDown },
+  normal: { label: "In range", tone: "text-risk-low", icon: Minus },
+  unrecorded: { label: "Not recorded", tone: "text-ink-muted", icon: Minus },
+};
+
+function VitalRow({
+  name,
+  value,
+  status,
+}: {
+  name: string;
+  value: string;
+  status: VitalStatus;
+}) {
+  const presentation = STATUS_PRESENTATION[status];
+  const StatusIcon = presentation.icon;
+  return (
+    <div className="p-2 rounded-control bg-surface-raised border border-rule space-y-0.5">
+      <p className="text-body-sm text-ink-muted">{name}</p>
+      <p className="text-body-sm font-semibold text-ink font-mono tabular">{value}</p>
+      <p className={`flex items-center gap-1 text-body-sm ${presentation.tone}`}>
+        <StatusIcon className="h-4 w-4" aria-hidden="true" />
+        <span>{presentation.label}</span>
+      </p>
+    </div>
+  );
+}
+
+function statusOf(
+  value: number | undefined,
+  { high, low }: { high?: number; low?: number }
+): VitalStatus {
+  if (value === undefined || !Number.isFinite(value)) return "unrecorded";
+  if (high !== undefined && value > high) return "high";
+  if (low !== undefined && value < low) return "low";
+  return "normal";
 }
 
 export function StickyPatientContextSidebar({
@@ -21,122 +77,150 @@ export function StickyPatientContextSidebar({
   uploadedFiles,
   currentStep,
 }: StickyPatientContextSidebarProps) {
-  // Generate real-time clinical advisory recommendations based on vitals
   const advisories: string[] = [];
   if ((patientData.hrBpm ?? 0) > 120) {
-    advisories.push("HR >120 bpm: Recommend 12-lead ECG strip upload if available.");
+    advisories.push("Heart rate above 120 bpm. Attach a 12-lead ECG strip if one is available.");
   }
   if ((patientData.systolicBp ?? 0) > 150) {
-    advisories.push("BP >150/90: Record second blood pressure measurement in 15 mins.");
+    advisories.push("Systolic pressure above 150 mmHg. Repeat the measurement in 15 minutes.");
   }
   if (symptoms.some((s) => s.toLowerCase().includes("chest"))) {
-    advisories.push("Chest Symptoms Detected: Ensure pain onset & radiation details are logged.");
+    advisories.push("Chest symptoms recorded. Log pain onset and radiation details.");
+  }
+  if (historyData.allergies.trim() === "") {
+    advisories.push("No allergy information recorded yet. Confirm on step 3.");
   }
 
+  const ageText = Number.isFinite(patientData.age ?? Number.NaN)
+    ? `${patientData.age} years`
+    : "Age not recorded";
+  const genderText = patientData.gender || "Gender not recorded";
+  const locationText = patientData.location?.trim() || "Location not recorded";
+
+  const bloodPressure =
+    patientData.systolicBp === undefined || patientData.diastolicBp === undefined
+      ? "Not recorded"
+      : `${patientData.systolicBp}/${patientData.diastolicBp}`;
+
   return (
-    <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 space-y-4 shadow-xl sticky top-4">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-        <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
-          <User className="h-4 w-4 text-teal-400" />
-          <span>Patient Intake Context</span>
+    <Card className="space-y-4 sticky top-4">
+      <div className="flex items-center justify-between gap-2 pb-2 border-b border-rule">
+        <h3 className="flex items-center gap-1.5 text-label text-ink">
+          <User className="h-4 w-4 text-action" aria-hidden="true" />
+          <span>Patient intake context</span>
         </h3>
-        <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
-          <ShieldCheck className="h-3 w-3" /> OFFLINE EDGE
+        <span className="flex items-center gap-1 text-body-sm text-risk-low">
+          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+          <span>Offline</span>
         </span>
       </div>
 
-      {/* Patient Overview */}
       <div className="space-y-1">
-        <div className="flex items-center space-x-2">
-          <h4 className="text-sm font-black text-white">{patientData.patientName || "New Patient"}</h4>
-          <span className="text-xs font-mono text-slate-400">({patientData.patientId || "P-NEW"})</span>
-        </div>
-        <p className="text-xs text-slate-400">
-          {patientData.age}y / {patientData.gender} • <span className="text-teal-300">{patientData.location}</span>
+        <p className="text-h3 text-ink">
+          {patientData.patientName.trim() || "New patient"}
         </p>
+        <BodySm className="text-ink-muted">
+          {patientData.patientId.trim() || "No patient ID yet"}
+        </BodySm>
+        <BodySm className="text-ink-muted">
+          {ageText}, {genderText}, {locationText}
+        </BodySm>
+        <BodySm className="text-ink-muted">Currently on step {currentStep} of 5.</BodySm>
       </div>
 
-      {/* Vitals Grid Preview */}
       <div className="space-y-1.5">
-        <p className="text-[10px] uppercase font-bold text-slate-400 font-mono">Recorded Vital Signs</p>
-        <div className="grid grid-cols-2 gap-1.5 font-mono text-xs">
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 flex justify-between">
-            <span className="text-slate-400">HR:</span>
-            <span className={`font-bold ${(patientData.hrBpm ?? 0) > 100 ? "text-amber-400" : "text-white"}`}>
-              {patientData.hrBpm} bpm
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 flex justify-between">
-            <span className="text-slate-400">BP:</span>
-            <span className={`font-bold ${(patientData.systolicBp ?? 0) > 140 ? "text-amber-400" : "text-white"}`}>
-              {patientData.systolicBp}/{patientData.diastolicBp}
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 flex justify-between">
-            <span className="text-slate-400">Temp:</span>
-            <span className="font-bold text-white">{patientData.tempCelsius}°C</span>
-          </div>
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 flex justify-between">
-            <span className="text-slate-400">SpO2:</span>
-            <span className={`font-bold ${(patientData.spO2Percent ?? 100) < 94 ? "text-rose-400" : "text-white"}`}>
-              {patientData.spO2Percent}%
-            </span>
-          </div>
+        <Label as="p">Recorded vital signs</Label>
+        <div className="grid grid-cols-2 gap-1.5">
+          <VitalRow
+            name="Heart rate"
+            value={
+              patientData.hrBpm === undefined ? "Not recorded" : `${patientData.hrBpm} bpm`
+            }
+            status={statusOf(patientData.hrBpm, { high: 100, low: 50 })}
+          />
+          <VitalRow
+            name="Blood pressure"
+            value={bloodPressure}
+            status={statusOf(patientData.systolicBp, { high: 140, low: 90 })}
+          />
+          <VitalRow
+            name="Temperature"
+            value={
+              patientData.tempCelsius === undefined
+                ? "Not recorded"
+                : `${patientData.tempCelsius} C`
+            }
+            status={statusOf(patientData.tempCelsius, { high: 38, low: 35 })}
+          />
+          <VitalRow
+            name="Oxygen saturation"
+            value={
+              patientData.spO2Percent === undefined
+                ? "Not recorded"
+                : `${patientData.spO2Percent} percent`
+            }
+            status={statusOf(patientData.spO2Percent, { low: 94 })}
+          />
         </div>
       </div>
 
-      {/* Real-time Clinical Advisory System */}
       {advisories.length > 0 && (
-        <div className="p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 text-xs space-y-1">
-          <p className="font-bold flex items-center gap-1 text-[10.5px] uppercase font-mono text-amber-300">
-            <AlertCircle className="h-3.5 w-3.5 text-amber-400" />
-            <span>Clinical Decision Advisories</span>
+        <div className="p-2.5 rounded-card bg-surface-raised border border-risk-high space-y-1">
+          <p className="flex items-center gap-1 text-label text-risk-high">
+            <AlertCircle className="h-4 w-4" aria-hidden="true" />
+            <span>Clinical decision advisories</span>
           </p>
-          {advisories.map((adv, idx) => (
-            <p key={idx} className="text-[11px] leading-snug font-medium">• {adv}</p>
-          ))}
+          <ul className="space-y-1 list-disc pl-5">
+            {advisories.map((adv) => (
+              <li key={adv} className="text-body-sm text-ink">
+                {adv}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
-      {/* Selected Symptoms List */}
       <div className="space-y-1.5">
-        <p className="text-[10px] uppercase font-bold text-slate-400 font-mono">Presenting Symptoms ({symptoms.length})</p>
-        <div className="flex flex-wrap gap-1">
-          {symptoms.length > 0 ? (
-            symptoms.map((s) => (
-              <span key={s} className="px-2 py-0.5 rounded-md bg-teal-950 text-teal-300 border border-teal-500/30 text-[11px] font-semibold">
+        <Label as="p">Presenting symptoms ({symptoms.length})</Label>
+        {symptoms.length > 0 ? (
+          <ul className="flex flex-wrap gap-1 list-none p-0 m-0">
+            {symptoms.map((s) => (
+              <li
+                key={s}
+                className="px-2 py-0.5 rounded-chip bg-action-subtle text-action border border-rule text-body-sm font-semibold"
+              >
                 {s}
-              </span>
-            ))
-          ) : (
-            <span className="text-xs text-slate-500 italic">No symptoms selected yet.</span>
-          )}
-        </div>
-      </div>
-
-      {/* Uploaded Files Summary */}
-      <div className="space-y-1 text-xs">
-        <p className="text-[10px] uppercase font-bold text-slate-400 font-mono">Attached Files ({uploadedFiles.length})</p>
-        {uploadedFiles.length > 0 ? (
-          <div className="space-y-1 font-mono text-[11px]">
-            {uploadedFiles.map((f) => (
-              <div key={f.id} className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between text-slate-300">
-                <span className="truncate max-w-[180px]">{f.file.name}</span>
-                <span className="text-[9.5px] text-teal-400 uppercase font-bold">{f.type}</span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         ) : (
-          <p className="text-xs text-slate-500 italic">No documents uploaded.</p>
+          <BodySm className="text-ink-muted">No symptoms recorded yet.</BodySm>
         )}
       </div>
 
-      {/* Trust Notice */}
-      <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[10.5px] font-mono text-slate-400 flex items-center space-x-2">
-        <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-        <span>Autosaved locally to SQLite edge volume.</span>
+      <div className="space-y-1.5">
+        <Label as="p">Attached files ({uploadedFiles.length})</Label>
+        {uploadedFiles.length > 0 ? (
+          <ul className="space-y-1 list-none p-0 m-0">
+            {uploadedFiles.map((f) => (
+              <li
+                key={f.id}
+                className="p-1.5 rounded-control bg-surface-raised border border-rule flex items-center justify-between gap-2 text-body-sm text-ink"
+              >
+                <span className="break-all">{f.file.name}</span>
+                <span className="text-ink-muted shrink-0">{f.type}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <BodySm className="text-ink-muted">No documents attached.</BodySm>
+        )}
       </div>
-    </div>
+
+      <p className="p-2.5 rounded-control bg-surface-raised border border-rule flex items-center gap-2 text-body-sm text-ink-muted">
+        <CheckCircle2 className="h-4 w-4 text-risk-low shrink-0" aria-hidden="true" />
+        <span>Saved locally to the SQLite edge volume.</span>
+      </p>
+    </Card>
   );
 }

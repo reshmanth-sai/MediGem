@@ -52,6 +52,11 @@ export default function HistoryPage() {
               selectedPatientId={selectedPatient?.caseId || null}
               onSelectPatient={(p) => setSelectedPatient(p)}
               onOpenReferralModal={(p) => handleOpenReferralModal(p)}
+              onClearFilters={() => {
+                setSearchQuery("");
+                setSelectedRisk("ALL");
+                setSelectedStatus("ALL");
+              }}
             />
           </div>
 
