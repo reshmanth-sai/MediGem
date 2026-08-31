@@ -37,3 +37,15 @@ build/
 .env
 .env.local
 *.log
+
+# Operating System
+.DS_Store
+*/.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# Agent / Tooling Runtime
+.ijfw/
+**/.ijfw/
+ijfw/
+
