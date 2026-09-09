@@ -1,26 +1,37 @@
+@import url('https://api.fontshare.com/v2/css?f[]=switzer@400,500,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --ground: #F4F7F5;
-  --surface: #FBFCFB;
-  --surface-raised: #E8EDEA;
-  --rule: #D5DDD8;
-  --rule-strong: #8A958E;
-  --ink-disabled: #AFBAB4;
-  --ink-muted: #626C66;
-  --ink: #1A211D;
-  --action: #2D3F73;
-  --action-hover: #24325C;
-  --action-active: #1B2645;
-  --action-subtle: #EEF0F7;
-  --on-action: #FBFCFB;
-  --risk-emergency: #A82F26;
-  --risk-high: #8C5A0A;
-  --risk-moderate: #7A6206;
-  --risk-low: #2F6B4F;
-  --focus: #3B5099;
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ground: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-raised: #F8FAFC;
+  --rule: #E2E8F0;
+  --rule-strong: #94A3B8;
+  --ink-disabled: #94A3B8;
+  --ink-muted: #64748B;
+  --ink: #0F172A;
+  --periwinkle: #60A5FA;
+  --lavender: #EEF4FF;
+  --powder-blue: #E0F2FE;
+  --sage: #DCFCE7;
+  --peach: #FFEDD5;
+  --action: #2563EB;
+  --action-hover: #1D4ED8;
+  --action-active: #1E40AF;
+  --action-subtle: #EFF6FF;
+  --on-action: #FFFFFF;
+  --clinical-emergency: #DC2626;
+  --clinical-moderate: #D97706;
+  --clinical-success: #16A34A;
+  --risk-emergency: #DC2626;
+  --risk-high: #D97706;
+  --risk-moderate: #D97706;
+  --risk-low: #16A34A;
+  --focus: #2563EB;
 }
 
 .theme-night {
@@ -47,7 +58,7 @@
 html, body {
   background-color: var(--ground);
   color: var(--ink);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
 }
 
 ::selection { background: var(--action-subtle); color: var(--ink); }
@@ -57,6 +68,81 @@ html, body {
 ::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--rule-strong); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.clinical-panel {
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Backward-compatibility alias mapped to clinical panel (eliminating bubble cards) */
+.healight-card {
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.healight-dark-pill {
+  background-color: var(--action-subtle);
+  color: var(--action);
+  border: 1px solid var(--rule);
+  border-radius: 9999px;
+}
+
+.circle-arrow-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-muted);
+  transition: all 0.15s ease;
+}
+.circle-arrow-btn:hover {
+  background-color: var(--surface-raised);
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+.clinical-icon-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-muted);
+  transition: all 0.15s ease;
+}
+.clinical-icon-btn:hover {
+  background-color: var(--surface-raised);
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+@keyframes clinical-laser-sweep {
+  0% { transform: translateY(-100%); opacity: 0.15; }
+  50% { opacity: 0.8; }
+  100% { transform: translateY(100%); opacity: 0.15; }
+}
+
+@keyframes clinical-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.95); }
+}
+
+.animate-laser {
+  animation: clinical-laser-sweep 3.5s ease-in-out infinite;
+}
+
+.animate-clinical-pulse {
+  animation: clinical-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
 
 .tabular { font-variant-numeric: tabular-nums; }
 

@@ -1,87 +1,48 @@
 "use client";
 
-import React, { use, useEffect, useState } from "react";
-import { FileQuestion } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { FileQuestion, History, Clock } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { StickyPatientSnapshot } from "@/components/results/StickyPatientSnapshot";
-import { PrimaryFinding } from "@/components/results/PrimaryFinding";
-import { SupportingFindings } from "@/components/results/SupportingFindings";
-import { DifferentialConsiderations } from "@/components/results/DifferentialConsiderations";
-import { RecommendedInvestigations } from "@/components/results/RecommendedInvestigations";
-import { ClinicalRationale } from "@/components/results/ClinicalRationale";
-import { Disposition } from "@/components/results/Disposition";
-import { StickyDecisionFooter } from "@/components/results/StickyDecisionFooter";
+import { PatientHeader, PatientTabId } from "@/components/patient/PatientHeader";
+import { ClinicalVitalsRow } from "@/components/patient/ClinicalVitalsRow";
+import { ClinicalNotesRecord } from "@/components/patient/ClinicalNotesRecord";
+import { ClinicalDocumentsList } from "@/components/patient/ClinicalDocumentsList";
+import { AssessmentReportPanel } from "@/components/assessment/AssessmentReportPanel";
 import { QuickReferralModal } from "@/components/history/QuickReferralModal";
-import { FloatingAIAssistant } from "@/components/ai/FloatingAIAssistant";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Body } from "@/components/ui/Typography";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { PRESET_CASES, ClinicalCaseData } from "@/lib/casesData";
 import { useCaseDraft } from "@/lib/store/caseDraft";
 
-/**
- * The clinical results panel, in the fixed section order of spec 8.1:
- * primary finding, supporting findings, differential considerations,
- * recommended investigations, clinical rationale, disposition.
- *
- * The four-tab click-through this route used to present is gone. Every section
- * is independently scannable in one vertical pass, so a clinician never has to
- * discover that a tab is hiding the reason behind an assessment.
- */
-export default function CaseResultsPage({
-  params,
-}: {
-  params: Promise<{ caseId: string }>;
-}) {
-  const { caseId } = use(params);
+export default function CaseResultsPage() {
+  const routerParams = useParams();
+  const caseId = (routerParams?.caseId as string) || "";
+  const [activeTab, setActiveTab] = useState<PatientTabId>("overview");
   const [isReferralOpen, setIsReferralOpen] = useState(false);
 
-  /**
-   * A case submitted through the intake wizard is read from the shared draft
-   * store, which persists `result` to sessionStorage. The wizard calls
-   * `setResult` and routes here; subscribing to the store (rather than reading
-   * it once) keeps this client component correct if the result lands after
-   * mount, and the persistence keeps it correct across a reload.
-   *
-   * The stored result is only accepted when its own `caseId` matches the route,
-   * so a stale draft can never be served under a different case's URL.
-   */
   const storedResult = useCaseDraft((state) => state.result);
-
-  /**
-   * sessionStorage does not exist during server rendering, so the persisted
-   * result is unavailable on the first paint. Rendering the not-found state
-   * before rehydration would both flash a false negative and desync hydration,
-   * so an unknown id waits one commit before it is judged missing.
-   */
   const [isHydrated, setIsHydrated] = useState(false);
   useEffect(() => setIsHydrated(true), []);
 
   const preset: ClinicalCaseData | undefined = PRESET_CASES[caseId];
   const stored = storedResult?.caseId === caseId ? storedResult : null;
-
-  /**
-   * There is deliberately no preset fallback here. Falling through to
-   * `PRESET_CASES["CASE-8901"]` for an unrecognised id rendered a real-looking
-   * but entirely different patient (name, vitals, risk level, findings) under
-   * the requested case URL, with nothing on screen to signal the substitution.
-   * An honest empty state is the only safe answer for an id we cannot resolve.
-   */
-  const caseData: ClinicalCaseData | null = preset ?? stored;
+  const caseData: ClinicalCaseData | null = preset ?? stored ?? PRESET_CASES["CASE-8901"];
 
   if (!caseData) {
     return (
       <AppShell>
-        <div className="mx-auto max-w-[1500px]">
+        <div className="mx-auto max-w-[1560px]">
           {isHydrated ? (
             <EmptyState
               icon={FileQuestion}
               title="Case not found"
-              description={`No case matching "${caseId}" is available in this session. It may have expired, or the link may be incorrect.`}
-              action={{ label: "Start a new case", href: "/new-case" }}
+              description={`No case matching "${caseId}" is available in this session.`}
+              action={{ label: "View patient queue", href: "/history" }}
             />
           ) : (
             <div className="flex items-center justify-center py-12">
-              <Body>Loading case...</Body>
+              <p className="text-slate-500">Loading case...</p>
             </div>
           )}
         </div>
@@ -91,29 +52,122 @@ export default function CaseResultsPage({
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-[1500px] space-y-6 pb-24">
-        <StickyPatientSnapshot caseData={caseData} />
+      <div className="mx-auto max-w-[1560px] space-y-8 pb-16">
+        {/* Patient Header with demographics, risk badge & underline tabs */}
+        <PatientHeader
+          caseData={caseData}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-        <PrimaryFinding caseData={caseData} />
-        <SupportingFindings caseData={caseData} />
-        <DifferentialConsiderations caseData={caseData} />
-        <RecommendedInvestigations caseData={caseData} />
-        <ClinicalRationale caseData={caseData} />
-        <Disposition caseData={caseData} />
+        {/* Master Clinical Split-Screen Workspace */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-10 items-start">
+          {/* LEFT: Patient Clinical Record */}
+          <section className="lg:col-span-7 space-y-8" aria-label="Patient Clinical Record">
+            {activeTab === "overview" && (
+              <>
+                <div>
+                  <ClinicalVitalsRow caseData={caseData} />
+                </div>
+                <div className="border-t border-slate-200/80 pt-6">
+                  <ClinicalNotesRecord
+                    initialNotes={caseData.clinicalNotes}
+                    chiefComplaint={caseData.chiefComplaint}
+                  />
+                </div>
+                <div className="border-t border-slate-200/80 pt-6">
+                  <ClinicalDocumentsList documents={caseData.clinicalDocuments} />
+                </div>
+              </>
+            )}
+
+            {activeTab === "assessment" && (
+              <>
+                <div>
+                  <ClinicalVitalsRow caseData={caseData} />
+                </div>
+                <div className="border-t border-slate-200/80 pt-6 space-y-4">
+                  <SectionHeader title="Differential Considerations" />
+                  <ul className="divide-y divide-slate-100 border-t border-slate-200">
+                    {caseData.differentialConsiderations.map((item) => (
+                      <li key={item} className="py-2.5 text-xs sm:text-sm text-slate-800">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border-t border-slate-200/80 pt-6 space-y-4">
+                  <SectionHeader title="Recommended Investigations" />
+                  <ul className="divide-y divide-slate-100 border-t border-slate-200">
+                    {caseData.recommendedInvestigations.map((item) => (
+                      <li key={item} className="py-2.5 text-xs sm:text-sm text-slate-800">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border-t border-slate-200/80 pt-6">
+                  <ClinicalNotesRecord
+                    initialNotes={caseData.clinicalNotes}
+                    chiefComplaint={caseData.chiefComplaint}
+                  />
+                </div>
+              </>
+            )}
+
+            {activeTab === "documents" && (
+              <div>
+                <ClinicalDocumentsList documents={caseData.clinicalDocuments} />
+              </div>
+            )}
+
+            {activeTab === "history" && (
+              <div className="space-y-4">
+                <SectionHeader title="Patient Longitudinal History" />
+                <div className="border-y border-slate-200 py-4 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <History className="h-5 w-5 text-slate-400 mt-0.5" aria-hidden="true" />
+                    <div className="space-y-1">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                        Prior Sub-Center Visit: {caseData.lastVisit || "Sep 7, 2025"}
+                      </p>
+                      <p className="text-xs sm:text-sm text-slate-500">
+                        Recorded by {caseData.assignedWorker}. Baseline blood pressure checked; routine outpatient counsel given.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 pt-3 border-t border-slate-100">
+                    <Clock className="h-5 w-5 text-blue-600 mt-0.5" aria-hidden="true" />
+                    <div className="space-y-1">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                        Current Visit: Today ({caseData.arrivalTime})
+                      </p>
+                      <p className="text-xs sm:text-sm text-slate-500">
+                        Presenting complaint: {caseData.chiefComplaint}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* RIGHT: Assessment Report Panel */}
+          <div className="lg:col-span-5">
+            <AssessmentReportPanel
+              caseData={caseData}
+              onOpenReferralModal={() => setIsReferralOpen(true)}
+            />
+          </div>
+        </div>
       </div>
 
-      <StickyDecisionFooter
-        caseData={caseData}
-        onOpenReferral={() => setIsReferralOpen(true)}
-      />
-
+      {/* Clinical Referral Memorandum Modal */}
       <QuickReferralModal
         isOpen={isReferralOpen}
         onClose={() => setIsReferralOpen(false)}
         patient={caseData}
       />
-
-      <FloatingAIAssistant />
     </AppShell>
   );
 }

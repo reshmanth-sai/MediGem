@@ -32,7 +32,7 @@ export function PresentationFlow() {
           <div className="space-y-0.5 min-w-0">
             <H1>MediGem Hackathon Presentation Flow</H1>
             <BodySm className="text-ink-muted">
-              Offline AI clinical co-pilot for rural healthcare workers
+              Offline clinical decision workstation for rural healthcare
             </BodySm>
           </div>
         </div>
@@ -136,7 +136,7 @@ export function PresentationFlow() {
             <div className="space-y-2">
               <H2>Thank You and Open Q&amp;A</H2>
               <Body className="text-ink-muted mx-auto">
-                MediGem delivers 100% offline, explainable, emergency-first AI decision support to
+                MediGem delivers 100% offline, explainable, emergency-first clinical decision support to
                 healthcare workers where it matters most.
               </Body>
             </div>

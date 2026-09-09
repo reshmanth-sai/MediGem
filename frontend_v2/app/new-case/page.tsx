@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ArrowRight, Save, X, PlayCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, X, PlayCircle, Stethoscope } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
@@ -300,8 +300,7 @@ export default function NewCasePage() {
           <div className="space-y-1">
             <H1>Guided clinical patient intake</H1>
             <BodySm className="text-ink-muted">
-              Offline clinical co-pilot intake, edge reasoning, local SQLite
-              storage.
+              Standardized rural intake protocol with offline decision support.
             </BodySm>
           </div>
 
@@ -442,9 +441,10 @@ export default function NewCasePage() {
                 ) : (
                   <Button
                     onClick={() => setIsAnalyzing(true)}
-                    leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
+                    aria-label="Run clinical reasoning"
+                    leftIcon={<Stethoscope className="h-4 w-4" aria-hidden="true" />}
                   >
-                    Run clinical reasoning
+                    Run clinical assessment
                   </Button>
                 )}
               </div>

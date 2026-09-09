@@ -11,7 +11,6 @@ import { AppearanceThemes } from "@/components/settings/AppearanceThemes";
 import { PrivacySecurityCenter } from "@/components/settings/PrivacySecurityCenter";
 import { DeviceDiagnostics } from "@/components/settings/DeviceDiagnostics";
 import { AboutSystem } from "@/components/settings/AboutSystem";
-import { FloatingAIAssistant } from "@/components/ai/FloatingAIAssistant";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("ai");
@@ -39,9 +38,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-
-      {/* Floating Offline AI Clinical Assistant */}
-      <FloatingAIAssistant />
     </AppShell>
   );
 }

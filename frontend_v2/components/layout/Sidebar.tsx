@@ -4,40 +4,31 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Activity,
-  ClipboardList,
-  Stethoscope,
+  LayoutGrid,
+  Users,
+  ClipboardCheck,
+  ArrowRightLeft,
+  MessageSquare,
+  ShieldCheck,
   BookOpen,
   Sliders,
-  Terminal,
-  BarChart2,
-  Sparkles,
-  Award,
-  Plus,
-  ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
-  Code2,
-  Search,
-  Bell,
-  ChevronRight,
+  Sun,
+  Moon,
+  LogOut,
   LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/hooks/useTheme";
 
 interface NavigationItem {
   label: string;
   href: string;
   icon: LucideIcon;
   badge?: string;
+  badgeType?: "red" | "neutral";
 }
-
-/** Shared chrome for every collapsible label, so expand and collapse stay in step. */
-const collapsibleLabel = (collapsed: boolean) =>
-  cn(
-    "transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden truncate",
-    collapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-[150px]"
-  );
 
 function NavItem({
   item,
@@ -55,28 +46,33 @@ function NavItem({
       href={item.href as any}
       title={item.label}
       aria-current={isActive ? "page" : undefined}
-      className="block rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+      className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
     >
       <div
         className={cn(
-          "h-10 flex items-center justify-between gap-2 rounded-control px-2.5 text-body-sm font-semibold transition-colors duration-200 overflow-hidden border",
+          "h-10 flex items-center justify-between gap-3 px-3 text-sm transition-all duration-150 rounded-lg",
           isActive
-            ? "bg-action-subtle text-action border-action/40"
-            : "border-transparent text-ink-muted hover:bg-surface-raised hover:text-ink"
+            ? "bg-blue-50 text-blue-600 font-medium shadow-none"
+            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-normal"
         )}
       >
-        <span className="flex items-center gap-2.5 min-w-0">
+        <span className="flex items-center gap-3 min-w-0">
           <Icon
-            className={cn("h-4 w-4 shrink-0", isActive ? "text-action" : "text-ink-muted")}
+            className={cn(
+              "h-4 w-4 shrink-0 transition-colors",
+              isActive ? "text-blue-600" : "text-slate-500"
+            )}
             aria-hidden="true"
           />
-          <span className={collapsibleLabel(collapsed)}>{item.label}</span>
+          {!collapsed && <span className="truncate">{item.label}</span>}
         </span>
-        {item.badge && (
+        {item.badge && !collapsed && (
           <span
             className={cn(
-              "text-label font-mono px-1.5 py-0.5 rounded-chip bg-surface-raised text-ink-muted border border-rule shrink-0 transition-all duration-300",
-              collapsed ? "opacity-0 max-w-0 pointer-events-none" : "opacity-100 max-w-[48px]"
+              "text-[11px] font-semibold px-1.5 py-0.5 rounded-full shrink-0",
+              item.badgeType === "red"
+                ? "bg-red-100 text-red-700"
+                : "bg-slate-100 text-slate-600"
             )}
           >
             {item.badge}
@@ -87,97 +83,75 @@ function NavItem({
   );
 }
 
-function NavGroup({
-  title,
-  collapsed,
-  children,
-}: {
-  title: string;
-  collapsed: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <p
-        className={cn(
-          "text-label uppercase text-ink-muted px-2 transition-all duration-300 whitespace-nowrap overflow-hidden",
-          collapsed ? "opacity-0 max-w-0 px-0 h-0" : "opacity-100 max-w-[200px]"
-        )}
-      >
-        {title}
-      </p>
-      {children}
-    </div>
-  );
-}
-
 export function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [showDevMode, setShowDevMode] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
-  const effectiveCollapsed = isCollapsed && !isHovered;
-
-  const handleOpenSearch = () => {
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
-  };
-
-  const mainNavItems: NavigationItem[] = [
-    { label: "Command Center", href: "/", icon: Activity, badge: "LIVE" },
-    { label: "Patient Triage Queue", href: "/history", icon: ClipboardList, badge: "14" },
+  const careNavItems: NavigationItem[] = [
+    { label: "Clinical Workstation", href: "/", icon: LayoutGrid },
+    { label: "Patient Queue", href: "/history", icon: Users },
+    { label: "Assessments", href: "/results/CASE-8901", icon: ClipboardCheck },
+    { label: "Referral Transfers", href: "/history", icon: ArrowRightLeft },
+    { label: "Clinical Chat", href: "/history", icon: MessageSquare },
+    { label: "Protocols", href: "/learning", icon: ShieldCheck },
   ];
 
-  const patientWorkspaceItems: NavigationItem[] = [
-    { label: "Clinical Decision Center", href: "/results/CASE-8901", icon: Stethoscope },
-  ];
-
-  const systemItems: NavigationItem[] = [
-    { label: "Learning & Protocol Hub", href: "/learning", icon: BookOpen },
-    { label: "System Control Center", href: "/settings", icon: Sliders },
-  ];
-
-  const devItems: NavigationItem[] = [
-    { label: "Developer Inspector", href: "/developer", icon: Terminal },
-    { label: "Evaluation Benchmarks", href: "/evaluation", icon: BarChart2 },
-    { label: "AI Co-Pilot & Demo", href: "/demo", icon: Sparkles },
-    { label: "Live Presentation", href: "/presentation", icon: Award },
+  const systemNavItems: NavigationItem[] = [
+    { label: "Guidelines", href: "/learning", icon: BookOpen },
+    { label: "System Controls", href: "/settings", icon: Sliders },
   ];
 
   return (
     <aside
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      aria-label="Primary"
+      aria-label="Primary clinical workstation navigation"
       className={cn(
-        "bg-surface border-r border-rule py-3 flex-col justify-between hidden md:flex shrink-0 min-h-screen select-none transition-all duration-300 relative z-50 overflow-hidden",
-        effectiveCollapsed ? "w-[68px] px-3" : "w-64 px-4"
+        "bg-white border-r border-slate-200 py-5 flex flex-col justify-between hidden md:flex shrink-0 min-h-screen select-none transition-all duration-150 relative z-30",
+        isCollapsed ? "w-[68px] px-2" : "w-[240px] px-3.5"
       )}
-      suppressHydrationWarning
     >
-      <div className="flex flex-col gap-2.5">
-        {/* Brand header and collapse toggle */}
-        <div className="flex items-center min-h-[40px]">
-          {!effectiveCollapsed ? (
-            <div className="flex items-center justify-between w-full gap-2">
-              <span className="flex items-center gap-2 min-w-0">
-                <span className="text-h3 text-ink truncate">MediGem</span>
-                <span className="text-label font-mono text-ink-muted bg-surface-raised border border-rule px-1.5 py-0.5 rounded-chip shrink-0">
-                  v3.3
-                </span>
-              </span>
+      <div className="flex flex-col gap-6">
+        {/* Brand Header */}
+        <div className="flex items-center justify-between min-h-[44px] px-1.5">
+          {!isCollapsed ? (
+            <>
+              <Link href="/" className="flex items-center gap-3 min-w-0 group">
+                <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100/60 shadow-sm">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-[17px] font-bold text-slate-900 tracking-tight leading-tight block">
+                    MediGem
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-normal leading-none mt-0.5 block">
+                    Care, Connected.
+                  </span>
+                </div>
+              </Link>
               <button
                 onClick={() => setIsCollapsed(true)}
-                className="h-9 w-9 flex items-center justify-center text-ink-muted hover:text-ink bg-surface-raised border border-rule rounded-control transition-colors shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                className="h-7 w-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                 aria-label="Collapse sidebar"
               >
                 <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
               </button>
-            </div>
+            </>
           ) : (
             <button
               onClick={() => setIsCollapsed(false)}
-              className="h-10 w-10 mx-auto rounded-control bg-action-subtle text-action border border-action/40 flex items-center justify-center transition-colors shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              className="h-8 w-8 mx-auto text-blue-600 hover:bg-blue-50 rounded-md flex items-center justify-center transition-colors"
               aria-label="Expand sidebar"
             >
               <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
@@ -185,183 +159,122 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Signed-in clinician */}
-        <div
-          className="h-10 rounded-control bg-surface-raised border border-rule flex items-center justify-between px-1.5"
-          title="Dr. Vikram Patel (Community Health Officer)"
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span
-              aria-hidden="true"
-              className="h-7 w-7 rounded-chip bg-action-subtle text-action border border-action/40 flex items-center justify-center font-semibold text-body-sm shrink-0"
-            >
-              VP
-            </span>
-            <div
-              className={cn(
-                "transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden",
-                effectiveCollapsed ? "opacity-0 max-w-0 pointer-events-none" : "opacity-100 max-w-[150px]"
-              )}
-            >
-              <p className="text-body-sm font-semibold text-ink truncate">Dr. Vikram Patel</p>
-              <p className="text-label text-ink-muted truncate">CHO, Rampur</p>
-            </div>
-          </div>
-          <ChevronDown
-            aria-hidden="true"
-            className={cn(
-              "h-4 w-4 text-ink-muted shrink-0 transition-opacity duration-300",
-              effectiveCollapsed ? "opacity-0" : "opacity-100"
-            )}
-          />
+        {/* CARE Group */}
+        <div className="space-y-1">
+          {!isCollapsed && (
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-3 pb-1">
+              Care
+            </p>
+          )}
+          <nav aria-label="Care Navigation" className="space-y-0.5">
+            {careNavItems.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname?.startsWith(item.href) && item.href !== "/";
+              return (
+                <NavItem
+                  key={item.label}
+                  item={item}
+                  isActive={Boolean(isActive)}
+                  collapsed={isCollapsed}
+                />
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Primary intake action */}
-        <Link
-          href="/new-case"
-          title="Start patient intake"
-          className={cn(
-            "h-10 w-full rounded-control bg-action text-on-action font-semibold text-body-sm transition-colors duration-200 hover:bg-action-hover active:bg-action-active flex items-center justify-center gap-2 overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
-            effectiveCollapsed ? "px-0" : "px-3"
+        {/* SYSTEM Group */}
+        <div className="space-y-1">
+          {!isCollapsed && (
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-3 pb-1">
+              System
+            </p>
           )}
-        >
-          <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span className={collapsibleLabel(effectiveCollapsed)}>New Patient Intake</span>
-        </Link>
-
-        {/* Search trigger */}
-        <button
-          onClick={handleOpenSearch}
-          className="h-10 w-full rounded-control bg-surface-raised border border-rule text-ink-muted hover:text-ink hover:border-rule-strong transition-colors flex items-center justify-between gap-2 px-2.5 text-body-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          title="Search patients and symptoms (Cmd K)"
-        >
-          <span className="flex items-center gap-2.5 min-w-0">
-            <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className={collapsibleLabel(effectiveCollapsed)}>Search</span>
-          </span>
-          <kbd
-            className={cn(
-              "px-1.5 py-0.5 rounded-chip bg-surface border border-rule text-label font-mono text-ink-muted transition-all duration-300",
-              effectiveCollapsed ? "opacity-0 max-w-0 pointer-events-none" : "opacity-100 max-w-[64px]"
-            )}
-          >
-            Cmd K
-          </kbd>
-        </button>
-
-        <div className="border-t border-rule my-0.5" />
-
-        {/* Core navigation */}
-        <nav className="flex flex-col gap-2.5">
-          <NavGroup title="Operations" collapsed={effectiveCollapsed}>
-            {mainNavItems.map((item) => (
-              <NavItem
-                key={item.label}
-                item={item}
-                isActive={pathname === item.href}
-                collapsed={effectiveCollapsed}
-              />
-            ))}
-          </NavGroup>
-
-          <NavGroup title="Workspace" collapsed={effectiveCollapsed}>
-            {patientWorkspaceItems.map((item) => (
-              <NavItem
-                key={item.label}
-                item={item}
-                isActive={pathname.startsWith("/results")}
-                collapsed={effectiveCollapsed}
-              />
-            ))}
-          </NavGroup>
-
-          <NavGroup title="System" collapsed={effectiveCollapsed}>
-            {systemItems.map((item) => (
-              <NavItem
-                key={item.label}
-                item={item}
-                isActive={pathname === item.href}
-                collapsed={effectiveCollapsed}
-              />
-            ))}
-          </NavGroup>
-
-          {/* Developer and sandbox, only while expanded */}
-          {!effectiveCollapsed && (
-            <div className="pt-2 border-t border-rule">
-              <button
-                onClick={() => setShowDevMode(!showDevMode)}
-                aria-expanded={showDevMode}
-                className="w-full flex items-center justify-between px-2 py-1 text-label uppercase text-ink-muted hover:text-ink transition-colors rounded-chip focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-              >
-                <span className="flex items-center gap-1.5">
-                  <Code2 className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span>Developer &amp; Sandbox</span>
-                </span>
-                {showDevMode ? (
-                  <ChevronDown className="h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                )}
-              </button>
-
-              {showDevMode && (
-                <div className="flex flex-col gap-1 pt-1">
-                  {devItems.map((item) => (
-                    <NavItem
-                      key={item.label}
-                      item={item}
-                      isActive={pathname === item.href}
-                      collapsed={false}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </nav>
+          <nav aria-label="System Navigation" className="space-y-0.5">
+            {systemNavItems.map((item) => {
+              const isActive = pathname?.startsWith(item.href);
+              return (
+                <NavItem
+                  key={item.label}
+                  item={item}
+                  isActive={Boolean(isActive)}
+                  collapsed={isCollapsed}
+                />
+              );
+            })}
+          </nav>
+        </div>
       </div>
 
-      {/* Footer alerts and telemetry */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-rule">
-        {/* Pending emergency case */}
-        <button
-          className="h-10 w-full rounded-control bg-surface-raised border border-rule hover:border-risk-emergency transition-colors flex items-center px-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          title="1 emergency case pending"
-        >
-          <span className="flex items-center gap-2.5 min-w-0">
-            <Bell className="h-4 w-4 text-risk-emergency shrink-0" aria-hidden="true" />
-            <span
-              className={cn(
-                "text-body-sm font-semibold text-risk-emergency transition-all duration-300 whitespace-nowrap overflow-hidden truncate",
-                effectiveCollapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-[140px]"
-              )}
-            >
-              1 emergency pending
-            </span>
-          </span>
-        </button>
+      {/* Bottom Area: Light/Dark Mode + Clinician Profile + Sign out */}
+      <div className="pt-4 border-t border-slate-200/80 space-y-4">
+        {!isCollapsed ? (
+          <>
+            {/* Sun / Moon theme slider */}
+            <div className="flex items-center justify-between px-3 py-1">
+              <div className="flex items-center gap-2">
+                <Sun className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  role="switch"
+                  aria-checked={isDark}
+                  className={cn(
+                    "w-10 h-5 rounded-full p-0.5 transition-colors duration-200 relative flex items-center cursor-pointer",
+                    isDark ? "bg-blue-600" : "bg-slate-200"
+                  )}
+                  aria-label="Toggle dark mode"
+                >
+                  <div
+                    className={cn(
+                      "w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+                      isDark ? "translate-x-5" : "translate-x-0"
+                    )}
+                  />
+                </button>
+                <Moon className="h-4 w-4 text-slate-400" aria-hidden="true" />
+              </div>
+            </div>
 
-        {/* Local telemetry */}
-        <div
-          className="h-10 w-full rounded-control bg-surface-raised border border-rule flex items-center px-2.5 overflow-hidden"
-          title="100% offline mode (local Gemma 3 4B active)"
-        >
-          <span className="flex items-center gap-2.5 min-w-0">
-            <span
-              aria-hidden="true"
-              className="h-2.5 w-2.5 rounded-full bg-risk-low shrink-0"
-            />
-            <span
-              className={cn(
-                "text-body-sm text-ink-muted transition-all duration-300 whitespace-nowrap overflow-hidden truncate",
-                effectiveCollapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-[140px]"
-              )}
+            {/* Clinician Profile */}
+            <div className="flex items-center gap-3 px-2 py-1.5">
+              <div className="h-9 w-9 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-700 shrink-0 shadow-sm">
+                DR
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-slate-900 truncate">
+                  Dr. Arjun N.
+                </p>
+                <p className="text-[11px] text-slate-400 truncate">
+                  General Medicine
+                </p>
+              </div>
+            </div>
+
+            {/* Sign out link */}
+            <button
+              type="button"
+              className="flex items-center gap-2.5 px-3 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors w-full text-left pt-1"
             >
-              100% Edge Offline
-            </span>
-          </span>
-        </div>
+              <LogOut className="h-4 w-4 text-slate-400" aria-hidden="true" />
+              <span>Sign out</span>
+            </button>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </button>
+            <div className="h-8 w-8 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-xs flex items-center justify-center">
+              DR
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

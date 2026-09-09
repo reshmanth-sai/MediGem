@@ -5,16 +5,14 @@ import Link from "next/link";
 import { ClinicalCaseData, ConfidenceLevel, CONFIDENCE_LABELS } from "@/lib/casesData";
 import { RiskIndicator } from "@/components/ui/RiskIndicator";
 import { Button, buttonVariants } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { H2, H3, Label, BodySm, Data } from "@/components/ui/Typography";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { cn } from "@/lib/utils";
 import {
   User,
-  Brain,
   FileText,
   Printer,
-  ArrowRight,
-  Sparkles,
+  ChevronRight,
   AlertTriangle,
 } from "lucide-react";
 
@@ -32,30 +30,32 @@ const CONFIDENCE_BAR_FILL: Record<ConfidenceLevel, number> = {
 const VITAL_TONE: Record<string, string> = {
   alert: "bg-risk-emergency/10 border-risk-emergency/50 text-risk-emergency",
   warning: "bg-risk-high/10 border-risk-high/50 text-risk-high",
-  normal: "bg-ground border-rule text-ink-muted",
+  normal: "bg-surface-raised border-rule text-ink",
 };
 
-export function ClinicalPatientWorkspace({ patient, onOpenReferralModal }: ClinicalPatientWorkspaceProps) {
+export function ClinicalPatientWorkspace({
+  patient,
+  onOpenReferralModal,
+}: ClinicalPatientWorkspaceProps) {
   if (!patient) {
     return (
-      <Card className="p-8 text-center space-y-3 flex flex-col items-center justify-center min-h-[500px]">
-        {/* rounded-control, not rounded-card: this reads as an icon chip, not a card. */}
-        <div className="p-4 rounded-control bg-ground border border-rule text-ink-muted">
-          <User className="h-8 w-8" aria-hidden="true" />
+      <div className="border border-rule rounded-control bg-surface p-8 text-center space-y-3 flex flex-col items-center justify-center min-h-[460px]">
+        <div className="p-3 rounded-control bg-surface-raised border border-rule text-ink-muted">
+          <User className="h-6 w-6" aria-hidden="true" />
         </div>
-        <H3>No Patient Selected</H3>
+        <H3>No patient selected</H3>
         <BodySm className="text-ink-muted max-w-xs">
-          Click any patient row in the queue to preview demographics, explainable AI reasoning, red flags, and generate referral memos.
+          Select any patient in the queue to review vitals, assessment summary, and referral status.
         </BodySm>
-      </Card>
+      </div>
     );
   }
 
   const isEmergency = patient.riskLevel === "EMERGENCY";
 
   return (
-    <Card className="space-y-5 sticky top-4">
-      {/* Patient Workspace Header */}
+    <div className="border border-rule rounded-control bg-surface p-5 space-y-5 sticky top-20">
+      {/* Patient Meta Header */}
       <div className="flex items-start justify-between pb-3 border-b border-rule">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -63,124 +63,110 @@ export function ClinicalPatientWorkspace({ patient, onOpenReferralModal }: Clini
             <Data className="text-ink-muted">({patient.patientId})</Data>
           </div>
           <BodySm className="text-ink-muted">
-            {patient.age}y / {patient.gender}
-            {" · "}
-            <span className="text-action font-semibold">{patient.village || "Rural Sub-Center"}</span>
+            {patient.age}y · {patient.gender} ·{" "}
+            <span className="text-ink font-medium">{patient.village || "Rural Sub-Center"}</span>
           </BodySm>
         </div>
         <RiskIndicator level={patient.riskLevel} variant="tint" />
       </div>
 
       {/* Vitals Grid */}
-      <div className="space-y-1.5">
-        <Label>Patient Vitals & Intake Parameters</Label>
+      <div className="space-y-2">
+        <SectionHeader title="Patient Vitals" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {patient.vitals.map((v) => (
             <div
               key={v.label}
               className={cn("p-2 rounded-control border text-center", VITAL_TONE[v.status] || VITAL_TONE.normal)}
             >
-              <Label className="text-inherit">{v.label}</Label>
-              <Data className="text-inherit block">{v.value}</Data>
+              <span className="text-label uppercase tracking-wider block text-ink-muted">{v.label}</span>
+              <span className="font-mono text-body-sm font-semibold block">{v.value}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/*
-        Explainable AI Diagnosis & Confidence Gauge.
-
-        Grouped by a rule and spacing rather than a second bordered surface:
-        this block sits inside the workspace Card, and giving it its own
-        card-like fill and border made a nested card. The treatment matches
-        the sibling groups further down this same component.
-      */}
+      {/* Clinical Assessment Summary */}
       <div className="space-y-3 border-t border-rule pt-3">
-        <div className="flex items-center justify-between">
-          <BodySm className="font-semibold text-action flex items-center gap-1.5">
-            <Brain className="h-4 w-4" aria-hidden="true" />
-            <span>Gemma 3 Offline AI Reasoning</span>
-          </BodySm>
-          <Label className="text-risk-low flex items-center gap-1">
-            <Sparkles className="h-3 w-3" aria-hidden="true" /> Explainable AI
-          </Label>
-        </div>
+        <SectionHeader title="Clinical Assessment" />
 
         {/* Primary Finding */}
         <div className="space-y-1">
-          <Label>Primary Finding / Diagnosis</Label>
-          <BodySm className="font-semibold text-ink leading-snug">{patient.primaryFinding}</BodySm>
+          <Label>Primary Finding</Label>
+          <p className="text-body-sm font-semibold text-ink leading-snug">
+            {patient.primaryFinding}
+          </p>
         </div>
 
-        {/* AI Confidence Band */}
+        {/* Assessment Confidence */}
         <div className="space-y-1 pt-1">
           <div className="flex items-center justify-between">
-            <BodySm className="text-ink-muted">AI Reasoning Confidence:</BodySm>
-            <BodySm className="font-semibold text-action">{CONFIDENCE_LABELS[patient.confidenceLevel]}</BodySm>
+            <BodySm className="text-ink-muted">Assessment Confidence:</BodySm>
+            <BodySm className="font-semibold text-ink font-mono">{CONFIDENCE_LABELS[patient.confidenceLevel]}</BodySm>
           </div>
-          <div className="w-full bg-surface-raised h-2 rounded-control overflow-hidden border border-rule">
+          <div className="w-full bg-surface-raised h-1.5 rounded-chip overflow-hidden border border-rule">
             <div
-              className={cn("h-full rounded-control", isEmergency ? "bg-risk-emergency" : "bg-action")}
+              className={cn("h-full rounded-chip", isEmergency ? "bg-risk-emergency" : "bg-action")}
               style={{ width: `${CONFIDENCE_BAR_FILL[patient.confidenceLevel]}%` }}
             />
           </div>
           {patient.requiresHumanReview && (
-            <Label className="text-ink-muted">Needs clinician review</Label>
+            <Label className="text-ink-muted normal-case">Requires clinician review</Label>
           )}
         </div>
 
-        {/* Supporting Evidence & Clinical Summary */}
+        {/* Summary */}
         <div className="space-y-1 border-t border-rule pt-2">
-          <Label>Clinical Reasoning Summary</Label>
-          <BodySm className="text-ink">{patient.clinicalSummary}</BodySm>
+          <Label>Clinical Summary</Label>
+          <p className="text-body-sm text-ink leading-relaxed font-sans">{patient.clinicalSummary}</p>
         </div>
 
-        {/* Red Flags / Critical Warnings if Emergency or High */}
+        {/* Red Flags / Emergency Warnings */}
         {(isEmergency || patient.riskLevel === "HIGH") && (
-          <div className="p-2.5 rounded-control bg-risk-emergency/10 border border-risk-emergency/50 text-risk-emergency space-y-1">
-            <BodySm className="font-semibold flex items-center gap-1">
-              <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Red Flags & Safety Intercept Warnings</span>
-            </BodySm>
-            <BodySm className="text-inherit leading-normal">
-              High acute presentation requiring STAT referral protocol to tertiary facility.
-            </BodySm>
+          <div className="p-2.5 rounded-control bg-risk-emergency/10 border border-risk-emergency/40 text-risk-emergency space-y-1">
+            <div className="font-semibold text-body-sm flex items-center gap-1.5">
+              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>Safety Screen: Immediate Escalation</span>
+            </div>
+            <p className="text-body-sm text-ink leading-normal">
+              High acute presentation requiring STAT referral protocol to tertiary hospital.
+            </p>
           </div>
         )}
       </div>
 
-      {/* Clinical Event Timeline */}
-      <div className="space-y-2">
-        <Label>Clinical Activity Progression</Label>
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-ink">
+      {/* Clinical Activity Progression */}
+      <div className="space-y-2 border-t border-rule pt-3">
+        <SectionHeader title="Clinical Progression" />
+        <div className="space-y-1.5 text-body-sm text-ink">
+          <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" aria-hidden="true" />
-            <BodySm>1. Patient Registration ({patient.village}), done</BodySm>
+            <span>1. Patient intake ({patient.village || "Rural clinic"}) recorded</span>
           </div>
-          <div className="flex items-center gap-2 text-ink">
+          <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" aria-hidden="true" />
-            <BodySm>2. Offline Report Extraction (PyMuPDF / OCR), done</BodySm>
+            <span>2. Document text and image extraction verified</span>
           </div>
-          <div className="flex items-center gap-2 text-ink">
+          <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-action shrink-0" aria-hidden="true" />
-            <BodySm>3. Gemma 3 Multimodal Reasoning, {CONFIDENCE_LABELS[patient.confidenceLevel]}</BodySm>
+            <span>3. Multimodal assessment completed</span>
           </div>
-          <div className="flex items-center gap-2 text-ink">
+          <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" aria-hidden="true" />
-            <BodySm>4. Safety Engine Gate Check (under 0.3ms), verified</BodySm>
+            <span>4. Deterministic safety screening verified</span>
           </div>
         </div>
       </div>
 
-      {/* Clinical Actions Toolbar */}
-      <div className="space-y-2 pt-2 border-t border-rule">
+      {/* Actions Toolbar */}
+      <div className="space-y-2 pt-3 border-t border-rule">
         <Button
-          variant="danger"
+          variant={isEmergency ? "danger" : "primary"}
           className="w-full"
           leftIcon={<FileText className="h-4 w-4" />}
           onClick={onOpenReferralModal}
         >
-          Generate 1-Click Referral Memo
+          Generate Referral Memo
         </Button>
 
         <div className="flex gap-2">
@@ -192,9 +178,7 @@ export function ClinicalPatientWorkspace({ patient, onOpenReferralModal }: Clini
             })}
           >
             Open Full Case
-            <span className="inline-flex" aria-hidden="true">
-              <ArrowRight className="h-3.5 w-3.5" />
-            </span>
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </Link>
           <Button
             variant="secondary"
@@ -205,6 +189,6 @@ export function ClinicalPatientWorkspace({ patient, onOpenReferralModal }: Clini
           </Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

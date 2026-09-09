@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Brain, ShieldCheck } from "lucide-react";
+import { Cpu, ShieldCheck } from "lucide-react";
 import { H2, BodySm, Label } from "@/components/ui/Typography";
 import { Field } from "@/components/ui/Field";
 import { cn } from "@/lib/utils";
@@ -30,12 +30,12 @@ export function AIClinicalConfig() {
     <div className="rounded-card bg-surface border border-rule p-6 space-y-6">
       <div className="flex items-center space-x-3 pb-3 border-b border-rule">
         <div className="p-2.5 rounded-control bg-action-subtle text-action border border-rule">
-          <Brain className="h-6 w-6" aria-hidden="true" />
+          <Cpu className="h-6 w-6" aria-hidden="true" />
         </div>
         <div>
-          <H2>AI Engine & Clinical Reasoning Preferences</H2>
+          <H2>Clinical Decision &amp; Assessment Preferences</H2>
           <BodySm className="text-ink-muted">
-            Configure local model reasoning, confidence thresholds, and safety gate parameters.
+            Configure local model execution, confidence thresholds, and safety screening parameters.
           </BodySm>
         </div>
       </div>
@@ -90,17 +90,17 @@ export function AIClinicalConfig() {
         </div>
       </div>
 
-      {/* Setting 2: AI Confidence Threshold Slider */}
+      {/* Setting 2: Assessment Confidence Threshold Slider */}
       <div className="p-4 rounded-control bg-ground border border-rule">
         <Field
           id="confidence-threshold"
           label={
             <span className="flex items-center justify-between">
-              <span>AI Confidence Flagging Threshold</span>
+              <span>Assessment Confidence Flagging Threshold</span>
               <span className="text-action font-semibold">{confidenceThreshold}%</span>
             </span>
           }
-          helper={`Cases with AI confidence below ${confidenceThreshold}% will automatically trigger a yellow caution flag requiring mandatory senior physician review.`}
+          helper={`Cases with assessment confidence below ${confidenceThreshold}% will automatically trigger a yellow caution flag requiring mandatory senior physician review.`}
         >
           <input
             type="range"

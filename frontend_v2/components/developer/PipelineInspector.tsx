@@ -25,7 +25,7 @@ export function PipelineInspector() {
       heading={
         <span className="inline-flex items-center gap-2">
           <Terminal className="h-4 w-4 text-ink-muted shrink-0" aria-hidden="true" />
-          8-Stage AI Pipeline Inspector
+          8-Stage Clinical Inference Pipeline Inspector
         </span>
       }
       headingAs="h3"

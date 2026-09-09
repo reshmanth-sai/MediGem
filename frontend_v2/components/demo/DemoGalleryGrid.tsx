@@ -2,13 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
-import { PlayCircle, FileText, Heart, Activity, Pill, Stethoscope, AlertTriangle } from "lucide-react";
+import { ChevronRight, FileText, Heart, Activity, Pill, Stethoscope, AlertTriangle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { RiskLevel } from "@/types/analysis";
-import { Card } from "@/components/ui/Card";
 import { RiskIndicator } from "@/components/ui/RiskIndicator";
 import { buttonVariants } from "@/components/ui/Button";
-import { H2, Label, BodySm } from "@/components/ui/Typography";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/Table";
 
 interface DemoPreset {
   id: string;
@@ -19,125 +19,155 @@ interface DemoPreset {
   desc: string;
   latency: string;
   icon: LucideIcon;
-  /** Icon tone. Only the emergency preset carries a risk colour; the rest stay neutral. */
-  iconClassName?: string;
 }
 
 export function DemoGalleryGrid() {
   const presets: DemoPreset[] = [
     {
+      id: "DEMO-ACUTE-CARDIAC",
+      title: "Acute Chest Pain Emergency",
+      category: "Emergency Protocol",
+      risk: "EMERGENCY",
+      diagnosis: "Acute Coronary Syndrome (STAT Referral)",
+      desc: "Emergency screening triggers cardiac gate in 0.28ms",
+      latency: "0.28s",
+      icon: AlertTriangle,
+    },
+    {
+      id: "CASE-8901",
+      title: "Hypertension with Cephalea",
+      category: "Primary Care",
+      risk: "MODERATE",
+      diagnosis: "Stage 2 Essential Hypertension (BP 150/90)",
+      desc: "62F presenting with headache, dizziness, and presbyopia",
+      latency: "8.40s",
+      icon: Stethoscope,
+    },
+    {
       id: "DEMO-ECG",
       title: "12-Lead ECG Tachycardia Strip",
-      category: "ECG",
+      category: "Cardiology",
       risk: "MODERATE",
-      diagnosis: "Sinus Tachycardia with elevated Heart Rate (95 bpm)",
-      desc: "Simulated 12-lead rhythm strip from rural primary health center",
+      diagnosis: "Sinus Tachycardia with elevated Heart Rate (98 bpm)",
+      desc: "12-lead rhythm scan from rural primary health center",
       latency: "5.42s",
       icon: Heart,
     },
     {
-      id: "DEMO-ACUTE-CARDIAC",
-      title: "Acute Chest Pain Emergency",
-      category: "EMERGENCY",
-      risk: "EMERGENCY",
-      diagnosis: "Severe crushing chest pain (Acute Cardiac Intercept)",
-      desc: "Emergency Safety Engine triggers acute cardiac gate in under 0.3ms",
-      latency: "0.18ms",
-      icon: AlertTriangle,
-      iconClassName: "text-risk-emergency",
-    },
-    {
       id: "DEMO-LAB-CBC",
       title: "CBC Diagnostic Lab Report PDF",
-      category: "LAB_REPORT",
+      category: "Laboratory",
       risk: "HIGH",
-      diagnosis: "Elevated WBC count (14.5 k/uL) indicating infection",
-      desc: "PyMuPDF text layer extraction bypassing OCR with 100% confidence",
+      diagnosis: "Marked leukocytosis (WBC 14.5 k/uL) with fever",
+      desc: "PyMuPDF document extraction from laboratory PDF",
       latency: "4.15s",
       icon: Activity,
     },
     {
+      id: "DEMO-WOUND",
+      title: "Post-Operative Wound Inspection",
+      category: "Surgical Monitoring",
+      risk: "MODERATE",
+      diagnosis: "Cesarean surgical site with mild benign erythema",
+      desc: "Wound image verification and healing progression",
+      latency: "5.10s",
+      icon: FileText,
+    },
+    {
       id: "DEMO-PRESCRIPTION",
-      title: "Handwritten Prescription Scan",
-      category: "PRESCRIPTION",
+      title: "Hypertension Prescription Review",
+      category: "Pharmacy",
       risk: "LOW",
-      diagnosis: "Standard anti-hypertensive dosage memo",
-      desc: "Handwritten memo text extraction & dosage formatting",
+      diagnosis: "Controlled hypertension on stable dual therapy",
+      desc: "Handwritten prescription memo text extraction",
       latency: "4.90s",
       icon: Pill,
-    },
-    {
-      id: "DEMO-WOUND",
-      title: "Post-Operative Wound Scan",
-      category: "WOUND",
-      risk: "MODERATE",
-      diagnosis: "Surgical site monitoring with mild erythema",
-      desc: "OpenCV quality variance evaluation (Laplacian score 245.2)",
-      latency: "5.10s",
-      icon: Stethoscope,
-    },
-    {
-      id: "DEMO-NORMAL",
-      title: "Normal Routine Checkup",
-      category: "CLINICAL_NOTE",
-      risk: "LOW",
-      diagnosis: "Normal physiological parameters & baseline vitals",
-      desc: "Baseline health worker consultation memo",
-      latency: "3.80s",
-      icon: FileText,
     },
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <H2>Curated Synthetic Demo Presets ({presets.length})</H2>
-        <Label>One-click instant loading</Label>
+    <section className="space-y-4" aria-label="Clinical Sample Presets">
+      <SectionHeader
+        title="Clinical Sample Cases"
+        badge={
+          <span className="text-label font-mono px-1.5 py-0.2 rounded-chip bg-surface-raised border border-rule text-ink-muted">
+            {presets.length} cases
+          </span>
+        }
+        subtitle="One-click clinical case loaders for workstation demonstrations"
+      />
+
+      {/* Quick Text Button Bar (Section 24) */}
+      <div className="flex flex-wrap items-center gap-2 py-1">
+        <span className="text-label uppercase tracking-wider text-ink-muted font-semibold mr-1">
+          Quick load:
+        </span>
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Quick preset loaders">
+          {presets.map((preset) => (
+            <Link
+              key={preset.id}
+              href={`/results/${preset.id}`}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-control bg-surface-raised border border-rule text-body-sm text-ink hover:text-action hover:border-rule-strong transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              <span>{preset.category}</span>
+              <ChevronRight className="h-3 w-3 text-ink-muted" aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {presets.map((preset) => {
-          const Icon = preset.icon;
-          return (
-            <Card key={preset.id} className="flex flex-col justify-between gap-4">
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <span className="flex items-center gap-2 min-w-0">
-                    <Icon
-                      className={`h-5 w-5 shrink-0 ${preset.iconClassName ?? "text-ink-muted"}`}
-                      aria-hidden="true"
-                    />
-                    <h3 className="text-h3 text-ink">{preset.title}</h3>
-                  </span>
-                  <RiskIndicator level={preset.risk} variant="tint" className="shrink-0" />
-                </div>
-
-                <BodySm className="text-ink-muted leading-relaxed">{preset.desc}</BodySm>
-
-                <div className="space-y-1 pt-3 border-t border-rule">
-                  <Label>Expected diagnosis</Label>
-                  <BodySm className="font-semibold text-ink">{preset.diagnosis}</BodySm>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 pt-3 border-t border-rule">
-                <span className="font-mono tabular text-body-sm text-ink-muted">
-                  Latency: {preset.latency}
-                </span>
-                <Link
-                  href={`/results/${preset.id}` as any}
-                  className={buttonVariants({ size: "sm", variant: "primary" })}
-                >
-                  <span className="inline-flex" aria-hidden="true">
-                    <PlayCircle className="h-4 w-4" />
-                  </span>
-                  Load Preset
-                </Link>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
+      {/* Structured Clinical Table (No AI cards) */}
+      <Table caption="Clinical demo preset library" captionHidden>
+        <THead>
+          <tr>
+            <TH>Case Title</TH>
+            <TH>Category</TH>
+            <TH>Clinical Presentation / Finding</TH>
+            <TH>Priority</TH>
+            <TH>Latency</TH>
+            <TH className="text-right">Action</TH>
+          </tr>
+        </THead>
+        <TBody>
+          {presets.map((preset) => {
+            const Icon = preset.icon;
+            const isEmergency = preset.risk === "EMERGENCY";
+            return (
+              <TR key={preset.id}>
+                <TD>
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="h-4 w-4 text-ink-muted shrink-0" aria-hidden="true" />
+                    <div>
+                      <span className="font-semibold text-ink block">{preset.title}</span>
+                      <span className="text-body-sm text-ink-muted">{preset.desc}</span>
+                    </div>
+                  </div>
+                </TD>
+                <TD className="text-ink-muted">{preset.category}</TD>
+                <TD className="text-ink font-medium max-w-sm truncate" title={preset.diagnosis}>
+                  {preset.diagnosis}
+                </TD>
+                <TD>
+                  <RiskIndicator level={preset.risk} variant="tint" />
+                </TD>
+                <TD className="font-mono tabular text-ink-muted">{preset.latency}</TD>
+                <TD className="text-right">
+                  <Link
+                    href={`/results/${preset.id}`}
+                    className={buttonVariants({
+                      size: "sm",
+                      variant: isEmergency ? "danger" : "secondary",
+                    })}
+                  >
+                    Open
+                    <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Link>
+                </TD>
+              </TR>
+            );
+          })}
+        </TBody>
+      </Table>
+    </section>
   );
 }

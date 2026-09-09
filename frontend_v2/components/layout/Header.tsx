@@ -1,79 +1,91 @@
 "use client";
 
-import React from "react";
-import { Search, CloudOff, Bell, Moon, Sun, MapPin } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, MapPin, ChevronDown, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
 export function Header() {
   const { isDark, toggleTheme } = useTheme();
+  const [currentTime, setCurrentTime] = useState("Tue, Sep 9, 2025  10:24 AM");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      };
+      setCurrentTime(now.toLocaleString("en-US", options).replace(",", ""));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleOpenCommand = () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
   };
 
   return (
-    <header className="h-16 border-b border-rule bg-surface sticky top-0 z-40 px-6 flex items-center justify-between">
-      {/* Brand & Version */}
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="text-h2 text-ink">MediGem</span>
-        <span className="text-label font-mono text-ink-muted bg-surface-raised border border-rule px-2 py-0.5 rounded-chip">
-          v3.3
-        </span>
-      </div>
-
-      {/* Center Cmd + K search trigger */}
-      <div className="hidden md:flex flex-1 max-w-xl mx-8">
+    <header className="h-16 border-b border-slate-200 bg-white sticky top-0 z-40 px-6 sm:px-8 flex items-center justify-between gap-4">
+      {/* LEFT: Search Bar */}
+      <div className="w-80 sm:w-96">
         <button
           onClick={handleOpenCommand}
-          className="w-full flex items-center justify-between gap-3 px-3.5 h-11 rounded-control bg-surface-raised border border-rule text-ink-muted hover:text-ink hover:border-rule-strong transition-colors text-body-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="w-full flex items-center justify-between gap-3 px-3.5 h-10 bg-white border border-slate-200 rounded-lg text-slate-400 hover:border-slate-300 transition-colors text-xs sm:text-sm shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          aria-label="Search patient, protocol, or command..."
         >
           <span className="flex items-center gap-2.5 min-w-0">
-            <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">Search patients, symptoms, IDs, protocols</span>
+            <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+            <span className="truncate text-slate-400 font-normal">
+              Search patient, protocol, or command...
+            </span>
           </span>
-          <kbd className="px-2 py-0.5 rounded-chip bg-surface border border-rule text-label font-mono text-ink-muted shrink-0">
-            Cmd K
+          <kbd className="text-[11px] font-mono bg-slate-100 border border-slate-200 text-slate-500 rounded px-1.5 py-0.5 shrink-0">
+            ⌘K
           </kbd>
         </button>
       </div>
 
-      {/* Right telemetry and status */}
-      <div className="flex items-center gap-3 shrink-0">
-        {/* Clinic location status */}
-        <div className="hidden xl:flex items-center gap-1.5 px-3 h-9 rounded-control bg-surface-raised border border-rule text-body-sm text-ink-muted">
-          <MapPin className="h-4 w-4 text-ink-muted shrink-0" aria-hidden="true" />
-          <span className="text-ink">Rampur Sub-Center</span>
-          <span aria-hidden="true">/</span>
-          <span className="text-risk-low font-semibold">Shift Active</span>
-        </div>
-
-        {/* Offline edge status */}
-        <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-control bg-risk-low/12 text-risk-low border border-risk-low/30 text-body-sm font-semibold">
-          <CloudOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>100% Edge Offline</span>
-        </div>
-
-        {/* Emergency alert notification */}
+      {/* RIGHT: Location, Status & Date & Theme Toggle */}
+      <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm shrink-0">
+        {/* Location Dropdown */}
         <button
-          className="relative h-11 w-11 inline-flex items-center justify-center text-ink-muted hover:text-ink bg-surface-raised border border-rule rounded-control transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          aria-label="Notifications: 1 emergency case pending"
+          type="button"
+          className="flex items-center gap-1.5 text-slate-700 hover:text-slate-900 font-medium transition-colors cursor-pointer"
         >
-          <Bell className="h-4 w-4 text-risk-emergency" aria-hidden="true" />
-          <span className="absolute top-1 right-1 min-h-[18px] min-w-[18px] px-1 rounded-full bg-risk-emergency text-on-action text-body-sm font-semibold leading-none flex items-center justify-center">
-            1
-          </span>
+          <MapPin className="h-4 w-4 text-slate-500 shrink-0" aria-hidden="true" />
+          <span>Rampur Sub-Center</span>
+          <ChevronDown className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
         </button>
 
-        {/* Theme toggle */}
+        {/* Shift Active Indicator */}
+        <div className="flex items-center gap-2 font-medium text-slate-700">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+          <span>Shift Active</span>
+        </div>
+
+        {/* Timestamp */}
+        <div className="hidden md:block text-slate-500 font-normal text-xs sm:text-sm">
+          {currentTime}
+        </div>
+
+        {/* Theme Toggle (Accessible + Header quick toggle) */}
         <button
+          type="button"
           onClick={toggleTheme}
-          className="h-11 w-11 inline-flex items-center justify-center text-ink-muted hover:text-ink bg-surface-raised border border-rule rounded-control transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           aria-label="Toggle Theme"
+          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
         >
           {isDark ? (
-            <Sun className="h-4 w-4" aria-hidden="true" />
+            <Sun className="h-4 w-4 text-amber-500" aria-hidden="true" />
           ) : (
-            <Moon className="h-4 w-4" aria-hidden="true" />
+            <Moon className="h-4 w-4 text-slate-500" aria-hidden="true" />
           )}
         </button>
       </div>

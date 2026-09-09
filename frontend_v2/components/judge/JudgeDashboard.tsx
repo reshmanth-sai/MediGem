@@ -18,19 +18,19 @@ export function JudgeDashboard({ onStartDemo }: { onStartDemo?: () => void }) {
   const pillars: Pillar[] = [
     {
       title: "1. Emergency First",
-      description: "Critical cases prioritized before AI reasoning begins (under 0.3ms gate).",
+      description: "Critical cases prioritized before inference reasoning begins (under 0.3ms gate).",
       icon: ShieldAlert,
       iconClassName: "text-ink-muted",
     },
     {
-      title: "2. 100% Offline AI",
-      description: "Runs locally with Gemma intelligence without internet connectivity.",
+      title: "2. 100% Offline",
+      description: "Runs locally with Gemma on-device model without internet connectivity.",
       icon: WifiOff,
       iconClassName: "text-action",
     },
     {
       title: "3. Explainable Reasoning",
-      description: "Confidence scores, supporting findings and transparent reasoning.",
+      description: "Assessment confidence, supporting findings and transparent reasoning.",
       icon: Cpu,
       iconClassName: "text-ink-muted",
     },
@@ -55,7 +55,7 @@ export function JudgeDashboard({ onStartDemo }: { onStartDemo?: () => void }) {
               </span>
             </div>
             <BodySm className="text-ink-muted">
-              MediGem, offline AI clinical co-pilot for rural healthcare workers
+              MediGem, offline clinical decision workstation for rural healthcare workers
             </BodySm>
           </div>
         </div>

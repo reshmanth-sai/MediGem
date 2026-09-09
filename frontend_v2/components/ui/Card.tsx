@@ -7,22 +7,22 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Card: border-only elevation. No shadow, no hover shadow, and no
- * light or dark mode specific override; theming runs entirely through tokens.
- * Elevation is declared once. Use Card only when the content is a discrete,
- * separately actionable object such as a patient case. Prefer Section for
- * grouping, sequence and related fields.
+ * Clinical Panel / Container: Flat clinical console surface with crisp 1px
+ * hairline rule and zero bubble card elevation. Used for modular clinical data
+ * workspaces and telemetry consoles.
  */
 export function Card({ children, className, ...props }: CardProps) {
   return (
     <div
-      className={cn("bg-surface border border-rule rounded-card p-5", className)}
+      className={cn("bg-surface border border-rule rounded-[2px] p-5", className)}
       {...props}
     >
       {children}
     </div>
   );
 }
+
+export const ClinicalPanel = Card;
 
 export interface SectionProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;

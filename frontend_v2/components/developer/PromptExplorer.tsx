@@ -6,7 +6,7 @@ export function PromptExplorer() {
   const promptMeta = {
     version: "v1.0-production",
     modelTarget: "gemma3:4b",
-    systemRole: "Senior Clinical AI Assistant for Rural Healthcare Workers",
+    systemRole: "Senior Clinical Decision Support System for Rural Healthcare Workers",
     safetyConstraints: "Strict non-diagnostic boundaries & mandatory referral recommendations",
   };
 

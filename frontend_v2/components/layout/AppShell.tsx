@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Sidebar } from "./Sidebar";
+import { Header } from "./Header";
 import { CommandPalette } from "@/components/search/CommandPalette";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Workspace Layout (Full Height Canvas) */}
       <div className="flex-1 flex flex-col min-w-0">
+        <Header />
         <main
           id="main-content"
           tabIndex={-1}

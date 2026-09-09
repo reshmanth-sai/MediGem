@@ -7,7 +7,6 @@ import { SegmentedQueueFilters } from "@/components/history/SegmentedQueueFilter
 import { CaseHistoryTable } from "@/components/history/CaseHistoryTable";
 import { ClinicalPatientWorkspace } from "@/components/history/ClinicalPatientWorkspace";
 import { QuickReferralModal } from "@/components/history/QuickReferralModal";
-import { FloatingAIAssistant } from "@/components/ai/FloatingAIAssistant";
 import { PRESET_CASES, ClinicalCaseData } from "@/lib/casesData";
 
 export default function HistoryPage() {
@@ -75,9 +74,6 @@ export default function HistoryPage() {
         onClose={() => setIsReferralOpen(false)}
         patient={referralTargetPatient}
       />
-
-      {/* Floating Offline AI Clinical Assistant */}
-      <FloatingAIAssistant />
     </AppShell>
   );
 }

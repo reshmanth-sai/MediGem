@@ -2,15 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PRESET_CASES, ClinicalCaseData, CONFIDENCE_LABELS } from "@/lib/casesData";
+import { PRESET_CASES, ClinicalCaseData } from "@/lib/casesData";
 import { RiskIndicator } from "@/components/ui/RiskIndicator";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Input";
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/Table";
-import { Section } from "@/components/ui/Card";
-import { Label } from "@/components/ui/Typography";
-import { Search, ArrowRight, ClipboardList } from "lucide-react";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Search, ChevronRight, ClipboardList } from "lucide-react";
 
 const RISK_FILTERS = ["ALL", "EMERGENCY", "HIGH", "MODERATE", "LOW"] as const;
 
@@ -22,7 +21,6 @@ export function PatientQueueTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRisk, setFilterRisk] = useState<string>("ALL");
 
-  // Sort by risk priority: EMERGENCY -> HIGH -> MODERATE -> LOW
   const riskWeight: Record<string, number> = {
     EMERGENCY: 4,
     HIGH: 3,
@@ -48,28 +46,42 @@ export function PatientQueueTable() {
 
   const clinicHasNoCases = casesList.length === 0;
 
+  const getPatientStatus = (patient: ClinicalCaseData) => {
+    if (patient.riskLevel === "EMERGENCY") return "Immediate STAT";
+    if (patient.disposition?.needsReferral) return "Awaiting review";
+    return "Stable";
+  };
+
   return (
-    <Section
-      heading="Today's patient intake and queue"
-      headingAdornment={<Label className="normal-case">Prioritized by emergency severity</Label>}
-    >
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-        <div className="relative w-full md:w-72">
+    <section className="clinical-panel p-5 space-y-4 bg-surface border border-rule" aria-label="Patient Queue">
+      <SectionHeader
+        title="Patient Queue & Clinical Census"
+        badge={
+          <span className="text-[11px] font-mono px-2 py-0.5 rounded-[2px] bg-surface-raised border border-rule text-ink-muted">
+            {filteredCases.length} Active Patients
+          </span>
+        }
+        subtitle="Prioritized by deterministic clinical emergency and triage severity"
+      />
+
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="relative w-full sm:w-72">
           <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted pointer-events-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-ink-muted pointer-events-none"
             aria-hidden="true"
           />
           <TextField
             type="text"
-            placeholder="Search patient, ID, village"
+            placeholder="Search patient, ID, village..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-8 h-9 text-body-sm"
             aria-label="Search patient queue"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter by risk level">
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter by priority">
           {RISK_FILTERS.map((lvl) => (
             <Button
               key={lvl}
@@ -95,8 +107,8 @@ export function PatientQueueTable() {
       ) : filteredCases.length === 0 ? (
         <EmptyState
           icon={Search}
-          title="No matching cases"
-          description="Try a different search term or clear the risk filter to see the full queue."
+          title="No matching patients"
+          description="Adjust your search query or clear priority filters."
           action={{
             label: "Clear filters",
             onClick: () => {
@@ -106,15 +118,15 @@ export function PatientQueueTable() {
           }}
         />
       ) : (
-        <Table caption="Today's patient intake queue, sorted by emergency severity" captionHidden>
+        <Table caption="Today's patient triage queue, sorted by clinical priority" captionHidden>
           <THead>
             <tr>
-              <TH>Patient and village</TH>
-              <TH>Age / sex</TH>
-              <TH>Chief complaint</TH>
-              <TH>Risk level</TH>
-              <TH>AI confidence</TH>
+              <TH>Patient</TH>
+              <TH>Age / Sex</TH>
+              <TH>Presenting complaint</TH>
+              <TH>Priority</TH>
               <TH>Arrival</TH>
+              <TH>Status</TH>
               <TH className="text-right">Action</TH>
             </tr>
           </THead>
@@ -125,22 +137,43 @@ export function PatientQueueTable() {
                 <TR key={patient.caseId}>
                   <TD>
                     <div className="font-semibold text-ink flex items-center gap-1.5">
-                      {patient.patientName}
-                      <span className="text-label text-ink-muted normal-case">({patient.patientId})</span>
+                      <Link
+                        href={`/results/${patient.caseId}`}
+                        className="hover:underline text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                      >
+                        {patient.patientName}
+                      </Link>
+                      <span className="text-label text-ink-muted normal-case font-mono">
+                        ({patient.patientId})
+                      </span>
                     </div>
                     <div className="text-body-sm text-ink-muted">{patient.village || "Rural clinic"}</div>
                   </TD>
-                  <TD>
-                    {patient.age}y / {patient.gender.charAt(0)}
+                  <TD className="font-mono tabular">
+                    {patient.age} {patient.gender.charAt(0)}
                   </TD>
-                  <TD className="max-w-xs truncate" title={patient.chiefComplaint}>
+                  <TD className="max-w-xs truncate text-ink" title={patient.chiefComplaint}>
                     {patient.chiefComplaint}
                   </TD>
                   <TD>
-                    <RiskIndicator level={patient.riskLevel} variant="tint" showScore={patient.urgencyScore} />
+                    <RiskIndicator level={patient.riskLevel} variant="tint" />
                   </TD>
-                  <TD>{CONFIDENCE_LABELS[patient.confidenceLevel]}</TD>
-                  <TD className="text-ink-muted">{patient.arrivalTime || "15 mins ago"}</TD>
+                  <TD className="text-ink-muted text-body-sm font-mono tabular">
+                    {patient.arrivalTime || "15m ago"}
+                  </TD>
+                  <TD>
+                    <span
+                      className={`text-body-sm font-semibold ${
+                        isEmergency
+                          ? "text-risk-emergency"
+                          : patient.riskLevel === "HIGH"
+                          ? "text-risk-high"
+                          : "text-ink-muted"
+                      }`}
+                    >
+                      {getPatientStatus(patient)}
+                    </span>
+                  </TD>
                   <TD className="text-right">
                     <Link
                       href={`/results/${patient.caseId}`}
@@ -149,10 +182,8 @@ export function PatientQueueTable() {
                         variant: isEmergency ? "danger" : "secondary",
                       })}
                     >
-                      Open case
-                      <span className="inline-flex" aria-hidden="true">
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </span>
+                      Open
+                      <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
                     </Link>
                   </TD>
                 </TR>
@@ -161,6 +192,6 @@ export function PatientQueueTable() {
           </TBody>
         </Table>
       )}
-    </Section>
+    </section>
   );
 }

@@ -20,10 +20,10 @@ export default function LearningPage() {
   const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement | null>>>({});
 
   const tabs = [
-    { id: "architecture", label: "AI Architecture & Modalities", icon: Layers },
-    { id: "principles", label: "Core Principles", icon: ShieldCheck },
-    { id: "guidance", label: "Clinical Guidance & Tips", icon: HeartPulse },
-    { id: "executive", label: "Hackathon Summary", icon: Award },
+    { id: "architecture", label: "Clinical Modalities", icon: Layers },
+    { id: "principles", label: "Safety Principles", icon: ShieldCheck },
+    { id: "guidance", label: "Clinical Guidance", icon: HeartPulse },
+    { id: "executive", label: "Executive Summary", icon: Award },
   ] as const;
 
   /**
@@ -58,18 +58,18 @@ export default function LearningPage() {
         <div className="rounded-card border border-rule bg-surface p-8 space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-chip text-label bg-action-subtle text-action border border-action/30">
-              <BookOpen className="h-3.5 w-3.5" aria-hidden="true" /> Knowledge &amp; learning hub
+              <BookOpen className="h-3.5 w-3.5" aria-hidden="true" /> Clinical guidelines &amp; protocols
             </span>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-chip text-label bg-surface-raised text-ink-muted border border-rule">
-              <WifiOff className="h-3.5 w-3.5" aria-hidden="true" /> Offline AI guide
+              <WifiOff className="h-3.5 w-3.5" aria-hidden="true" /> Offline reference
             </span>
           </div>
 
           <div className="space-y-3 max-w-3xl">
-            <H1 className="text-display">MediGem Learning &amp; Architecture Hub</H1>
+            <H1 className="text-display">Clinical Guidelines &amp; Protocols Hub</H1>
             <Body className="text-ink-muted">
-              Explore the technical architecture, offline multimodal AI pipeline, clinical safety
-              rules, and operational guidelines behind MediGem Clinical Co-Pilot.
+              Reference specifications for rural triage protocols, multimodal clinical document
+              ingestion, deterministic safety screening, and primary care decision workflows.
             </Body>
           </div>
 

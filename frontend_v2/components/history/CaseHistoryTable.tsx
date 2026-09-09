@@ -90,7 +90,7 @@ export function CaseHistoryTable({
         <Label className="normal-case">{filteredCases.length} of {casesList.length} patients</Label>
       }
     >
-      <BodySm className="text-ink-muted">Select a row to view the AI summary in the workspace panel.</BodySm>
+      <BodySm className="text-ink-muted">Select a row to view the clinical assessment in the workspace panel.</BodySm>
 
       {clinicHasNoCases ? (
         <EmptyState
@@ -118,7 +118,7 @@ export function CaseHistoryTable({
               <TH>Age / sex</TH>
               <TH>Chief complaint</TH>
               <TH>Risk level</TH>
-              <TH>AI confidence</TH>
+              <TH>Confidence</TH>
               <TH className="text-right">Actions</TH>
             </tr>
           </THead>

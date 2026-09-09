@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Home, PlusCircle, History, Award, Settings, Terminal } from "lucide-react";
+import { Search, Home, PlusCircle, History, Award, Settings, Terminal, BookOpen } from "lucide-react";
 import { ModalDialog } from "@/components/ui/Dialog";
 import { BodySm } from "@/components/ui/Typography";
 
@@ -23,13 +23,14 @@ export function CommandPalette() {
   }, []);
 
   const commands = [
-    { title: "Home Dashboard", route: "/", icon: Home },
-    { title: "Start New Patient Case", route: "/new-case", icon: PlusCircle },
-    { title: "Clinical Case History", route: "/history", icon: History },
-    { title: "Demo Presets & Hackathon Mode", route: "/demo", icon: Award },
-    { title: "Evaluation Analytics Dashboard", route: "/evaluation", icon: Terminal },
-    { title: "Developer Workspace & Inspector", route: "/developer", icon: Terminal },
-    { title: "Settings & Accessibility", route: "/settings", icon: Settings },
+    { title: "Today's Clinical Work", route: "/", icon: Home },
+    { title: "New Patient Intake", route: "/new-case", icon: PlusCircle },
+    { title: "Patient Queue & Archive", route: "/history", icon: History },
+    { title: "Clinical Guidelines & Protocols", route: "/learning", icon: BookOpen },
+    { title: "Clinical Sample Presets", route: "/demo", icon: Award },
+    { title: "System Benchmarks & Quality", route: "/evaluation", icon: Terminal },
+    { title: "Pipeline Inspector & Diagnostics", route: "/developer", icon: Terminal },
+    { title: "Workstation Settings", route: "/settings", icon: Settings },
   ];
 
   const filtered = commands.filter((c) => c.title.toLowerCase().includes(query.toLowerCase()));

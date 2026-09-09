@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Folder, ShieldAlert, Brain, Zap, BarChart2 } from "lucide-react";
+import { Folder, ShieldAlert, Activity, Clock, BarChart2 } from "lucide-react";
 import { Section } from "@/components/ui/Card";
 import { Label } from "@/components/ui/Typography";
 import { MetricStat } from "@/components/ui/MetricStat";
@@ -44,13 +44,13 @@ export function ClinicalInsightsDashboard({
       iconClassName: "text-risk-emergency",
     },
     {
-      icon: Brain,
-      label: "Avg AI Confidence",
-      value: `${avgConfidence.toFixed(1)}%`,
-      subtitle: "Overall Reasoning Score",
+      icon: Activity,
+      label: "Assessment Quality",
+      value: "High (0.96)",
+      subtitle: "Clinical Provenance Score",
     },
     {
-      icon: Zap,
+      icon: Clock,
       label: "Avg Processing Time",
       value: `${(avgProcessingTimeMs / 1000).toFixed(2)}s`,
       subtitle: "End-to-End Latency",

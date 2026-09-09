@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Brain, HardDrive, Eye, Sun, ShieldCheck, Cpu, Info } from "lucide-react";
+import { Sliders, HardDrive, Eye, Sun, ShieldCheck, Cpu, Info } from "lucide-react";
 import { Label, BodySm } from "@/components/ui/Typography";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ interface SettingsCategoryNavProps {
 
 export function SettingsCategoryNav({ activeTab, setActiveTab }: SettingsCategoryNavProps) {
   const categories = [
-    { id: "ai", label: "AI & Clinical Reasoning", icon: Brain, desc: "Confidence threshold, reasoning detail, model selection" },
+    { id: "ai", label: "Clinical Decision Parameters", icon: Sliders, desc: "Confidence threshold, reasoning detail, model selection" },
     { id: "storage", label: "Offline Storage & Backup", icon: HardDrive, desc: "SQLite cache, database backup, clear temp files" },
     { id: "accessibility", label: "Accessibility & Human Factors", icon: Eye, desc: "Reduced motion, high contrast, font scaling" },
     { id: "appearance", label: "Appearance & Visual Themes", icon: Sun, desc: "Dark, light, and healthcare night mode" },

@@ -26,7 +26,7 @@ export function PipelineWorkflow() {
       tech: "Python Rule Engine",
       latency: "< 0.3ms",
       icon: <ShieldAlert className="h-5 w-5 text-risk-emergency" aria-hidden="true" />,
-      details: "Evaluates 11 rule groups across cardiac, stroke and toxicity before calling AI models.",
+      details: "Evaluates 11 rule groups across cardiac, stroke and toxicity before invoking inference models.",
     },
     {
       id: 3,
@@ -39,7 +39,7 @@ export function PipelineWorkflow() {
     },
     {
       id: 4,
-      title: "4. Gemma AI Engine",
+      title: "4. Gemma Reasoning Engine",
       desc: "Ollama local LLM reasoning",
       tech: "Gemma 3 4B Local",
       latency: "5,200ms",
@@ -73,7 +73,7 @@ export function PipelineWorkflow() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-body font-bold text-ink tracking-tight">
-            Multimodal AI Pipeline Architecture
+            Multimodal Clinical Pipeline Architecture
           </h2>
           <BodySm className="text-ink-muted">
             Hover over any pipeline stage to inspect technology, latency and execution details

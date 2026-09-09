@@ -15,7 +15,7 @@ export function CompactOperationalHeader() {
         <div className="space-y-1.5 max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-chip text-label bg-risk-low/12 text-risk-low border border-risk-low/30">
-              <WifiOff className="h-3.5 w-3.5" aria-hidden="true" /> Offline AI ready
+              <WifiOff className="h-3.5 w-3.5" aria-hidden="true" /> Offline ready
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-chip text-label bg-surface-raised text-ink-muted border border-rule">
               <Cpu className="h-3.5 w-3.5" aria-hidden="true" /> Gemma 3 4B
@@ -30,7 +30,7 @@ export function CompactOperationalHeader() {
             Good morning, <span className="text-action">Dr. Vikram</span>
           </H1>
           <Body className="text-ink-muted">
-            Clinical co-pilot active. Primary sub-center, Rampur. Offline edge engine.
+            Clinical workstation active. Primary sub-center, Rampur. Offline local engine.
           </Body>
         </div>
 

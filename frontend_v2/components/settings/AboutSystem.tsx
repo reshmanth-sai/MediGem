@@ -12,9 +12,9 @@ export function AboutSystem() {
           <Info className="h-6 w-6" aria-hidden="true" />
         </div>
         <div>
-          <H2>About MediGem Clinical Co-Pilot</H2>
+          <H2>About MediGem Clinical Workstation</H2>
           <BodySm className="text-ink-muted">
-            System build metadata, local AI engine licenses, and offline certification.
+            System build metadata, local inference engine licenses, and offline certification.
           </BodySm>
         </div>
       </div>
@@ -26,7 +26,7 @@ export function AboutSystem() {
             <span className="text-action font-semibold">MediGem v2.0.0 (Production Edge)</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-ink-muted">AI Model Provider:</span>
+            <span className="text-ink-muted">Inference Model Provider:</span>
             <span className="text-ink font-semibold">Gemma 3 4B (Google DeepMind)</span>
           </div>
           <div className="flex justify-between">
