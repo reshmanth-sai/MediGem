@@ -1,142 +1,133 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { PatientHeader, PatientTabId } from "@/components/patient/PatientHeader";
-import { ClinicalVitalsRow } from "@/components/patient/ClinicalVitalsRow";
-import { ClinicalNotesRecord } from "@/components/patient/ClinicalNotesRecord";
-import { ClinicalDocumentsList } from "@/components/patient/ClinicalDocumentsList";
-import { AssessmentReportPanel } from "@/components/assessment/AssessmentReportPanel";
-import { QuickReferralModal } from "@/components/history/QuickReferralModal";
-import { SectionHeader } from "@/components/ui/SectionHeader";
-import { PRESET_CASES, ClinicalCaseData } from "@/lib/casesData";
-import { History, Clock } from "lucide-react";
+import { PRESET_CASES } from "@/lib/casesData";
+import { Users, ShieldAlert, Activity, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
-export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<PatientTabId>("overview");
-  const [isReferralOpen, setIsReferralOpen] = useState(false);
+export default function DashboardHome() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  // Default to primary active clinical case (Lakshmi Ammal - CASE-8901)
-  const caseData: ClinicalCaseData = PRESET_CASES["CASE-8901"];
+  const cases = Object.values(PRESET_CASES);
+  const emergencyCases = cases.filter((c) => c.riskLevel === "EMERGENCY");
+  const highRiskCases = cases.filter((c) => c.riskLevel === "HIGH");
+
+  if (!mounted) return null;
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-[1560px] space-y-8 pb-16">
-        {/* Patient Header with demographics, risk badge & underline tabs */}
-        <PatientHeader
-          caseData={caseData}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+      <div className="max-w-[1400px] space-y-12">
+        {/* Header Section */}
+        <header className="space-y-2">
+          <h1 className="text-h2 font-semibold text-ink">Clinical Workspace</h1>
+          <p className="text-body text-ink-muted max-w-xl">
+            {cases.length} active sessions undergoing continuous telemetry monitoring.
+          </p>
+        </header>
 
-        {/* Master Clinical Split-Screen Workspace (Left: Record ~63% / Right: Assessment ~37%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-10 items-start">
-          {/* LEFT: Patient Clinical Record */}
-          <section className="lg:col-span-7 space-y-8" aria-label="Patient Clinical Record">
-            {activeTab === "overview" && (
-              <>
-                <div>
-                  <ClinicalVitalsRow caseData={caseData} />
-                </div>
-                <div className="border-t border-slate-200/80 pt-6">
-                  <ClinicalNotesRecord
-                    initialNotes={caseData.clinicalNotes}
-                    chiefComplaint={caseData.chiefComplaint}
-                  />
-                </div>
-                <div className="border-t border-slate-200/80 pt-6">
-                  <ClinicalDocumentsList documents={caseData.clinicalDocuments} />
-                </div>
-              </>
-            )}
+        {/* Utilitarian Metrics Overview */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <MetricBlock
+            label="Active Encounters"
+            value={cases.length.toString()}
+            icon={<Users className="w-4 h-4" />}
+          />
+          <MetricBlock
+            label="Critical Alerts"
+            value={emergencyCases.length.toString()}
+            icon={<ShieldAlert className="w-4 h-4" />}
+            isAlert={emergencyCases.length > 0}
+          />
+          <MetricBlock
+            label="Elevated Risk"
+            value={highRiskCases.length.toString()}
+            icon={<Activity className="w-4 h-4" />}
+          />
+        </section>
 
-            {activeTab === "assessment" && (
-              <>
-                <div>
-                  <ClinicalVitalsRow caseData={caseData} />
-                </div>
-                <div className="border-t border-slate-200/80 pt-6 space-y-4">
-                  <SectionHeader title="Differential Considerations" />
-                  <ul className="divide-y divide-slate-100 border-t border-slate-200">
-                    {caseData.differentialConsiderations.map((item) => (
-                      <li key={item} className="py-2.5 text-xs sm:text-sm text-slate-800">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="border-t border-slate-200/80 pt-6 space-y-4">
-                  <SectionHeader title="Recommended Investigations" />
-                  <ul className="divide-y divide-slate-100 border-t border-slate-200">
-                    {caseData.recommendedInvestigations.map((item) => (
-                      <li key={item} className="py-2.5 text-xs sm:text-sm text-slate-800">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="border-t border-slate-200/80 pt-6">
-                  <ClinicalNotesRecord
-                    initialNotes={caseData.clinicalNotes}
-                    chiefComplaint={caseData.chiefComplaint}
-                  />
-                </div>
-              </>
-            )}
+        {/* Minimalist Patient Queue Grid */}
+        <section className="space-y-6">
+          <div className="flex justify-between items-center border-b border-rule pb-4">
+            <h2 className="text-h3 font-semibold text-ink">Active Queue</h2>
+            <Link
+              href="/history"
+              className="text-body-sm font-medium text-action hover:text-action-hover"
+            >
+              View full history
+            </Link>
+          </div>
 
-            {activeTab === "documents" && (
-              <div>
-                <ClinicalDocumentsList documents={caseData.clinicalDocuments} />
-              </div>
-            )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-8">
+            {cases.map((patient) => (
+              <PatientListItem key={patient.caseId} patient={patient} />
+            ))}
+          </div>
+        </section>
+      </div>
+    </AppShell>
+  );
+}
 
-            {activeTab === "history" && (
-              <div className="space-y-4">
-                <SectionHeader title="Patient Longitudinal History" />
-                <div className="border-y border-slate-200 py-4 space-y-4">
-                  <div className="flex items-start gap-3">
-                    <History className="h-5 w-5 text-slate-400 mt-0.5" aria-hidden="true" />
-                    <div className="space-y-1">
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">
-                        Prior Sub-Center Visit: {caseData.lastVisit || "Sep 7, 2025"}
-                      </p>
-                      <p className="text-xs sm:text-sm text-slate-500">
-                        Recorded by {caseData.assignedWorker}. Baseline blood pressure checked; routine outpatient counsel given.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 pt-3 border-t border-slate-100">
-                    <Clock className="h-5 w-5 text-blue-600 mt-0.5" aria-hidden="true" />
-                    <div className="space-y-1">
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">
-                        Current Visit: Today ({caseData.arrivalTime})
-                      </p>
-                      <p className="text-xs sm:text-sm text-slate-500">
-                        Presenting complaint: {caseData.chiefComplaint}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
+// --- Strictly functional components (no floating cards) ---
 
-          {/* RIGHT: Clinical Assessment Report Panel */}
-          <div className="lg:col-span-5">
-            <AssessmentReportPanel
-              caseData={caseData}
-              onOpenReferralModal={() => setIsReferralOpen(true)}
-            />
+function MetricBlock({ label, value, icon, isAlert = false }: any) {
+  return (
+    <div className="flex flex-col border-l-2 border-rule pl-4 py-1">
+      <div className="flex items-center gap-2 text-ink-muted mb-2">
+        {icon}
+        <span className="text-label uppercase tracking-widest">{label}</span>
+      </div>
+      <span className={`text-display tabular-nums ${isAlert ? "text-clinical-emergency" : "text-ink"}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function PatientListItem({ patient }: { patient: any }) {
+  const isEmergency = patient.riskLevel === "EMERGENCY";
+
+  return (
+    <div className={`relative flex flex-col gap-4 pb-6 border-b ${isEmergency ? "border-clinical-emergency/50" : "border-rule"}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Link
+            href={`/results/${patient.caseId}`}
+            className="text-h3 font-semibold text-ink hover:text-action transition-colors inline-block"
+          >
+            {patient.patientName}
+          </Link>
+          <div className="text-body-sm text-ink-muted mt-0.5">
+            {patient.age}y {patient.gender.charAt(0)} · {patient.patientId}
+          </div>
+        </div>
+        <div className="text-right">
+          <div className={`text-label font-bold ${isEmergency ? "text-clinical-emergency" : "text-ink-muted"}`}>
+            {patient.riskLevel}
+          </div>
+          <div className="text-xs text-ink-muted font-medium mt-0.5 tabular-nums">
+            {patient.arrivalTime}
           </div>
         </div>
       </div>
 
-      {/* Clinical Referral Memorandum Modal */}
-      <QuickReferralModal
-        isOpen={isReferralOpen}
-        onClose={() => setIsReferralOpen(false)}
-        patient={caseData}
-      />
-    </AppShell>
+      <p className="text-body text-ink line-clamp-2">
+        {patient.chiefComplaint}
+      </p>
+
+      <div className="flex items-center justify-between mt-2 pt-4 border-t border-rule/50">
+        <span className="text-body-sm font-medium text-ink-muted truncate pr-4">
+          Finding: {patient.primaryFinding}
+        </span>
+        <Link
+          href={`/results/${patient.caseId}`}
+          className="text-xs font-semibold text-action hover:text-action-hover inline-flex items-center gap-1 shrink-0"
+        >
+          Analyze record <ArrowRight className="w-3 h-3" />
+        </Link>
+      </div>
+    </div>
   );
 }

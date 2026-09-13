@@ -50,8 +50,8 @@ export function PatientHeader({
             <span className="px-2.5 py-1 text-xs font-mono font-medium text-slate-600 bg-slate-100 rounded-md border border-slate-200/70">
               {caseData.patientId}
             </span>
-            <span className="px-2.5 py-1 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200/80 rounded-full inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-amber-500" />
+            <span className="px-2.5 py-1 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200/80 rounded-[2px] inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
               <span>
                 {caseData.riskLevel === "MODERATE" ? "Moderate" : caseData.riskLevel} ({caseData.urgencyScore || 6.4})
               </span>

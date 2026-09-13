@@ -37,7 +37,7 @@ export function AssessmentReportPanel({
 
   return (
     <div
-      className="bg-[#F8FAFC] border border-slate-200/90 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs"
+      className="space-y-6 pt-4"
       aria-label="Clinical Assessment Report"
     >
       {/* 1. Header & Time */}

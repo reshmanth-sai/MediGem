@@ -17,8 +17,8 @@ export function ClinicalVitalsRow({ caseData }: ClinicalVitalsRowProps) {
         <span className="text-xs text-slate-400 font-normal">Today, 10:12 AM</span>
       </div>
 
-      {/* 6 Clean Columns */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 pt-1 pb-4">
+      {/* Responsive wrapped layout instead of strict 6 columns to prevent overlap */}
+      <div className="flex flex-wrap gap-x-8 gap-y-6 pt-1 pb-4">
         {/* Blood Pressure */}
         <div className="flex flex-col justify-between">
           <div>
