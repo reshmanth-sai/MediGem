@@ -1,28 +1,51 @@
-# MediGem System Limitations & Assumptions
+# Limitations
 
-> **Honest Clinical AI Transparency & Constraints Document**
+Read this before drawing any conclusion from the product page's figures.
 
-MediGem aims to assist rural health workers safely while maintaining strict transparency regarding technical boundaries and system assumptions.
+## Clinical
 
----
+- **Not validated.** No labelled dataset, no clinician agreement study, no
+  outcome data. The measured figures are latency and schema validity. Nothing
+  measured says whether a risk level, red flag or next step is correct.
+- **Decision support, not diagnosis.** Every output has
+  `requires_human_review: true` by default and the clinician decides. MediGem
+  is not a medical device and is not certified as one.
+- **Small model.** `gemma3:4b` with no clinical fine-tuning. Observations
+  occasionally come back empty; assessments can be generic. Confidence is
+  qualitative (low / medium / high) and uncalibrated.
+- **Small gate.** 11 rules across 11 categories with one English synonym
+  table. Symptoms in Hindi or transliterated Hindi do not match. The assistant's
+  free-text symptom extraction is a substring list.
+- **OCR.** Tesseract with no preprocessing; 77.5 % mean confidence on the two
+  sample documents that carry a text layer. Handwriting is not read.
 
-## ⚠️ System Limitations & Constraints
+## Data
 
-1. **Hardware-Dependent LLM Inference Latency**:
-   - MediGem executes Gemma 3 4B locally via Ollama. Total pipeline latency depends directly on the host machine's hardware (e.g. CPU vs Apple Silicon / CUDA GPU acceleration). On modern Apple Silicon hardware, inference completes in 5–12 seconds, whereas on older dual-core CPUs it may take 25–45 seconds.
+- **No accounts.** The signed-in clinician is a fixed demo persona. Sign-offs
+  are recorded under that name.
+- **No audit trail** beyond the single review row on a case. Deletes are hard
+  deletes.
+- **Plain SQLite** on one disk. No encryption at rest, no backups, no retention
+  policy. Uploaded images are deleted after the run, so the document behind a
+  stored assessment cannot be re-viewed.
+- **API key is a shared string** that also ships in the browser bundle when set
+  for the site. It deters casual abuse; it is not authentication.
 
-2. **OCR Quality Dependency on Image Capture**:
-   - While PyMuPDF extracts 100% accurate text layers from digital PDF reports, image scans of physical paper prescriptions or lab printouts rely on Tesseract OCR. Extremely blurry, crumpled, low-contrast, or handwritten notes may produce partial OCR text.
+## Operations
 
-3. **Language Scope**:
-   - Version 1.0 prompt engineering and reasoning output contracts are written in English. Local regional language translation (Hindi, Swahili, Spanish, French) is planned for Version 2.0.
+- **One machine.** Single-process API, in-memory rate limiter, no metrics. A
+  hung model call holds the worker for up to the 120 s client timeout.
+- **Hardware.** 9.1 s median is an Apple M5 figure. A CPU-only laptop should
+  expect 60–120 s per assessment and needs 16 GB to be comfortable.
+- **No installer.** Running it means Python, Ollama, `uvicorn` and a Node
+  process. "Offline" means a laptop serving itself over the clinic's network.
+- **Hosted demo cannot run the model.** medigem.vercel.app replays recorded
+  runs and says so on every screen.
 
-4. **Non-Diagnostic & Non-Prescriptive Constraints**:
-   - MediGem strictly triages risk levels (`LOW`, `MODERATE`, `HIGH`, `EMERGENCY`), summarizes observations, highlights abnormal lab values, and formats facility referral letters. It DOES NOT replace a licensed physician, formulate definitive medical diagnoses, or prescribe drug dosages.
+## Safety guard
 
----
-
-## 📋 Operational Assumptions
-
-1. **Healthcare Worker Supervision**: MediGem is designed as a co-pilot for trained front-line healthcare workers (nurses, community officers) who perform physical patient examinations. It is not intended for unassisted self-triage by patients.
-2. **Offline Local Ollama Service**: Assumes the local Ollama daemon is running on the host machine (`http://localhost:11434`) with `gemma3:4b` pulled.
+The output guard is regex-based. It catches doses (`650 mg`, `2 tablets`),
+`prescribe …`, `dose: N`, and certainty claims (`diagnosed with`,
+`definitive diagnosis`). It excludes lab concentrations (`13.8 g/dL`) after a
+bug that marked every lab-report run degraded. It will miss phrasings it has
+not seen; it is a backstop, not a guarantee.

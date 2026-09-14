@@ -1,33 +1,48 @@
-# MediGem Product Roadmap
+# Roadmap
 
-> **Offline AI Co-Pilot for Rural Healthcare Workers**
+MediGem is a portfolio project. The goal of the roadmap is a finished, honest,
+defensible piece of engineering, not a shipped medical product. Items are in
+the order they would be done; the first block is planned, the rest is written
+up so the scope is clear.
 
-MediGem's roadmap balances healthcare safety, edge performance, multimodal intelligence, and open-source accessibility.
+## Planned
 
----
+1. **Accounts and an event log.** Local users (bcrypt, roles CHO / ANM / MO /
+   admin), session cookie, reviewer taken from the session. An append-only
+   `events` table and a case `state` (open → assessed → reviewed → referred →
+   closed) with a History tab that reads it. Makes sign-off attributable.
+2. **End-to-end tests.** Playwright through intake → overlay → results →
+   sign-off, plus an `axe` pass per route, on the CI verify build.
+3. **Dead controls.** "Edit patient", "Update care plan", and the notes editor
+   are wired to the store or removed.
+4. **`docker compose up`.** API + Ollama in one command, so an engineer can run
+   the live queue without three terminals.
 
-## 🎯 Phase 1: Core System & Evaluation (v1.0.0 - Current)
+## Not planned, and why
 
-- [x] **Deterministic Emergency Safety Engine**: Rule-based safety gate intercepting critical acute symptoms in `< 0.3ms`.
-- [x] **Provider-Agnostic AI Infrastructure**: Gemma 3 4B integration via Ollama with resilient JSON extraction.
-- [x] **Input Processing Framework**: Multi-format ingestion (`IMAGE`, `PDF`, `TEXT`), smart searchable PDF text layer extraction, optional Tesseract OCR, and OpenCV quality scoring.
-- [x] **Context Fusion Engine**: Fusing clinical context, processed input data, image quality metrics, and OCR confidence into an immutable `ReasoningContext`.
-- [x] **Clinical SaaS Gradio UI**: 3-Column layout (Left 25%, Center 35%, Right 40%), Reasoning Transparency Card, Demo Gallery presets, and file export downloads.
-- [x] **Evaluation Framework**: Non-mutating benchmark suite generating `evaluation_report.md`, `evaluation_summary.json`, `benchmark_results.csv`, and SVG architecture diagrams.
+- **Clinical validation.** A labelled set (≥ 50 cases per modality) reviewed by
+  a clinician, with agreement and sensitivity for EMERGENCY / HIGH. This is the
+  work that would make the tool trustworthy; it needs a clinician and weeks, and
+  the numbers would not transfer to a different model. Documented in
+  [`LIMITATIONS.md`](LIMITATIONS.md) instead.
+- **Install for a clinic laptop.** Standalone Next build served by the API,
+  first-run wizard, encrypted SQLite, backups, retention. Product work.
+- **Languages.** Hindi patient summaries and referral notes first; UI strings
+  later. Invisible to a reviewer, a week of work.
+- **CPU-only hardware tier.** Measure `gemma3:4b` vs `gemma3:1b` on an 8 GB
+  laptop and decide. The evaluation above cannot be reused across that choice.
+- **Hosted inference.** The public site replays recorded runs. A GPU host would
+  cost money to show a visitor the model thinking; a recorded video does the
+  same job.
 
----
+## Done
 
-## 📱 Phase 2: Mobile Edge & Voice Transcription (v2.0 - Q4 2026)
-
-- [ ] **Android Native App Deployment**: Mobile edge execution using MediaPipe & Gemma 2B quantized ONNX/TFLite models.
-- [ ] **Offline Voice-to-Text Transcription**: Whisper-Tiny offline speech recognition for voice symptom entry in regional languages (Hindi, Swahili, Spanish, Bengali).
-- [ ] **Camera Auto-Focus & Blur Assistant**: Live camera guidance warning health workers of motion blur prior to capture.
-- [ ] **Offline Patient Record Storage**: Encrypted SQLite local storage for session management and facility synchronization.
-
----
-
-## 🌐 Phase 3: DICOM Imaging & Federated Learning (v3.0 - 2027)
-
-- [ ] **DICOM X-Ray & Ultrasound Support**: Direct ingestion of DICOM medical imaging files.
-- [ ] **Federated Learning Network**: Privacy-preserving model tuning across rural clinic nodes without centralized patient data transmission.
-- [ ] **EHR System Integration**: FHIR / HL7 interoperability for seamless facility referral syncing.
+- FastAPI layer over the orchestrator with API key, rate limit, CORS.
+- SQLite case store; `/analyze` persists; clinician sign-off.
+- Workstation reads the store when it is up, bundled examples otherwise, and
+  says which on every screen; replay mode without an API.
+- Safety-guard regex fixed (lab concentrations were read as doses).
+- Landing page re-measured at 20 runs per modality; fonts bundled; nav,
+  hero and telemetry fit a phone.
+- Sidebar, page headers, tables and filters rebuilt on one design system with
+  a design gate in CI.

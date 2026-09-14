@@ -1,10 +1,33 @@
-# MediGem Healthcare Safety & Clinical Bounds Architecture
+# Safety design
 
-> **Deterministic Safety Gate & Layered Safety Guard Specification**
+The safety model is layered, and the layers are in a fixed order.
 
-MediGem prioritizes patient safety and ethical AI deployment. It operates under strict non-diagnostic clinical boundaries and implements a multi-layer safety framework.
+1. **Deterministic gate before inference.** `backend/emergency` matches
+   normalised symptoms against `rules.json` (11 rules: cardiac, respiratory,
+   stroke, sepsis, anaphylaxis, poisoning, snakebite, burns, trauma, obstetric,
+   general). A match returns a referral and the model is not called. The gate
+   cannot be disabled from the UI or the API.
+2. **Output contract.** The model must return `ClinicalReasoningOutput`
+   (`backend/reasoning/output_schema.py`). `requires_human_review` defaults to
+   `true`. Invalid or empty output is retried once, then reported as
+   `DEGRADED`.
+3. **Output guard.** `SafetyGuard` (`backend/reasoning/safety.py`) rejects
+   prohibited content: doses and quantities (`650 mg`, `2 tablets`),
+   `prescribe …`, `dose: N`, and certainty claims (`diagnosed with`,
+   `definitive diagnosis`, `100% certain`). Lab concentrations (`13.8 g/dL`)
+   are excluded after a false positive that degraded every lab-report run.
+4. **Clinician sign-off.** A stored case carries `requires_review` until a
+   clinician records approved / modified / rejected with a note.
+5. **Assistant.** The chat assistant's prompt forbids doses and diagnoses and
+   consults the gate first; its fallback text contains no quantities and is
+   labelled "Reference text. No model was consulted." Its output does not yet
+   pass through `SafetyGuard` (see `LIMITATIONS.md`).
+
+What follows is the original clinical-bounds contract.
 
 ---
+
+
 
 ## 🛑 What MediGem DOES vs What MediGem DOES NOT Do
 
