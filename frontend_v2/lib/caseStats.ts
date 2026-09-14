@@ -19,8 +19,13 @@ export function allCases(): ClinicalCaseData[] {
   );
 }
 
-export function emergencyCases(): ClinicalCaseData[] {
-  return allCases().filter((c) => c.riskLevel === "EMERGENCY");
+export function emergencyCases(cases: ClinicalCaseData[] = allCases()): ClinicalCaseData[] {
+  return cases.filter((c) => c.riskLevel === "EMERGENCY");
+}
+
+/** Sort any list the way the queue orders it: gate first, then urgency. */
+export function sortBySeverity(cases: ClinicalCaseData[]): ClinicalCaseData[] {
+  return [...cases].sort((a, b) => RISK_WEIGHT[b.riskLevel] - RISK_WEIGHT[a.riskLevel] || b.urgencyScore - a.urgencyScore);
 }
 
 export interface CaseCounters {

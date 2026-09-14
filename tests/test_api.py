@@ -1,8 +1,12 @@
 """The HTTP layer over the orchestrator: gate first, honest health, no patient files left behind."""
 
+import os
 import unittest
 import warnings
 from unittest.mock import patch
+
+# Tests must never write to the real case store.
+os.environ.setdefault("MEDIGEM_DB_PATH", ":memory:")
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -70,12 +74,10 @@ class ApiTests(unittest.TestCase):
 
     def test_upload_is_removed_after_analysis(self) -> None:
         before = set(settings.TMP_DIR.glob("REQ-*")) if settings.TMP_DIR.exists() else set()
-        with patch("backend.api.app.orchestrator.process_analysis_request") as run:
-            run.return_value = {
-                "request_id": "REQ-X",
-                "summary": "stub",
-                "status": "COMPLETED",
-            }
+        with patch("backend.api.app.orchestrator.process_analysis_request") as run, patch.object(api, "case_store", api.case_store.__class__(":memory:")):
+            from backend.schemas import AnalysisResponse
+
+            run.return_value = AnalysisResponse(request_id="REQ-X", summary="stub", status="COMPLETED")
             self.client.post(
                 "/analyze",
                 data={"age": 30, "gender": "Male", "image_type": "WOUND"},

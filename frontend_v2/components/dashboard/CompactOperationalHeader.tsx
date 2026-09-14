@@ -6,10 +6,12 @@ import { MetricStat } from "@/components/ui/MetricStat";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SESSION, greetingFor } from "@/lib/session";
 import { caseCounters } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
 import { capture } from "@/components/landing/data";
 
 export function CompactOperationalHeader() {
-  const counters = caseCounters();
+  const list = useCaseList();
+  const counters = caseCounters(list.cases);
   // Measured by evaluation/capture_landing_data.py, the same figure the
   // product page quotes. Replaced by /health once the pipeline API answers.
   const gateMs = capture.summary.gate_latency_ms_median;

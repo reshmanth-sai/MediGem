@@ -9,14 +9,7 @@ export interface ClinicalDocumentsListProps {
   onUploadFile?: (file: File) => void;
 }
 
-export function ClinicalDocumentsList({
-  documents = [
-    { name: "chest_xray.jpg", type: "Image", size: "2.1 MB", uploadedTime: "Today, 10:12 AM" },
-    { name: "lab_report.pdf", type: "PDF", size: "1.4 MB", uploadedTime: "Today, 10:10 AM" },
-    { name: "prescription.jpg", type: "Image", size: "512 KB", uploadedTime: "Today, 10:08 AM" },
-  ],
-  onUploadFile,
-}: ClinicalDocumentsListProps) {
+export function ClinicalDocumentsList({ documents = [], onUploadFile }: ClinicalDocumentsListProps) {
   const [docList, setDocList] = useState<ClinicalDocument[]>(documents);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {

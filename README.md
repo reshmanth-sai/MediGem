@@ -150,7 +150,9 @@ MediGem/
    ```
    Open `http://localhost:3000` for the product page and `http://localhost:3000/workstation` for the workstation. Without `NEXT_PUBLIC_API_BASE_URL` the workstation runs on bundled example cases and says so on every screen; a new intake cannot run.
 
-   API routes: `GET /health`, `GET /rules`, `POST /gate/evaluate`, `POST /analyze` (multipart: demographics, symptoms, vitals, one image with `image_type`). Interactive docs at `http://localhost:8000/docs`.
+   API routes: `GET /health`, `GET /rules`, `POST /gate/evaluate`, `POST /analyze` (multipart: demographics, symptoms, vitals, one image with `image_type`; the case is stored and its `case_id` returned), `GET /cases`, `GET /cases/{id}`, `POST /cases/{id}/review` (clinician sign-off: approved / modified / rejected with a note), `DELETE /cases/{id}`. Interactive docs at `http://localhost:8000/docs`.
+
+   **Case store.** Cases live in one SQLite file, `data/medigem.db` by default (`MEDIGEM_DB_PATH` to move it; `:memory:` for tests). With the API up, every workstation list reads from it and the ribbon says "Live queue"; without it, the lists are the bundled examples and say so. Uploaded images are not kept; the stored case holds the intake fields and the pipeline's response.
 
    **Hosting.** A hosted build (Vercel) has no Ollama and no Python process. Two supported modes, switched by `NEXT_PUBLIC_API_BASE_URL`:
    - *Unset:* product page plus example workstation. A new intake **replays** one of the runs recorded by `evaluation/capture_landing_data.py` (the same data the product page quotes), labelled as a replay on every screen. No infrastructure.

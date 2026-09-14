@@ -5,6 +5,11 @@ export type ImageType = "ECG" | "REPORT" | "PRESCRIPTION" | "WOUND";
 
 export interface AnalyzeInput {
   patientId?: string;
+  patientName?: string;
+  location?: string;
+  chiefComplaint?: string;
+  /** Store the case on the API. Default true. */
+  persist?: boolean;
   age: number;
   gender: string;
   symptoms: string[];
@@ -43,6 +48,10 @@ export async function analyze(input: AnalyzeInput): Promise<AnalysisResponse> {
   form.set("gender", input.gender);
   form.set("symptoms", JSON.stringify(input.symptoms));
   if (input.notes) form.set("notes", input.notes);
+  if (input.patientName) form.set("patient_name", input.patientName);
+  if (input.location) form.set("location", input.location);
+  if (input.chiefComplaint) form.set("chief_complaint", input.chiefComplaint);
+  if (input.persist === false) form.set("persist", "false");
   for (const [k, v] of Object.entries(input.vitals ?? {})) {
     if (typeof v === "number" && Number.isFinite(v)) form.set(k, String(v));
   }

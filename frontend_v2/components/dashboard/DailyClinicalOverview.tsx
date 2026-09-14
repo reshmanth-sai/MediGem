@@ -3,7 +3,8 @@
 import React from "react";
 import { ShieldCheck, WifiOff, Wifi, Cpu } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { allCases, symptomDistribution } from "@/lib/caseStats";
+import { symptomDistribution } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
 import { capture } from "@/components/landing/data";
 import { useSystemStatus } from "@/hooks/useSystemStatus";
 
@@ -13,7 +14,7 @@ import { useSystemStatus } from "@/hooks/useSystemStatus";
  * this surface is typed in.
  */
 export function DailyClinicalOverview() {
-  const cases = allCases();
+  const cases = useCaseList().cases;
   const rows = symptomDistribution(cases);
   const status = useSystemStatus();
   const gate = capture.gate;

@@ -18,6 +18,8 @@ export interface AssessmentReportPanelProps {
   onModifyAssessment?: () => void;
   onRejectAssessment?: () => void;
   onAddNote?: () => void;
+  /** Present for cases stored on the API: records the clinician's decision. */
+  onReview?: (decision: "approved" | "modified" | "rejected", note: string) => Promise<void>;
 }
 
 export function AssessmentReportPanel({
@@ -26,9 +28,31 @@ export function AssessmentReportPanel({
   onModifyAssessment,
   onRejectAssessment,
   onAddNote,
+  onReview,
 }: AssessmentReportPanelProps) {
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [noteText, setNoteText] = useState("");
+  const [reviewNote, setReviewNote] = useState("");
+  const [reviewBusy, setReviewBusy] = useState<"approved" | "modified" | "rejected" | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const review = caseData.review;
+  const submitReview = async (decision: "approved" | "modified" | "rejected") => {
+    if (!onReview) return;
+    if (decision !== "approved" && !reviewNote.trim()) {
+      setReviewError("A note is required when you change or reject an assessment.");
+      return;
+    }
+    setReviewBusy(decision);
+    setReviewError(null);
+    try {
+      await onReview(decision, reviewNote.trim());
+      setReviewNote("");
+    } catch (e) {
+      setReviewError(e instanceof Error ? e.message : "The review could not be saved.");
+    } finally {
+      setReviewBusy(null);
+    }
+  };
 
   // Everything below reads from the case. Observations come from the case's
   // own list, or from its supporting findings when no summary list exists.
@@ -108,9 +132,50 @@ export function AssessmentReportPanel({
       {/* 6. Actions (2x2 Grid matching Image 1) */}
       <div className="space-y-3">
         <h4 className="text-body-sm font-bold text-ink">
-          Actions
+          {onReview ? "Clinician sign-off" : "Actions"}
         </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        {onReview && review && (
+          <div className="border border-rule bg-surface-sunken p-3 text-body-sm space-y-1" role="status">
+            <p className="font-semibold text-ink">
+              {review.decision === "approved" ? "Signed off" : review.decision === "modified" ? "Signed off with changes" : "Rejected"} by {review.reviewer}
+            </p>
+            <p className="font-mono text-ink-muted">{review.at.replace("T", " ").slice(0, 16)} UTC</p>
+            {review.note && <p className="text-ink">{review.note}</p>}
+          </div>
+        )}
+        {onReview && !review && (
+          <div className="space-y-2">
+            <textarea
+              value={reviewNote}
+              onChange={(e) => setReviewNote(e.target.value)}
+              placeholder="Reviewer note (required when changing or rejecting)"
+              rows={3}
+              aria-label="Reviewer note"
+              className="w-full p-2.5 text-body-sm border border-rule rounded-card bg-surface text-ink focus:outline-none focus:border-action focus:ring-1 focus:ring-action"
+            />
+            {reviewError && <p role="alert" className="text-body-sm text-risk-emergency">{reviewError}</p>}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button type="button" disabled={reviewBusy !== null} onClick={() => submitReview("approved")} className="h-10 px-3 bg-action hover:bg-action-hover text-on-action font-medium text-body-sm rounded-card disabled:opacity-60">
+                {reviewBusy === "approved" ? "Saving" : "Sign off"}
+              </button>
+              <button type="button" disabled={reviewBusy !== null} onClick={() => submitReview("modified")} className="h-10 px-3 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card disabled:opacity-60">
+                {reviewBusy === "modified" ? "Saving" : "Sign off with changes"}
+              </button>
+              <button type="button" disabled={reviewBusy !== null} onClick={() => submitReview("rejected")} className="h-10 px-3 bg-surface border border-risk-emergency/40 hover:bg-risk-emergency-subtle text-risk-emergency font-medium text-body-sm rounded-card disabled:opacity-60">
+                {reviewBusy === "rejected" ? "Saving" : "Reject"}
+              </button>
+            </div>
+            <button type="button" onClick={onOpenReferralModal} className="h-10 w-full px-3 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2">
+              <ArrowRight className="h-4 w-4" aria-hidden="true" /> Write referral note
+            </button>
+          </div>
+        )}
+        {onReview && review && (
+          <button type="button" onClick={onOpenReferralModal} className="h-10 w-full px-3 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2">
+            <ArrowRight className="h-4 w-4" aria-hidden="true" /> Write referral note
+          </button>
+        )}
+        <div className={onReview ? "hidden" : "grid grid-cols-1 sm:grid-cols-2 gap-2.5"}>
           {/* Approve referral */}
           <button
             type="button"
@@ -190,7 +255,7 @@ export function AssessmentReportPanel({
 
       {/* 7. Footer Timestamp */}
       <div className="pt-2 text-body-sm text-ink-muted font-normal">
-        Last updated: Sep 7, 2025, 10:12 AM
+        {caseData.pipeline ? `Request ${caseData.pipeline.requestId}` : "Bundled example"}
       </div>
     </div>
   );

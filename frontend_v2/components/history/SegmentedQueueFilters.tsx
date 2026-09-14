@@ -1,6 +1,7 @@
 "use client";
 
-import { allCases } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
+import type { ClinicalCaseData } from "@/lib/casesData";
 
 import React from "react";
 import { Search, Layers } from "lucide-react";
@@ -25,8 +26,7 @@ const RISK_LEVELS = [
 ] as const;
 
 // Counts come from the case list itself, never typed in.
-function riskCounts() {
-  const cases = allCases();
+function riskCounts(cases: ClinicalCaseData[]) {
   return RISK_LEVELS.map((r) => ({ ...r, count: cases.filter((c) => c.riskLevel === r.id).length }));
 }
 
@@ -54,6 +54,7 @@ export function SegmentedQueueFilters({
   selectedStatus,
   setSelectedStatus,
 }: SegmentedQueueFiltersProps) {
+  const cases = useCaseList().cases;
   const toggleRisk = (riskId: string) => {
     if (selectedRisk === riskId) {
       setSelectedRisk("ALL");
@@ -115,7 +116,7 @@ export function SegmentedQueueFilters({
         role="group"
         aria-label="Filter by risk level"
       >
-        {riskCounts().map((rc) => {
+        {riskCounts(cases).map((rc) => {
           const isActive = selectedRisk === rc.id;
           return (
             <button

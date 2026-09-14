@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertOctagon, ArrowRight, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/Button";
 import { emergencyCases } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
 
 /*
  * One banner per EMERGENCY case that has not been acknowledged in this tab.
@@ -13,7 +14,8 @@ import { emergencyCases } from "@/lib/caseStats";
  */
 export function EmergencyAlertBanner() {
   const [acknowledged, setAcknowledged] = useState<Set<string>>(() => new Set());
-  const open = emergencyCases().filter((c) => !acknowledged.has(c.caseId));
+  const list = useCaseList();
+  const open = emergencyCases(list.cases).filter((c) => !acknowledged.has(c.caseId));
   if (open.length === 0) return null;
 
   return (

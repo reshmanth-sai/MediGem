@@ -18,7 +18,7 @@ export interface PatientHeaderProps {
 const TABS: Array<{ id: PatientTabId; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "assessment", label: "Assessment" },
-  { id: "documents", label: "Documents (3)" },
+  { id: "documents", label: "Documents" },
   { id: "history", label: "History" },
 ];
 
@@ -89,18 +89,26 @@ export function PatientHeader({
             <span>·</span>
             <span className="inline-flex items-center gap-1 text-ink-muted">
               <MapPin className="h-3.5 w-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
-              {caseData.village || "Kovilpatti, Tamil Nadu"}
+              {caseData.village}
             </span>
-            <span>·</span>
-            <span className="inline-flex items-center gap-1 text-ink-muted">
-              <Calendar className="h-3.5 w-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
-              Last visit: {caseData.lastVisit || "Sep 7, 2025"}
-            </span>
-            <span>·</span>
-            <span className="inline-flex items-center gap-1 text-action font-medium">
-              <Clock className="h-3.5 w-3.5 text-action shrink-0" aria-hidden="true" />
-              Follow-up: {caseData.followUp || "In 3 days"}
-            </span>
+            {caseData.lastVisit && (
+              <>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1 text-ink-muted">
+                  <Calendar className="h-3.5 w-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
+                  Last visit: {caseData.lastVisit}
+                </span>
+              </>
+            )}
+            {caseData.followUp && (
+              <>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1 text-action font-medium">
+                  <Clock className="h-3.5 w-3.5 text-action shrink-0" aria-hidden="true" />
+                  Follow-up: {caseData.followUp}
+                </span>
+              </>
+            )}
           </div>
         </div>
 

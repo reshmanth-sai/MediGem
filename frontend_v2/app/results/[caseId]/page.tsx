@@ -15,6 +15,11 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { PRESET_CASES, ClinicalCaseData } from "@/lib/casesData";
 import { useCaseDraft } from "@/lib/store/caseDraft";
+import { isApiConfigured } from "@/lib/api-client";
+import { getCase, reviewCase } from "@/services/cases.service";
+import { mapStoredCase } from "@/lib/mapAnalysis";
+import { useCaseList } from "@/providers/CasesProvider";
+import { SESSION } from "@/lib/session";
 
 export default function CaseResultsPage() {
   const routerParams = useParams();
@@ -26,18 +31,48 @@ export default function CaseResultsPage() {
   const [isHydrated, setIsHydrated] = useState(false);
   useEffect(() => setIsHydrated(true), []);
 
-  // A case is either a bundled preset or the one result this tab produced.
-  // There is deliberately no fallback: an unknown id must render "not found",
-  // never another patient's record under this URL.
+  // A case is a bundled preset, the one result this tab produced, or a case
+  // stored on the API. There is deliberately no other fallback: an unknown id
+  // renders "not found", never another patient's record under this URL.
   const preset: ClinicalCaseData | undefined = PRESET_CASES[caseId];
   const stored = storedResult?.caseId === caseId ? storedResult : null;
-  const caseData: ClinicalCaseData | null = preset ?? stored ?? null;
+  const list = useCaseList();
+  const [remote, setRemote] = useState<ClinicalCaseData | null>(null);
+  const [remoteState, setRemoteState] = useState<"idle" | "loading" | "missing">("idle");
+  const canFetch = isApiConfigured() && !preset && !stored;
+  useEffect(() => {
+    if (!canFetch) return;
+    let cancelled = false;
+    setRemoteState("loading");
+    getCase(caseId)
+      .then((c) => {
+        if (!cancelled) {
+          setRemote(mapStoredCase(c));
+          setRemoteState("idle");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setRemoteState("missing");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [caseId, canFetch]);
+  const caseData: ClinicalCaseData | null = preset ?? stored ?? remote ?? null;
+  const isLive = Boolean(remote) || (Boolean(stored?.pipeline) && !stored?.pipeline?.replay && caseId.startsWith("CASE-") && caseId !== "CASE-CUSTOM");
+  const loading = !isHydrated || remoteState === "loading";
+
+  const handleReview = async (decision: "approved" | "modified" | "rejected", note: string) => {
+    const updated = await reviewCase(caseId, decision, SESSION.clinician.name, note || undefined);
+    setRemote(mapStoredCase(updated));
+    void list.refresh();
+  };
 
   if (!caseData) {
     return (
       <AppShell>
         <div className="mx-auto max-w-[1560px]">
-          {isHydrated ? (
+          {!loading ? (
             <EmptyState
               icon={FileQuestion}
               title="Case not found"
@@ -85,7 +120,7 @@ export default function CaseResultsPage() {
                   />
                 </div>
                 <div className="border-t border-rule pt-6">
-                  <ClinicalDocumentsList documents={caseData.clinicalDocuments} />
+                  <ClinicalDocumentsList documents={caseData.clinicalDocuments ?? caseData.documents?.map((name) => ({ name, type: /\.pdf$/i.test(name) ? "PDF" : "Image", size: "", uploadedTime: caseData.arrivalTime }))} />
                 </div>
               </>
             )}
@@ -135,7 +170,7 @@ export default function CaseResultsPage() {
 
             {activeTab === "documents" && (
               <div>
-                <ClinicalDocumentsList documents={caseData.clinicalDocuments} />
+                <ClinicalDocumentsList documents={caseData.clinicalDocuments ?? caseData.documents?.map((name) => ({ name, type: /\.pdf$/i.test(name) ? "PDF" : "Image", size: "", uploadedTime: caseData.arrivalTime }))} />
               </div>
             )}
 
@@ -175,6 +210,7 @@ export default function CaseResultsPage() {
             <AssessmentReportPanel
               caseData={caseData}
               onOpenReferralModal={() => setIsReferralOpen(true)}
+              onReview={isLive ? handleReview : undefined}
             />
           </div>
         </div>

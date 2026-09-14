@@ -35,6 +35,8 @@ import { analyze, imageTypeFor } from "@/services/analysis.service";
 import { mapAnalysisToCase } from "@/lib/mapAnalysis";
 import { isApiConfigured } from "@/lib/api-client";
 import { REPLAY_OPTIONS, CAPTURED_AT, replayRun, type ReplayId } from "@/lib/replay";
+import { useCaseList } from "@/providers/CasesProvider";
+import type { Route } from "next";
 import {
   AGE_NOT_RECORDED,
   buildErrorSummary,
@@ -62,6 +64,7 @@ const CASE_ID = "CASE-CUSTOM";
 
 export default function NewCasePage() {
   const router = useRouter();
+  const caseList = useCaseList();
 
   const step = useCaseDraft((s) => s.step);
   const patient = useCaseDraft((s) => s.patient);
@@ -264,6 +267,9 @@ export default function NewCasePage() {
 
       const res = await analyze({
         patientId: patient.patientId || undefined,
+        patientName: patient.patientName || undefined,
+        location: patient.location || undefined,
+        chiefComplaint: patient.chiefComplaint || undefined,
         age: isAgeRecorded(patient.age) ? patient.age : 0,
         gender: patient.gender || "Not recorded",
         symptoms: symptoms.symptoms,
@@ -279,7 +285,9 @@ export default function NewCasePage() {
         signal,
       });
 
-      return mapAnalysisToCase(res, intake);
+      // The API stored the case; its id becomes the URL, so a reload of the
+      // results page reads it back from the store rather than this tab.
+      return mapAnalysisToCase(res, { ...intake, caseId: res.case_id ?? CASE_ID });
     },
     [patient, symptoms, history, uploads, replayId]
   );
@@ -291,9 +299,10 @@ export default function NewCasePage() {
       // results route does not lose it. Nothing is written to localStorage.
       setResult(result);
       setIsAnalyzing(false);
-      router.push(`/results/${CASE_ID}`);
+      void caseList.refresh();
+      router.push(`/results/${result.caseId}` as Route);
     },
-    [setResult, router]
+    [setResult, router, caseList]
   );
 
   const cancelAnalysis = useCallback(() => {

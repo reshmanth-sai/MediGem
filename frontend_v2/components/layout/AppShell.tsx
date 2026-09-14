@@ -5,10 +5,12 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { DemoDataRibbon } from "./DemoDataRibbon";
 import { CommandPalette, CommandPaletteProvider } from "@/components/search/CommandPalette";
+import { CasesProvider } from "@/providers/CasesProvider";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <CommandPaletteProvider>
+      <CasesProvider>
       <div className="min-h-screen bg-ground text-ink flex">
         {/*
           WCAG 2.4.1 bypass block. Without it, every route walks a keyboard user
@@ -41,6 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <CommandPalette />
       </div>
+      </CasesProvider>
     </CommandPaletteProvider>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { allCases } from "@/lib/caseStats";
+import { sortBySeverity } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
 import { useCaseFilter } from "@/hooks/useCaseFilter";
 import { CaseFilterBar } from "@/components/cases/CaseFilterBar";
 import { CaseTable, OpenCaseAction, columns } from "@/components/cases/CaseTable";
@@ -10,7 +11,8 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const COLS = [columns.patient, columns.ageSex, columns.complaint, columns.priority, columns.arrival, columns.status];
 
 export function PatientQueueTable() {
-  const cases = allCases();
+  const list = useCaseList();
+  const cases = React.useMemo(() => sortBySeverity(list.cases), [list.cases]);
   const f = useCaseFilter(cases);
 
   return (

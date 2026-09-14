@@ -120,6 +120,8 @@ export interface ClinicalCaseData {
   safetyScreening?: SafetyScreening;
   provenance?: CaseProvenance;
   pipeline?: PipelineRecord;
+  /** Clinician sign-off, when the case came from the store and has one. */
+  review?: { decision: "approved" | "modified" | "rejected"; reviewer: string; at: string; note?: string | null };
 }
 
 export const PRESET_CASES: Record<string, ClinicalCaseData> = {

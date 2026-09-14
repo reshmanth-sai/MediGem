@@ -3,9 +3,10 @@
 import React from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { caseCounters } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
 
 export function HistoryQueueHeader() {
-  const c = caseCounters();
+  const c = caseCounters(useCaseList().cases);
   return (
     <PageHeader
       title="Patient queue"

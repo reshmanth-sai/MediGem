@@ -2,7 +2,8 @@
 
 import React from "react";
 import { type ClinicalCaseData } from "@/lib/casesData";
-import { allCases } from "@/lib/caseStats";
+import { sortBySeverity } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
 import { filterCases, RISK_FILTERS, type RiskFilter } from "@/lib/caseFilter";
 import { CaseTable, columns } from "@/components/cases/CaseTable";
 
@@ -27,7 +28,8 @@ export function CaseHistoryTable({
   onOpenReferralModal: _onOpenReferralModal,
   onClearFilters,
 }: CaseHistoryTableProps) {
-  const casesList = React.useMemo(() => allCases(), []);
+  const list = useCaseList();
+  const casesList = React.useMemo(() => sortBySeverity(list.cases), [list.cases]);
 
   // The queue header owns the search and risk state (URL-synced), so the
   // shared filter runs here as a pure function with the status predicate.

@@ -131,3 +131,6 @@ Thumbs.db
 ijfw/
 .claude/
 .superpowers/
+
+# local case store
+data/

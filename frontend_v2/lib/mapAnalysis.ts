@@ -1,4 +1,4 @@
-import type { AnalysisResponse } from "@/lib/schemas/analysis";
+import type { AnalysisResponse, StoredCase } from "@/lib/schemas/analysis";
 import type { ClinicalCaseData, VitalSign } from "@/lib/casesData";
 import { SESSION } from "@/lib/session";
 
@@ -13,6 +13,13 @@ export interface IntakeSnapshot {
   symptoms: string[];
   vitals: VitalSign[];
   documents: string[];
+}
+
+/** First sentence of the summary, or a risk-level line when it runs long. */
+function headline(summary: string, risk: ClinicalCaseData["riskLevel"]): string {
+  const first = summary.split(/(?<=[.!?])\s+/)[0]?.trim() ?? "";
+  if (first.length > 0 && first.length <= 110) return first;
+  return `${risk.charAt(0)}${risk.slice(1).toLowerCase()} risk assessment; see summary`;
 }
 
 function urgencyLabel(level: ClinicalCaseData["riskLevel"], needsReferral: boolean): string {
@@ -55,7 +62,7 @@ export function mapAnalysisToCase(res: AnalysisResponse, intake: IntakeSnapshot)
     vitals: intake.vitals,
     primaryFinding: intercepted
       ? `Emergency gate: ${risk?.risk_flags.join(", ") || "rule match"}`
-      : r?.assessment.clinical_summary.split(/(?<=\.)\s/)[0] ?? res.summary,
+      : headline(r?.assessment.clinical_summary ?? res.summary, riskLevel),
     recommendedAction,
     clinicalSummary: r?.assessment.clinical_summary ?? res.summary,
     confidenceLevel: r?.assessment.confidence_level ?? (intercepted ? "HIGH" : "LOW"),
@@ -102,4 +109,55 @@ export function mapAnalysisToCase(res: AnalysisResponse, intake: IntakeSnapshot)
       gateSummary: intercepted ? res.summary : null,
     },
   };
+}
+
+function vitalStatus(label: string, v: number): VitalSign["status"] {
+  if (label === "HR") return v > 100 || v < 50 ? "alert" : "normal";
+  if (label === "BP") return v > 140 ? "warning" : "normal";
+  if (label === "Temp") return v > 38 ? "warning" : "normal";
+  if (label === "SpO2") return v < 94 ? "alert" : "normal";
+  return "normal";
+}
+
+/** A stored case, as the results and list screens render it. */
+export function mapStoredCase(c: StoredCase): ClinicalCaseData {
+  const p = c.patient;
+  const vs = p.vital_signs ?? {};
+  const vitals: VitalSign[] = [];
+  if (vs.heart_rate_bpm != null) vitals.push({ label: "HR", value: `${vs.heart_rate_bpm} bpm`, status: vitalStatus("HR", vs.heart_rate_bpm) });
+  if (vs.blood_pressure_sys != null && vs.blood_pressure_dia != null)
+    vitals.push({ label: "BP", value: `${vs.blood_pressure_sys}/${vs.blood_pressure_dia} mmHg`, status: vitalStatus("BP", vs.blood_pressure_sys) });
+  if (vs.temperature_c != null) vitals.push({ label: "Temp", value: `${vs.temperature_c} °C`, status: vitalStatus("Temp", vs.temperature_c) });
+  if (vs.spo2_percent != null) vitals.push({ label: "SpO2", value: `${vs.spo2_percent}%`, status: vitalStatus("SpO2", vs.spo2_percent) });
+
+  const mapped = mapAnalysisToCase(c.response, {
+    caseId: c.id,
+    patientId: p.patient_id || "UNKNOWN",
+    patientName: p.patient_name || "Unnamed patient",
+    age: p.age ?? 0,
+    gender: p.gender || "Not recorded",
+    village: p.location || SESSION.facility.name,
+    chiefComplaint: p.chief_complaint || p.symptoms.join(", ") || "Not recorded",
+    symptoms: p.symptoms,
+    vitals,
+    documents: p.documents,
+  });
+  mapped.arrivalTime = relativeTime(c.created_at);
+  mapped.requiresHumanReview = c.requires_review;
+  mapped.clinicalNotes = p.notes ?? undefined;
+  if (c.reviewed_at && c.review_decision && c.reviewer) {
+    mapped.review = { decision: c.review_decision, reviewer: c.reviewer, at: c.reviewed_at, note: c.review_note };
+  }
+  return mapped;
+}
+
+export function relativeTime(iso: string, now: Date = new Date()): string {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return iso;
+  const mins = Math.max(0, Math.round((now.getTime() - t) / 60_000));
+  if (mins < 1) return "Arrived just now";
+  if (mins < 60) return `Arrived ${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `Arrived ${hours}h ago`;
+  return `Arrived ${Math.round(hours / 24)}d ago`;
 }

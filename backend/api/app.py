@@ -35,6 +35,7 @@ from backend.exceptions import ApplicationError
 from backend.logging import logger
 from backend.schemas import AnalysisRequest, AnalysisResponse, MedicalImage, PatientInput
 from backend.services.orchestrator import orchestrator
+from backend.store import case_store
 from backend.utils import get_current_utc_timestamp
 
 API_VERSION = "1"
@@ -111,9 +112,38 @@ class HealthResponse(BaseModel):
     ollama_connected: bool
     provider_details: str
     gate_rule_count: int
+    case_count: int
     gate_latency_ms: float
     uptime_seconds: float
     timestamp: str
+
+
+class ReviewRequest(BaseModel):
+    decision: str = Field(..., description="approved, modified or rejected")
+    reviewer: str = Field(..., min_length=1)
+    note: Optional[str] = None
+
+
+class CaseOut(BaseModel):
+    id: str
+    created_at: str
+    updated_at: str
+    patient: Dict[str, Any]
+    response: Dict[str, Any]
+    status: str
+    risk_level: Optional[str]
+    needs_referral: bool
+    requires_review: bool
+    reviewed_at: Optional[str] = None
+    reviewer: Optional[str] = None
+    review_note: Optional[str] = None
+    review_decision: Optional[str] = None
+
+
+class AnalyzeOut(AnalysisResponse):
+    """The pipeline's answer plus the id it was stored under."""
+
+    case_id: Optional[str] = None
 
 
 class RuleSummary(BaseModel):
@@ -172,7 +202,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=_origins(),
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["*"],
     )
 
@@ -187,6 +217,7 @@ def create_app() -> FastAPI:
             ollama_connected=status.is_available,
             provider_details=status.details,
             gate_rule_count=len(emergency_engine.rules),
+            case_count=case_store.count(),
             gate_latency_ms=_gate_latency_ms(),
             uptime_seconds=round(time.time() - STARTED_AT, 1),
             timestamp=get_current_utc_timestamp(),
@@ -200,13 +231,17 @@ def create_app() -> FastAPI:
     def gate(body: GateRequest) -> EmergencyResponse:
         return emergency_engine.evaluate(symptoms=body.symptoms, patient_id=body.patient_id, request_id=f"GATE-{uuid.uuid4().hex[:8]}")
 
-    @app.post("/analyze", response_model=AnalysisResponse, dependencies=[Depends(require_api_key), Depends(rate_limit_analyze)])
+    @app.post("/analyze", response_model=AnalyzeOut, dependencies=[Depends(require_api_key), Depends(rate_limit_analyze)])
     async def analyze(
         patient_id: str = Form("UNKNOWN"),
         age: Optional[int] = Form(None),
         gender: Optional[str] = Form(None),
         symptoms: str = Form("", description="JSON array or comma-separated list."),
         notes: Optional[str] = Form(None),
+        patient_name: Optional[str] = Form(None),
+        location: Optional[str] = Form(None),
+        chief_complaint: Optional[str] = Form(None),
+        persist: bool = Form(True, description="Store the case. False for throwaway runs."),
         heart_rate_bpm: Optional[float] = Form(None),
         blood_pressure_sys: Optional[float] = Form(None),
         blood_pressure_dia: Optional[float] = Form(None),
@@ -214,7 +249,7 @@ def create_app() -> FastAPI:
         temperature_c: Optional[float] = Form(None),
         image_type: Optional[str] = Form(None, description="ECG, REPORT, PRESCRIPTION or WOUND."),
         image: Optional[UploadFile] = File(None),
-    ) -> AnalysisResponse:
+    ) -> AnalyzeOut:
         request_id = f"REQ-{uuid.uuid4().hex[:10].upper()}"
 
         vitals: Dict[str, float] = {}
@@ -268,7 +303,27 @@ def create_app() -> FastAPI:
         )
 
         try:
-            return orchestrator.process_analysis_request(req)
+            result = orchestrator.process_analysis_request(req)
+            out = AnalyzeOut(**result.model_dump())
+            if persist:
+                stored = case_store.create(
+                    patient={
+                        "patient_id": patient.patient_id,
+                        "patient_name": patient_name,
+                        "age": patient.age,
+                        "gender": patient.gender,
+                        "location": location,
+                        "chief_complaint": chief_complaint,
+                        "symptoms": patient.symptoms,
+                        "vital_signs": patient.vital_signs,
+                        "notes": notes,
+                        "documents": [image.filename] if image is not None and image.filename else [],
+                        "image_type": image_type,
+                    },
+                    response=result.model_dump(mode="json"),
+                )
+                out.case_id = stored.id
+            return out
         except ApplicationError as e:
             logger.error(f"[{request_id}] Analysis rejected: {e}")
             raise HTTPException(422, str(e))
@@ -279,6 +334,32 @@ def create_app() -> FastAPI:
                     saved_path.unlink()
                 except OSError:
                     pass
+
+    @app.get("/cases", response_model=List[CaseOut])
+    def list_cases(risk_level: Optional[str] = None, needs_referral: Optional[bool] = None, limit: int = 200) -> List[CaseOut]:
+        return [CaseOut(**r.to_dict()) for r in case_store.list(risk_level=risk_level, needs_referral=needs_referral, limit=min(limit, 1000))]
+
+    @app.get("/cases/{case_id}", response_model=CaseOut)
+    def get_case(case_id: str) -> CaseOut:
+        rec = case_store.get(case_id)
+        if rec is None:
+            raise HTTPException(404, "No such case.")
+        return CaseOut(**rec.to_dict())
+
+    @app.post("/cases/{case_id}/review", response_model=CaseOut, dependencies=[Depends(require_api_key)])
+    def review_case(case_id: str, body: ReviewRequest) -> CaseOut:
+        try:
+            rec = case_store.review(case_id, body.decision, body.reviewer, body.note)
+        except ValueError as e:
+            raise HTTPException(422, str(e))
+        if rec is None:
+            raise HTTPException(404, "No such case.")
+        return CaseOut(**rec.to_dict())
+
+    @app.delete("/cases/{case_id}", status_code=204, dependencies=[Depends(require_api_key)])
+    def delete_case(case_id: str) -> None:
+        if not case_store.delete(case_id):
+            raise HTTPException(404, "No such case.")
 
     return app
 

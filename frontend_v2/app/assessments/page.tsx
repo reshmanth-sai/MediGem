@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { CaseFilterBar } from "@/components/cases/CaseFilterBar";
 import { CaseTable, OpenCaseAction, columns } from "@/components/cases/CaseTable";
 import { useCaseFilter } from "@/hooks/useCaseFilter";
-import { allCases } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
+import { sortBySeverity } from "@/lib/caseStats";
 import type { ClinicalCaseData } from "@/lib/casesData";
 
 type ReviewFilter = "ALL" | "REVIEW_REQUIRED" | "CLEARED";
@@ -18,7 +19,8 @@ const COLS = [columns.patient, columns.finding, columns.priorityScore, columns.c
 
 export default function ClinicalAssessmentsPage() {
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("ALL");
-  const cases = useMemo(() => allCases(), []);
+  const list = useCaseList();
+  const cases = useMemo(() => sortBySeverity(list.cases), [list.cases]);
   const reviewPredicate = useCallback(
     (c: ClinicalCaseData) =>
       reviewFilter === "ALL" || (reviewFilter === "REVIEW_REQUIRED" && c.requiresHumanReview) || (reviewFilter === "CLEARED" && !c.requiresHumanReview),

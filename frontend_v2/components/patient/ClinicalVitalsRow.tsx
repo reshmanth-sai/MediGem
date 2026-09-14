@@ -1,105 +1,68 @@
 "use client";
 
 import React from "react";
-import { ArrowUp } from "lucide-react";
-import { ClinicalCaseData } from "@/lib/casesData";
+import { ClinicalCaseData, VitalSign } from "@/lib/casesData";
+import { cn } from "@/lib/utils";
 
-export interface ClinicalVitalsRowProps {
-  caseData: ClinicalCaseData;
+/*
+ * The vitals recorded for this case, and nothing else. A vital that was not
+ * taken is not shown; a case with none says so.
+ */
+
+const LABELS: Record<string, string> = {
+  HR: "Pulse",
+  BP: "Blood pressure",
+  Temp: "Temperature",
+  SpO2: "SpO2",
+  RR: "Respiratory rate",
+};
+
+function splitValue(v: string): { number: string; unit: string } {
+  const m = v.match(/^([\d./]+)\s*(.*)$/);
+  return m ? { number: m[1], unit: m[2] } : { number: v, unit: "" };
 }
 
-export function ClinicalVitalsRow({ caseData }: ClinicalVitalsRowProps) {
+function Vital({ v }: { v: VitalSign }) {
+  const { number, unit } = splitValue(v.value);
+  const tone = v.status === "alert" ? "text-risk-emergency" : v.status === "warning" ? "text-risk-high" : "text-ink";
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-base sm:text-lg font-bold text-ink">Vital Signs</h2>
-        <span className="text-body-sm text-ink-muted font-normal">Today, 10:12 AM</span>
+    <div className="space-y-1 min-w-[6rem]">
+      <div className="flex items-baseline gap-1">
+        <span className={cn("text-data tabular", tone)}>{number}</span>
+        {unit && <span className="text-body-sm text-ink-muted">{unit}</span>}
       </div>
-
-      {/* Responsive wrapped layout instead of strict 6 columns to prevent overlap */}
-      <div className="flex flex-wrap gap-x-8 gap-y-6 pt-1 pb-4">
-        {/* Blood Pressure */}
-        <div className="flex flex-col justify-between">
-          <div>
-            <div className="flex items-baseline">
-              <span className="text-2xl sm:text-3xl font-bold text-risk-emergency tracking-tight">
-                150/90
-              </span>
-              <span className="text-body-sm font-semibold text-risk-emergency ml-1">
-                mmHg
-              </span>
-            </div>
-            <div className="text-body-sm font-semibold text-risk-emergency flex items-center gap-0.5 mt-0.5">
-              <ArrowUp className="w-3 h-3 stroke-[2.5]" />
-              <span>Elevated</span>
-            </div>
-          </div>
-          <span className="text-body-sm text-ink-muted mt-3 font-normal">Blood Pressure</span>
-        </div>
-
-        {/* Pulse */}
-        <div className="flex flex-col justify-between">
-          <div className="flex items-baseline">
-            <span className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-              88
-            </span>
-            <span className="text-body-sm text-ink-muted ml-1">
-              bpm
-            </span>
-          </div>
-          <span className="text-body-sm text-ink-muted mt-6 font-normal">Pulse</span>
-        </div>
-
-        {/* Temperature */}
-        <div className="flex flex-col justify-between">
-          <div className="flex items-baseline">
-            <span className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-              37.2
-            </span>
-            <span className="text-body-sm text-ink-muted ml-1">
-              °C
-            </span>
-          </div>
-          <span className="text-body-sm text-ink-muted mt-6 font-normal">Temperature</span>
-        </div>
-
-        {/* SpO2 */}
-        <div className="flex flex-col justify-between">
-          <div className="flex items-baseline">
-            <span className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-              96%
-            </span>
-          </div>
-          <span className="text-body-sm text-ink-muted mt-6 font-normal">SpO2</span>
-        </div>
-
-        {/* Respiratory Rate */}
-        <div className="flex flex-col justify-between">
-          <div className="flex items-baseline">
-            <span className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-              20
-            </span>
-            <span className="text-body-sm text-ink-muted ml-1">
-              /min
-            </span>
-          </div>
-          <span className="text-body-sm text-ink-muted mt-6 font-normal">Respiratory Rate</span>
-        </div>
-
-        {/* Weight */}
-        <div className="flex flex-col justify-between">
-          <div className="flex items-baseline">
-            <span className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-              {caseData.weightKg || 58}
-            </span>
-            <span className="text-body-sm text-ink-muted ml-1">
-              kg
-            </span>
-          </div>
-          <span className="text-body-sm text-ink-muted mt-6 font-normal">Weight</span>
-        </div>
-      </div>
+      {v.status !== "normal" && <p className={cn("text-body-sm font-semibold", tone)}>{v.status === "alert" ? "Out of range" : "Elevated"}</p>}
+      <p className="text-body-sm text-ink-muted">{LABELS[v.label] ?? v.label}</p>
     </div>
+  );
+}
+
+export function ClinicalVitalsRow({ caseData }: { caseData: ClinicalCaseData }) {
+  const recorded = caseData.vitals.filter((v) => v.value && !/not recorded/i.test(v.value));
+  return (
+    <section aria-label="Vital signs" className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-h3 text-ink">Vital signs</h2>
+        <span className="text-body-sm text-ink-muted">{caseData.arrivalTime}</span>
+      </div>
+      {recorded.length === 0 ? (
+        <p className="text-body-sm text-ink-muted">No vitals were recorded at intake.</p>
+      ) : (
+        <div className="flex flex-wrap gap-x-10 gap-y-5">
+          {recorded.map((v) => (
+            <Vital key={v.label} v={v} />
+          ))}
+          {caseData.weightKg != null && (
+            <div className="space-y-1 min-w-[6rem]">
+              <div className="flex items-baseline gap-1">
+                <span className="text-data tabular text-ink">{caseData.weightKg}</span>
+                <span className="text-body-sm text-ink-muted">kg</span>
+              </div>
+              <p className="text-body-sm text-ink-muted">Weight</p>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   );
 }

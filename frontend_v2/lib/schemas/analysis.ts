@@ -53,8 +53,42 @@ export const AnalysisResponse = z.object({
   timestamp: z.string().nullable(),
   reasoning: ReasoningOutput.nullable().optional(),
   input_summary: InputSummary.nullable().optional(),
+  /** Set when the API stored the case. */
+  case_id: z.string().nullable().optional(),
 });
 export type AnalysisResponse = z.infer<typeof AnalysisResponse>;
+
+/** What the intake sent, as the API stored it alongside the response. */
+export const StoredPatient = z.object({
+  patient_id: z.string().nullable().optional(),
+  patient_name: z.string().nullable().optional(),
+  age: z.number().nullable().optional(),
+  gender: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  chief_complaint: z.string().nullable().optional(),
+  symptoms: z.array(z.string()).default([]),
+  vital_signs: z.record(z.number()).default({}),
+  notes: z.string().nullable().optional(),
+  documents: z.array(z.string()).default([]),
+  image_type: z.string().nullable().optional(),
+});
+
+export const StoredCase = z.object({
+  id: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  patient: StoredPatient,
+  response: AnalysisResponse,
+  status: z.string(),
+  risk_level: RiskLevel.nullable(),
+  needs_referral: z.boolean(),
+  requires_review: z.boolean(),
+  reviewed_at: z.string().nullable().optional(),
+  reviewer: z.string().nullable().optional(),
+  review_note: z.string().nullable().optional(),
+  review_decision: z.enum(["approved", "modified", "rejected"]).nullable().optional(),
+});
+export type StoredCase = z.infer<typeof StoredCase>;
 
 export const HealthResponse = z.object({
   ok: z.boolean(),
@@ -64,6 +98,7 @@ export const HealthResponse = z.object({
   ollama_connected: z.boolean(),
   provider_details: z.string(),
   gate_rule_count: z.number(),
+  case_count: z.number().default(0),
   gate_latency_ms: z.number(),
   uptime_seconds: z.number(),
   timestamp: z.string(),

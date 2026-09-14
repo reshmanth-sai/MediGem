@@ -12,7 +12,8 @@ import { CaseFilterBar } from "@/components/cases/CaseFilterBar";
 import { CaseTable, columns, type CaseColumn } from "@/components/cases/CaseTable";
 import { QuickReferralModal } from "@/components/history/QuickReferralModal";
 import { useCaseFilter } from "@/hooks/useCaseFilter";
-import { allCases } from "@/lib/caseStats";
+import { useCaseList } from "@/providers/CasesProvider";
+import { sortBySeverity } from "@/lib/caseStats";
 import type { ClinicalCaseData } from "@/lib/casesData";
 
 /*
@@ -32,7 +33,8 @@ const urgencyCol: CaseColumn = {
 const COLS = [columns.patient, columns.finding, columns.priority, urgencyCol];
 
 export default function ReferralsPage() {
-  const referrals = useMemo(() => allCases().filter((c) => c.disposition?.needsReferral), []);
+  const list = useCaseList();
+  const referrals = useMemo(() => sortBySeverity(list.cases).filter((c) => c.disposition?.needsReferral), [list.cases]);
   const f = useCaseFilter(referrals);
   const [selected, setSelected] = useState<ClinicalCaseData | null>(referrals[0] ?? null);
   const [memoOpen, setMemoOpen] = useState(false);
