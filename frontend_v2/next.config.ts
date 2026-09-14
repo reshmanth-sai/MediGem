@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  // A verification build (CI, or an agent checking its work) can point at
+  // its own directory so it never clobbers the cache a running `next dev`
+  // is serving from: NEXT_DIST_DIR=.next-verify npm run build
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   reactStrictMode: true,
   typedRoutes: true,
   devIndicators: false,
