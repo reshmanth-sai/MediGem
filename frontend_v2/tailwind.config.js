@@ -13,11 +13,19 @@ module.exports = {
     extend: {
       colors: {
         ground: "var(--ground)",
-        surface: { DEFAULT: "var(--surface)", raised: "var(--surface-raised)" },
+        surface: {
+          DEFAULT: "var(--surface)",
+          raised: "var(--surface-raised)",
+          sunken: "var(--surface-sunken)",
+        },
+        hover: "var(--bg-hover)",
+        selected: "var(--bg-selected)",
+        active: "var(--bg-active)",
         rule: { DEFAULT: "var(--rule)", strong: "var(--rule-strong)" },
         ink: {
           DEFAULT: "var(--ink)",
           muted: "var(--ink-muted)",
+          subtle: "var(--ink-subtle)",
           disabled: "var(--ink-disabled)",
         },
         action: {
@@ -32,10 +40,26 @@ module.exports = {
         peach: "var(--peach)",
         "on-action": "var(--on-action)",
         risk: {
-          emergency: "var(--risk-emergency)",
-          high: "var(--risk-high)",
-          moderate: "var(--risk-moderate)",
-          low: "var(--risk-low)",
+          emergency: {
+            DEFAULT: "var(--risk-emergency)",
+            subtle: "var(--risk-emergency-subtle)",
+            border: "var(--risk-emergency-border)",
+          },
+          high: {
+            DEFAULT: "var(--risk-high)",
+            subtle: "var(--risk-high-subtle)",
+            border: "var(--risk-high-border)",
+          },
+          moderate: {
+            DEFAULT: "var(--risk-moderate)",
+            subtle: "var(--risk-moderate-subtle)",
+            border: "var(--risk-moderate-border)",
+          },
+          low: {
+            DEFAULT: "var(--risk-low)",
+            subtle: "var(--risk-low-subtle)",
+            border: "var(--risk-low-border)",
+          },
         },
         focus: "var(--focus)",
       },
@@ -53,7 +77,9 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-sans)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Iowan Old Style", "serif"],
+        // Identifiers, timestamps and readouts. Real mono, tabular by nature.
+        mono: ["var(--font-mono)", "ui-monospace", "Menlo", "monospace"],
       },
     },
   },

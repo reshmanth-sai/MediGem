@@ -9,6 +9,7 @@ import { ClinicalVitalsRow } from "@/components/patient/ClinicalVitalsRow";
 import { ClinicalNotesRecord } from "@/components/patient/ClinicalNotesRecord";
 import { ClinicalDocumentsList } from "@/components/patient/ClinicalDocumentsList";
 import { AssessmentReportPanel } from "@/components/assessment/AssessmentReportPanel";
+import { ReasoningCard } from "@/components/results/ReasoningCard";
 import { QuickReferralModal } from "@/components/history/QuickReferralModal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -25,9 +26,12 @@ export default function CaseResultsPage() {
   const [isHydrated, setIsHydrated] = useState(false);
   useEffect(() => setIsHydrated(true), []);
 
+  // A case is either a bundled preset or the one result this tab produced.
+  // There is deliberately no fallback: an unknown id must render "not found",
+  // never another patient's record under this URL.
   const preset: ClinicalCaseData | undefined = PRESET_CASES[caseId];
   const stored = storedResult?.caseId === caseId ? storedResult : null;
-  const caseData: ClinicalCaseData | null = preset ?? stored ?? PRESET_CASES["CASE-8901"];
+  const caseData: ClinicalCaseData | null = preset ?? stored ?? null;
 
   if (!caseData) {
     return (
@@ -42,7 +46,7 @@ export default function CaseResultsPage() {
             />
           ) : (
             <div className="flex items-center justify-center py-12">
-              <p className="text-slate-500">Loading case...</p>
+              <p className="text-ink-muted">Loading case...</p>
             </div>
           )}
         </div>
@@ -69,13 +73,18 @@ export default function CaseResultsPage() {
                 <div>
                   <ClinicalVitalsRow caseData={caseData} />
                 </div>
-                <div className="border-t border-slate-200/80 pt-6">
+                {caseData.pipeline && (
+                  <div className="border-t border-rule pt-6">
+                    <ReasoningCard record={caseData.pipeline} />
+                  </div>
+                )}
+                <div className="border-t border-rule pt-6">
                   <ClinicalNotesRecord
                     initialNotes={caseData.clinicalNotes}
                     chiefComplaint={caseData.chiefComplaint}
                   />
                 </div>
-                <div className="border-t border-slate-200/80 pt-6">
+                <div className="border-t border-rule pt-6">
                   <ClinicalDocumentsList documents={caseData.clinicalDocuments} />
                 </div>
               </>
@@ -86,27 +95,36 @@ export default function CaseResultsPage() {
                 <div>
                   <ClinicalVitalsRow caseData={caseData} />
                 </div>
-                <div className="border-t border-slate-200/80 pt-6 space-y-4">
+                {caseData.pipeline && (
+                  <div className="border-t border-rule pt-6">
+                    <ReasoningCard record={caseData.pipeline} />
+                  </div>
+                )}
+                {caseData.differentialConsiderations.length > 0 && (
+                <div className="border-t border-rule pt-6 space-y-4">
                   <SectionHeader title="Differential Considerations" />
-                  <ul className="divide-y divide-slate-100 border-t border-slate-200">
+                  <ul className="divide-y divide-rule border-t border-rule">
                     {caseData.differentialConsiderations.map((item) => (
-                      <li key={item} className="py-2.5 text-xs sm:text-sm text-slate-800">
+                      <li key={item} className="py-2.5 text-body-sm text-ink">
                         {item}
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="border-t border-slate-200/80 pt-6 space-y-4">
+                )}
+                {caseData.recommendedInvestigations.length > 0 && (
+                <div className="border-t border-rule pt-6 space-y-4">
                   <SectionHeader title="Recommended Investigations" />
-                  <ul className="divide-y divide-slate-100 border-t border-slate-200">
+                  <ul className="divide-y divide-rule border-t border-rule">
                     {caseData.recommendedInvestigations.map((item) => (
-                      <li key={item} className="py-2.5 text-xs sm:text-sm text-slate-800">
+                      <li key={item} className="py-2.5 text-body-sm text-ink">
                         {item}
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="border-t border-slate-200/80 pt-6">
+                )}
+                <div className="border-t border-rule pt-6">
                   <ClinicalNotesRecord
                     initialNotes={caseData.clinicalNotes}
                     chiefComplaint={caseData.chiefComplaint}
@@ -124,25 +142,25 @@ export default function CaseResultsPage() {
             {activeTab === "history" && (
               <div className="space-y-4">
                 <SectionHeader title="Patient Longitudinal History" />
-                <div className="border-y border-slate-200 py-4 space-y-4">
+                <div className="border-y border-rule py-4 space-y-4">
                   <div className="flex items-start gap-3">
-                    <History className="h-5 w-5 text-slate-400 mt-0.5" aria-hidden="true" />
+                    <History className="h-5 w-5 text-ink-muted mt-0.5" aria-hidden="true" />
                     <div className="space-y-1">
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                      <p className="text-body-sm font-semibold text-ink">
                         Prior Sub-Center Visit: {caseData.lastVisit || "Sep 7, 2025"}
                       </p>
-                      <p className="text-xs sm:text-sm text-slate-500">
+                      <p className="text-body-sm text-ink-muted">
                         Recorded by {caseData.assignedWorker}. Baseline blood pressure checked; routine outpatient counsel given.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 pt-3 border-t border-slate-100">
-                    <Clock className="h-5 w-5 text-blue-600 mt-0.5" aria-hidden="true" />
+                  <div className="flex items-start gap-3 pt-3 border-t border-rule">
+                    <Clock className="h-5 w-5 text-action mt-0.5" aria-hidden="true" />
                     <div className="space-y-1">
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                      <p className="text-body-sm font-semibold text-ink">
                         Current Visit: Today ({caseData.arrivalTime})
                       </p>
-                      <p className="text-xs sm:text-sm text-slate-500">
+                      <p className="text-body-sm text-ink-muted">
                         Presenting complaint: {caseData.chiefComplaint}
                       </p>
                     </div>

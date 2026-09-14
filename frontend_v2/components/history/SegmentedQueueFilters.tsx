@@ -1,5 +1,7 @@
 "use client";
 
+import { allCases } from "@/lib/caseStats";
+
 import React from "react";
 import { Search, Layers } from "lucide-react";
 import { TextField } from "@/components/ui/Input";
@@ -15,20 +17,25 @@ interface SegmentedQueueFiltersProps {
   setSelectedStatus: (status: string) => void;
 }
 
-const RISK_COUNTS = [
-  { id: "ALL", label: "All Cases", count: 128, colorClass: "text-ink" },
-  { id: "EMERGENCY", label: "Emergency", count: 14, colorClass: "text-risk-emergency" },
-  { id: "HIGH", label: "High Risk", count: 31, colorClass: "text-risk-high" },
-  { id: "MODERATE", label: "Moderate", count: 52, colorClass: "text-risk-moderate" },
-  { id: "LOW", label: "Low Risk", count: 31, colorClass: "text-risk-low" },
+const RISK_LEVELS = [
+  { id: "EMERGENCY", label: "Emergency", iconClass: "text-risk-emergency" },
+  { id: "HIGH", label: "High Risk", iconClass: "text-risk-high" },
+  { id: "MODERATE", label: "Moderate", iconClass: "text-risk-moderate" },
+  { id: "LOW", label: "Low Risk", iconClass: "text-risk-low" },
 ] as const;
+
+// Counts come from the case list itself, never typed in.
+function riskCounts() {
+  const cases = allCases();
+  return RISK_LEVELS.map((r) => ({ ...r, count: cases.filter((c) => c.riskLevel === r.id).length }));
+}
 
 const ACTIVE_RISK_CLASS: Record<string, string> = {
   ALL: "bg-surface-raised border-rule-strong text-ink",
-  EMERGENCY: "bg-risk-emergency/12 border-risk-emergency/60 text-risk-emergency",
-  HIGH: "bg-risk-high/12 border-risk-high/60 text-risk-high",
-  MODERATE: "bg-risk-moderate/12 border-risk-moderate/60 text-risk-moderate",
-  LOW: "bg-risk-low/12 border-risk-low/60 text-risk-low",
+  EMERGENCY: "bg-risk-emergency/10 border-risk-emergency text-risk-emergency",
+  HIGH: "bg-risk-high/10 border-risk-high text-risk-high",
+  MODERATE: "bg-risk-moderate/10 border-risk-moderate text-risk-moderate",
+  LOW: "bg-risk-low/10 border-risk-low text-risk-low",
 };
 
 const STATUS_FILTERS = [
@@ -47,79 +54,103 @@ export function SegmentedQueueFilters({
   selectedStatus,
   setSelectedStatus,
 }: SegmentedQueueFiltersProps) {
+  const toggleRisk = (riskId: string) => {
+    if (selectedRisk === riskId) {
+      setSelectedRisk("ALL");
+    } else {
+      setSelectedRisk(riskId);
+    }
+  };
+
   return (
-    <div className="rounded-card bg-surface border border-rule p-4 space-y-3">
+    <div className="space-y-3 pt-1">
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
         {/* Search Input Box */}
         <div className="relative flex-1 w-full lg:max-w-md">
           <Search
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted pointer-events-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted pointer-events-none"
             aria-hidden="true"
           />
-          <TextField
+          <input
             type="text"
-            placeholder="Search patient name, ID, village, diagnosis, or symptom..."
+            placeholder="Search patients, symptoms, or protocols..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="w-full pl-9 pr-4 py-1.5 text-body-sm bg-surface border border-rule rounded-lg text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-action focus:border-action transition-colors"
             aria-label="Search patient queue"
           />
         </div>
 
         {/* Workflow Status Chips */}
         <div
-          className="flex flex-wrap items-center gap-1.5 bg-ground p-1 rounded-control border border-rule"
+          className="flex flex-wrap items-center gap-1 text-body-sm"
           role="group"
           aria-label="Filter by status"
         >
-          {STATUS_FILTERS.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setSelectedStatus(s.id)}
-              aria-pressed={selectedStatus === s.id}
-              className={cn(
-                "px-3 py-1.5 rounded-control transition-colors text-body-sm font-semibold",
-                selectedStatus === s.id
-                  ? "bg-surface-raised text-action border border-rule-strong"
-                  : "text-ink-muted hover:text-ink"
-              )}
-            >
-              {s.label}
-            </button>
-          ))}
+          {STATUS_FILTERS.map((s) => {
+            const isActive = selectedStatus === s.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setSelectedStatus(s.id)}
+                aria-pressed={isActive}
+                className={cn(
+                  "px-3 py-1 rounded-md transition-colors font-medium text-body-sm",
+                  isActive
+                    ? "bg-action/10 text-action border border-action/20 font-semibold"
+                    : "text-ink-muted hover:text-ink hover:bg-surface-raised"
+                )}
+              >
+                {s.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Segmented Risk Level Buttons with Live Counts */}
+      {/* Pill-shaped Risk Filter Buttons */}
       <div
-        className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-3 border-t border-rule"
+        className="flex flex-wrap items-center gap-2.5"
         role="group"
         aria-label="Filter by risk level"
       >
-        {RISK_COUNTS.map((rc) => {
+        {riskCounts().map((rc) => {
           const isActive = selectedRisk === rc.id;
           return (
             <button
               key={rc.id}
               type="button"
-              onClick={() => setSelectedRisk(rc.id)}
+              onClick={() => toggleRisk(rc.id)}
               aria-pressed={isActive}
               className={cn(
-                "p-2.5 rounded-control border text-left transition-colors flex items-center justify-between",
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-body-sm font-medium transition-all",
                 isActive
-                  ? ACTIVE_RISK_CLASS[rc.id]
-                  : "bg-ground border-rule text-ink-muted hover:border-rule-strong hover:text-ink"
+                  ? rc.id === "EMERGENCY"
+                    ? "bg-risk-emergency/10 border-risk-emergency text-risk-emergency ring-1 ring-risk-emergency"
+                    : rc.id === "HIGH"
+                    ? "bg-risk-high/10 border-risk-high text-risk-high ring-1 ring-risk-high"
+                    : rc.id === "MODERATE"
+                    ? "bg-risk-moderate/10 border-risk-moderate text-risk-moderate ring-1 ring-risk-moderate"
+                    : "bg-risk-low/10 border-risk-low text-risk-low ring-1 ring-risk-low"
+                  : "bg-surface border-rule text-ink hover:border-rule-strong hover:bg-surface-raised"
               )}
             >
-              <div>
-                <Label className={cn(isActive ? "text-inherit" : undefined)}>{rc.label}</Label>
-                <Data className={cn("block", isActive ? "text-inherit" : rc.colorClass)}>{rc.count}</Data>
-              </div>
-              <Layers
-                className={cn("h-4 w-4", isActive ? "opacity-100" : "opacity-40")}
+              <span
+                className={cn(
+                  "h-2 w-2 rounded-full shrink-0",
+                  rc.id === "EMERGENCY"
+                    ? "bg-risk-emergency"
+                    : rc.id === "HIGH"
+                    ? "bg-risk-high"
+                    : rc.id === "MODERATE"
+                    ? "bg-risk-moderate"
+                    : "bg-risk-low"
+                )}
                 aria-hidden="true"
               />
+              <span className="text-ink">{rc.label}</span>
+              <span className="font-bold text-ink ml-1">{rc.count}</span>
             </button>
           );
         })}

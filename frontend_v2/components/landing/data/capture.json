@@ -1,0 +1,686 @@
+{
+  "meta": {
+    "captured_at": "2026-09-14T17:48:20Z",
+    "model": "gemma3:4b",
+    "ollama_host": "http://localhost:11434",
+    "hardware": {
+      "chip": "Apple M5",
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "python": "3.14.0"
+    },
+    "runs_per_modality": 20,
+    "gate_iterations": 5000
+  },
+  "summary": {
+    "total_runs": 80,
+    "validated_runs": 80,
+    "fallback_runs": 0,
+    "pipeline_ms_median": 9063.16,
+    "pipeline_ms_min": 7974.69,
+    "pipeline_ms_max": 12961.15,
+    "ocr_confidence_mean": 0.775,
+    "ocr_samples": 2,
+    "gate_latency_ms_median": 0.352,
+    "gate_latency_ms_max": 0.915,
+    "gate_rule_count": 11,
+    "supported_inputs": 4
+  },
+  "gate": {
+    "iterations": 5000,
+    "match_case": {
+      "symptoms": [
+        "chest tightness",
+        "breathlessness"
+      ],
+      "emergency_detected": true,
+      "safe_for_ai_processing": false,
+      "category": "CARDIAC",
+      "priority": "CRITICAL",
+      "matched_symptoms": [
+        "shortness of breath",
+        "chest pain"
+      ],
+      "matched_reason": "Triggered rule 'R-CARDIAC-01' (Acute Cardiac Event) with priority CRITICAL and match score 1.00. Matching clinical criteria: ['chest pain', 'shortness of breath'] from patient input ['chest tightness', 'breathlessness'].",
+      "recommended_action": "CALL_AMBULANCE",
+      "matched_rules": [
+        "R-CARDIAC-01",
+        "R-RESP-01"
+      ]
+    },
+    "latency_ms": {
+      "match_median": 0.352,
+      "match_p95": 0.364,
+      "match_max": 0.915,
+      "benign_median": 0.276,
+      "benign_max": 0.403
+    },
+    "rule_count": 11,
+    "rules": [
+      {
+        "id": "R-CARDIAC-01",
+        "name": "Acute Cardiac Event",
+        "category": "CARDIAC",
+        "priority": 4,
+        "description": "Triggers on acute chest pain, angina, or chest tightness with breathlessness.",
+        "symptoms_required": [
+          "chest pain",
+          "shortness of breath"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "CALL_AMBULANCE"
+      },
+      {
+        "id": "R-STROKE-01",
+        "name": "Acute Cerebrovascular Event (Stroke)",
+        "category": "STROKE",
+        "priority": 4,
+        "description": "Triggers on sudden neurological deficits, slurred speech, or facial drooping.",
+        "symptoms_required": [
+          "stroke symptoms"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "CALL_AMBULANCE"
+      },
+      {
+        "id": "R-RESP-01",
+        "name": "Severe Respiratory Distress",
+        "category": "RESPIRATORY",
+        "priority": 4,
+        "description": "Triggers on acute dyspnea, cyanosis, or gasping for air.",
+        "symptoms_required": [
+          "shortness of breath"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "EMERGENCY_STABILIZATION"
+      },
+      {
+        "id": "R-TRAUMA-01",
+        "name": "Severe Uncontrolled Trauma / Hemorrhage",
+        "category": "TRAUMA",
+        "priority": 4,
+        "description": "Triggers on major trauma or active severe hemorrhage.",
+        "symptoms_required": [
+          "severe bleeding"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "EMERGENCY_STABILIZATION"
+      },
+      {
+        "id": "R-NEURO-01",
+        "name": "Unconsciousness / Active Seizure",
+        "category": "GENERAL_EMERGENCY",
+        "priority": 4,
+        "description": "Triggers on unresponsiveness, fainting, or prolonged convulsive seizure.",
+        "symptoms_required": [
+          "loss of consciousness",
+          "seizure"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "IMMEDIATE_REFERRAL"
+      },
+      {
+        "id": "R-SEPSIS-01",
+        "name": "High Fever with Altered Mental Status (Sepsis)",
+        "category": "SEPSIS",
+        "priority": 3,
+        "description": "Triggers on severe high fever accompanied by confusion or delirium.",
+        "symptoms_required": [
+          "high fever with confusion"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "NEAREST_HOSPITAL"
+      },
+      {
+        "id": "R-TOXIC-01",
+        "name": "Acute Poisoning / Chemical Ingestion",
+        "category": "POISONING",
+        "priority": 4,
+        "description": "Triggers on suspected toxic substance, pesticide, or chemical ingestion.",
+        "symptoms_required": [
+          "poisoning"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "IMMEDIATE_REFERRAL"
+      },
+      {
+        "id": "R-SNAKE-01",
+        "name": "Venomous Snake Bite",
+        "category": "SNAKE_BITE",
+        "priority": 4,
+        "description": "Triggers on suspected or confirmed venomous snake envenomation.",
+        "symptoms_required": [
+          "snake bite"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "CALL_AMBULANCE"
+      },
+      {
+        "id": "R-BURNS-01",
+        "name": "Major Thermal / Airway Burn",
+        "category": "BURNS",
+        "priority": 4,
+        "description": "Triggers on severe thermal injury or facial/airway involvement.",
+        "symptoms_required": [
+          "severe burns"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "IMMEDIATE_REFERRAL"
+      },
+      {
+        "id": "R-ANAPHYLAXIS-01",
+        "name": "Severe Anaphylaxis / Airway Compromise",
+        "category": "ANAPHYLAXIS",
+        "priority": 4,
+        "description": "Triggers on severe acute systemic allergic reaction.",
+        "symptoms_required": [
+          "anaphylaxis"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "CALL_AMBULANCE"
+      },
+      {
+        "id": "R-OB-01",
+        "name": "Obstetric / Pregnancy Emergency",
+        "category": "PREGNANCY_EMERGENCY",
+        "priority": 4,
+        "description": "Triggers on vaginal hemorrhage or acute severe pain/complications in pregnancy.",
+        "symptoms_required": [
+          "pregnancy emergency"
+        ],
+        "min_match_count": 1,
+        "recommended_action": "IMMEDIATE_REFERRAL"
+      }
+    ],
+    "orchestrator_block": {
+      "status": "EMERGENCY_INTERCEPTED",
+      "summary": "EMERGENCY GATE INTERCEPTION: Emergency detected (CARDIAC): Acute Cardiac Event. Recommended Action: CALL_AMBULANCE.",
+      "duration_ms": 2.01,
+      "wall_ms": 2.809,
+      "risk_level": "EMERGENCY"
+    }
+  },
+  "modalities": {
+    "lab": {
+      "label": "Lab report",
+      "file": "sample_data/reports/cbc_lab_report.png",
+      "modality": "LAB_REPORT",
+      "symptoms": [
+        "fatigue",
+        "pallor"
+      ],
+      "input": {
+        "input_processing_ms": 608.16,
+        "ocr_performed": true,
+        "processing_time_ms": 607.85,
+        "quality": {
+          "blur_score": 3302.39,
+          "brightness_score": 217.41,
+          "contrast_score": 39.64,
+          "resolution_score": 0.54,
+          "quality_level": "EXCELLENT",
+          "warnings": []
+        },
+        "extracted": {
+          "text": "Central Diagnostic Laboratory\n\nPatient Name: [Patient Name]\nAge: [Age]\n\nDate: [Date]\n\nAccession Number: [Number]\n\nOrdering Physician: Dr. [Physician Name]\n\nTest Parameter Result Reference Range Units\nWhite Blood Cell Count (WBC) | 14.5 45 -11.0 1049/L\nRed Blood Cell Count (RBC) 4.65 4.50 - 5.90 10412/L\nHemoglobin 13.8 13.5 - 17.5 g/dL\nHematocrit 41.2 41.0 - 53.0 %\nPlatelet Count 280 150 - 400 10\u00b09/L\nNeutrophil Count 8.2 1.8-7.0 1049/L\nNeutrophil Count 8.2 H 1.8-7.0 1049/L\n\nLab Technician Verification: g\n\nReviewed and Finalized: 06/22/2023 at 1:03 PM\n\nReviewed and Finalized: 07/21/2023",
+          "confidence": 0.9,
+          "language": "eng"
+        },
+        "image": {
+          "width": 896,
+          "height": 1200,
+          "file_size_bytes": 1165168
+        }
+      },
+      "runs": 20,
+      "validated_runs": 20,
+      "fallback_runs": 0,
+      "statuses": [
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED"
+      ],
+      "pipeline_ms": {
+        "median": 10828.5,
+        "min": 9609.78,
+        "max": 12961.15,
+        "all": [
+          12944.9,
+          9818.03,
+          10172.99,
+          12817.13,
+          10715.83,
+          10391.52,
+          12842.99,
+          11038.06,
+          10915.21,
+          11528.43,
+          10554.03,
+          9609.78,
+          12731.82,
+          10195.18,
+          11256.61,
+          12274.68,
+          10741.8,
+          10119.39,
+          12961.15,
+          10501.36
+        ]
+      },
+      "response": {
+        "summary": "The patient presents with fatigue and pallor alongside significantly elevated white blood cell count (14.5 x 10^9/L) and neutrophil counts (8.2 x 10^9/L). The low hemoglobin (13.8 g/dL) and hematocrit (41.2%) contribute to the patient\u2019s symptoms. These findings are suggestive of a possible inflammatory or infectious process.",
+        "status": "COMPLETED",
+        "risk_level": "MODERATE",
+        "risk_flags": [
+          "Elevated WBC count",
+          "Elevated neutrophil count",
+          "Low Hemoglobin"
+        ],
+        "recommended_action": "Obtain further investigation to determine the underlying cause of the elevated white blood cell and neutrophil counts. Consider a differential blood smear to evaluate for specific pathogens or abnormal cells."
+      },
+      "reasoning": {
+        "metadata": {
+          "reasoning_version": "1.0",
+          "modality": "GENERAL",
+          "timestamp": "2026-09-14T17:52:08.042171+00:00"
+        },
+        "observations": [],
+        "assessment": {
+          "clinical_summary": "The patient presents with fatigue and pallor alongside significantly elevated white blood cell count (14.5 x 10^9/L) and neutrophil counts (8.2 x 10^9/L). The low hemoglobin (13.8 g/dL) and hematocrit (41.2%) contribute to the patient\u2019s symptoms. These findings are suggestive of a possible inflammatory or infectious process.",
+          "risk_level": "MODERATE",
+          "confidence_level": "MEDIUM",
+          "red_flags": [
+            "Elevated WBC count",
+            "Elevated neutrophil count",
+            "Low Hemoglobin"
+          ]
+        },
+        "recommendations": {
+          "recommended_next_step": "Obtain further investigation to determine the underlying cause of the elevated white blood cell and neutrophil counts. Consider a differential blood smear to evaluate for specific pathogens or abnormal cells.",
+          "needs_referral": false,
+          "requires_human_review": true,
+          "follow_up_notes": "Monitor patient closely for worsening symptoms. Repeat lab work in 24-48 hours to assess response to initial interventions and further investigate the cause of the elevated inflammatory markers."
+        },
+        "patient_summary": "The patient's laboratory results indicate an active inflammatory or infectious process, likely contributing to their reported fatigue and pallor. Further investigation is needed to identify the specific etiology.",
+        "limitations": [
+          "This assessment is based solely on provided lab values and clinical symptoms.",
+          "A definitive diagnosis cannot be made without additional information such as a physical examination and further investigations."
+        ],
+        "safety": {
+          "is_safe": true,
+          "safety_flags": []
+        }
+      }
+    },
+    "ecg": {
+      "label": "ECG",
+      "file": "sample_data/ecg/sample_ecg_lead_ii.png",
+      "modality": "ECG",
+      "symptoms": [
+        "palpitations"
+      ],
+      "input": {
+        "input_processing_ms": 38.62,
+        "ocr_performed": false,
+        "processing_time_ms": 37.93,
+        "quality": {
+          "blur_score": 5854.8,
+          "brightness_score": 203.22,
+          "contrast_score": 46.21,
+          "resolution_score": 0.53,
+          "quality_level": "EXCELLENT",
+          "warnings": []
+        },
+        "extracted": null,
+        "image": {
+          "width": 1376,
+          "height": 768,
+          "file_size_bytes": 1800805
+        }
+      },
+      "runs": 20,
+      "validated_runs": 20,
+      "fallback_runs": 0,
+      "statuses": [
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED"
+      ],
+      "pipeline_ms": {
+        "median": 8368.12,
+        "min": 7974.69,
+        "max": 10600.22,
+        "all": [
+          10600.22,
+          9028.74,
+          8967.2,
+          8885.88,
+          8168.26,
+          8276.87,
+          8329.66,
+          8363.94,
+          9113.23,
+          8011.46,
+          8121.4,
+          8465.81,
+          7974.69,
+          8657.59,
+          8175.77,
+          8078.55,
+          8178.05,
+          8775.58,
+          8484.93,
+          8372.31
+        ]
+      },
+      "response": {
+        "summary": "The ECG shows a regular rhythm with no acute ST-segment elevation or significant T-wave abnormalities. The QRS duration appears normal. While palpitations are reported, the ECG findings do not immediately suggest an acute cardiac etiology.",
+        "status": "COMPLETED",
+        "risk_level": "LOW",
+        "risk_flags": [],
+        "recommended_action": "Perform a thorough history, including detailed characterization of the palpitations (timing, triggers, associated symptoms). Obtain vital signs - blood pressure, heart rate, respiratory rate, temperature. Consider further investigations such as cardiac enzymes if clinically indicated."
+      },
+      "reasoning": {
+        "metadata": {
+          "reasoning_version": "1.0",
+          "modality": "GENERAL",
+          "timestamp": "2026-09-14T17:54:59.130272+00:00"
+        },
+        "observations": [],
+        "assessment": {
+          "clinical_summary": "The ECG shows a regular rhythm with no acute ST-segment elevation or significant T-wave abnormalities. The QRS duration appears normal. While palpitations are reported, the ECG findings do not immediately suggest an acute cardiac etiology.",
+          "risk_level": "LOW",
+          "confidence_level": "MEDIUM",
+          "red_flags": []
+        },
+        "recommendations": {
+          "recommended_next_step": "Perform a thorough history, including detailed characterization of the palpitations (timing, triggers, associated symptoms). Obtain vital signs - blood pressure, heart rate, respiratory rate, temperature. Consider further investigations such as cardiac enzymes if clinically indicated.",
+          "needs_referral": false,
+          "requires_human_review": true,
+          "follow_up_notes": "Reassess the patient's symptoms and ECG after initial investigation."
+        },
+        "patient_summary": "The patient is experiencing palpitations. The ECG shows a normal rhythm without immediate signs of heart problems. However, further evaluation is needed to determine the cause of the palpitations.",
+        "limitations": [
+          "This analysis is based solely on the provided ECG and limited clinical information.",
+          "A complete medical history and physical examination are essential for accurate diagnosis."
+        ],
+        "safety": {
+          "is_safe": true,
+          "safety_flags": []
+        }
+      }
+    },
+    "prescription": {
+      "label": "Prescription",
+      "file": "sample_data/prescriptions/handwritten_prescription.png",
+      "modality": "PRESCRIPTION",
+      "symptoms": [
+        "follow-up visit"
+      ],
+      "input": {
+        "input_processing_ms": 214.25,
+        "ocr_performed": true,
+        "processing_time_ms": 213.94,
+        "quality": {
+          "blur_score": 2197.73,
+          "brightness_score": 247.82,
+          "contrast_score": 18.05,
+          "resolution_score": 0.21,
+          "quality_level": "FAIR",
+          "warnings": [
+            "High brightness/glare detected.",
+            "Low image contrast detected.",
+            "Low resolution image (<0.6 Megapixels)."
+          ]
+        },
+        "extracted": {
+          "text": "PRIMARY HEALTH CENTER- MEDICAL MEMO\n\nPx/CLINICAL ADVICE\n\n1. Tab Amoxicillin-Clavulanate 625mg ~1 tab PO BDx7 days\n\n2.Tab Paracetamol650mg \u2014 ~1 tab POTDS (PRN fever)\n3.Tab Pantoprazole 40mg ~ 1 tab FOOD (before food)\nInstructions:\n\nTake restand maintain adequate hydration,\n\nReturn to PHC immediately if high fever persists or breathing worsens\n\nDr. Sharma, MD",
+          "confidence": 0.65,
+          "language": "eng"
+        },
+        "image": {
+          "width": 700,
+          "height": 600,
+          "file_size_bytes": 18886
+        }
+      },
+      "runs": 20,
+      "validated_runs": 20,
+      "fallback_runs": 0,
+      "statuses": [
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED"
+      ],
+      "pipeline_ms": {
+        "median": 9369.76,
+        "min": 8302.59,
+        "max": 11660.07,
+        "all": [
+          11660.07,
+          9401.55,
+          8887.7,
+          11342.94,
+          8521.76,
+          8302.59,
+          11169.2,
+          8800.75,
+          9819.41,
+          11436.18,
+          9380.31,
+          9167.18,
+          10668.75,
+          9064.54,
+          8999.93,
+          10898.11,
+          9359.2,
+          9216.49,
+          11209.49,
+          8938.75
+        ]
+      },
+      "response": {
+        "summary": "The patient is receiving a regimen of Amoxicillin-Clavulanate for a duration of 7 days, Paracetamol PRN for fever, and Pantoprazole daily. The instructions emphasize adequate hydration and return to the Primary Health Center (PHC) if high fever persists or breathing worsens.",
+        "status": "COMPLETED",
+        "risk_level": "LOW",
+        "risk_flags": [],
+        "recommended_action": "Verify the transcription of the medication order against the original prescription provided by Dr. Sharma, MD. Advise the patient to maintain adequate hydration and return to PHC immediately if high fever persists or breathing worsens."
+      },
+      "reasoning": {
+        "metadata": {
+          "reasoning_version": "1.0",
+          "modality": "GENERAL",
+          "timestamp": "2026-09-14T17:58:15.606151+00:00"
+        },
+        "observations": [],
+        "assessment": {
+          "clinical_summary": "The patient is receiving a regimen of Amoxicillin-Clavulanate for a duration of 7 days, Paracetamol PRN for fever, and Pantoprazole daily. The instructions emphasize adequate hydration and return to the Primary Health Center (PHC) if high fever persists or breathing worsens.",
+          "risk_level": "LOW",
+          "confidence_level": "MEDIUM",
+          "red_flags": []
+        },
+        "recommendations": {
+          "recommended_next_step": "Verify the transcription of the medication order against the original prescription provided by Dr. Sharma, MD. Advise the patient to maintain adequate hydration and return to PHC immediately if high fever persists or breathing worsens.",
+          "needs_referral": false,
+          "requires_human_review": true,
+          "follow_up_notes": "Monitor for resolution of symptoms as per medication instructions. Assess hydration status."
+        },
+        "patient_summary": "The patient is following up on a previously prescribed course of antibiotics and medications for gastrointestinal discomfort. The healthcare worker should ensure the patient understands the importance of adhering to the medication schedule and recognizing signs requiring immediate attention.",
+        "limitations": [
+          "This assessment is based solely on the provided clinical memo and does not include a full medical history or examination.",
+          "The confidence level reflects the limited information available. Further investigation may be necessary."
+        ],
+        "safety": {
+          "is_safe": true,
+          "safety_flags": []
+        }
+      }
+    },
+    "wound": {
+      "label": "Wound image",
+      "file": "sample_data/wounds/post_op_wound.png",
+      "modality": "WOUND",
+      "symptoms": [
+        "redness around incision",
+        "mild pain"
+      ],
+      "input": {
+        "input_processing_ms": 31.86,
+        "ocr_performed": false,
+        "processing_time_ms": 31.21,
+        "quality": {
+          "blur_score": 124.01,
+          "brightness_score": 154.36,
+          "contrast_score": 42.12,
+          "resolution_score": 0.52,
+          "quality_level": "EXCELLENT",
+          "warnings": []
+        },
+        "extracted": null,
+        "image": {
+          "width": 1024,
+          "height": 1024,
+          "file_size_bytes": 1304420
+        }
+      },
+      "runs": 20,
+      "validated_runs": 20,
+      "fallback_runs": 0,
+      "statuses": [
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED",
+        "COMPLETED"
+      ],
+      "pipeline_ms": {
+        "median": 8564.2,
+        "min": 8073.8,
+        "max": 10791.72,
+        "all": [
+          10791.72,
+          9297.41,
+          9161.69,
+          9061.77,
+          8840.12,
+          8789.05,
+          8426.88,
+          8488.32,
+          9285.71,
+          8521.74,
+          8442.89,
+          8264.31,
+          8957.2,
+          8483.0,
+          8606.67,
+          8412.08,
+          8073.8,
+          8618.09,
+          8140.55,
+          8211.5
+        ]
+      },
+      "response": {
+        "summary": "The patient presents with a recently closed wound (P-WOUND) exhibiting redness around the incision site and mild pain. Visual inspection reveals sutures in place. The current presentation suggests a normal healing process, however, close monitoring is recommended.",
+        "status": "COMPLETED",
+        "risk_level": "LOW",
+        "risk_flags": [],
+        "recommended_action": "Perform wound dressing change with appropriate sterile technique. Advise patient to keep the area clean and dry."
+      },
+      "reasoning": {
+        "metadata": {
+          "reasoning_version": "1.0",
+          "modality": "GENERAL",
+          "timestamp": "2026-09-14T18:01:10.531586+00:00"
+        },
+        "observations": [],
+        "assessment": {
+          "clinical_summary": "The patient presents with a recently closed wound (P-WOUND) exhibiting redness around the incision site and mild pain. Visual inspection reveals sutures in place. The current presentation suggests a normal healing process, however, close monitoring is recommended.",
+          "risk_level": "LOW",
+          "confidence_level": "MEDIUM",
+          "red_flags": []
+        },
+        "recommendations": {
+          "recommended_next_step": "Perform wound dressing change with appropriate sterile technique. Advise patient to keep the area clean and dry.",
+          "needs_referral": false,
+          "requires_human_review": true,
+          "follow_up_notes": "Monitor for signs of infection (increased redness, warmth, drainage, or pain) over the next 24-48 hours. Advise patient to report any worsening symptoms."
+        },
+        "patient_summary": "The patient has a surgically closed wound that is currently presenting with mild redness and pain. Routine wound care and observation are recommended to ensure proper healing.",
+        "limitations": [
+          "This assessment is based solely on the provided visual information and limited clinical data.",
+          "A complete medical history and physical examination would be necessary for a more comprehensive evaluation."
+        ],
+        "safety": {
+          "is_safe": true,
+          "safety_flags": []
+        }
+      }
+    }
+  }
+}

@@ -1,94 +1,91 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Search, MapPin, ChevronDown, Sun, Moon } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Search, MapPin, Sun, Moon, Menu } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { useCommandPalette } from "@/components/search/CommandPalette";
+import { SESSION } from "@/lib/session";
+import { MobileNav } from "./MobileNav";
+import { BrandMark } from "./Sidebar";
+
+const TIME_FORMAT: Intl.DateTimeFormatOptions = {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+};
 
 export function Header() {
   const { isDark, toggleTheme } = useTheme();
-  const [currentTime, setCurrentTime] = useState("Tue, Sep 9, 2025  10:24 AM");
+  const palette = useCommandPalette();
+  const [navOpen, setNavOpen] = useState(false);
+  const closeNav = useCallback(() => setNavOpen(false), []);
+  // Empty until mounted so the server and first client paint agree.
+  const [now, setNow] = useState("");
 
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const options: Intl.DateTimeFormatOptions = {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      };
-      setCurrentTime(now.toLocaleString("en-US", options).replace(",", ""));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 60000);
-    return () => clearInterval(interval);
+    const tick = () => setNow(new Date().toLocaleString("en-US", TIME_FORMAT).replace(",", ""));
+    tick();
+    const id = setInterval(tick, 60_000);
+    return () => clearInterval(id);
   }, []);
 
-  const handleOpenCommand = () => {
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
-  };
-
   return (
-    <header className="h-16 border-b border-slate-200 bg-white sticky top-0 z-40 px-6 sm:px-8 flex items-center justify-between gap-4">
-      {/* LEFT: Search Bar */}
-      <div className="w-80 sm:w-96">
+    <header className="h-14 md:h-16 border-b border-rule bg-surface sticky top-0 z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 min-w-0 flex-1">
         <button
-          onClick={handleOpenCommand}
-          className="w-full flex items-center justify-between gap-3 px-3.5 h-10 bg-white border border-slate-200 rounded-lg text-slate-400 hover:border-slate-300 transition-colors text-xs sm:text-sm shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          aria-label="Search patient, protocol, or command..."
+          type="button"
+          onClick={() => setNavOpen(true)}
+          className="md:hidden h-10 w-10 -ml-2 inline-flex items-center justify-center rounded-md text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          aria-label="Open navigation"
+          aria-expanded={navOpen}
+        >
+          <Menu className="h-5 w-5" aria-hidden="true" />
+        </button>
+        <div className="md:hidden"><BrandMark compact /></div>
+
+        <button
+          type="button"
+          onClick={palette.open}
+          className="hidden sm:flex w-full max-w-sm items-center justify-between gap-3 px-3.5 h-10 bg-surface-sunken border border-rule rounded-lg text-ink-muted hover:border-rule-strong transition-colors text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          aria-label="Search patients, protocols, or commands"
+          aria-keyshortcuts="Meta+K Control+K"
         >
           <span className="flex items-center gap-2.5 min-w-0">
-            <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
-            <span className="truncate text-slate-400 font-normal">
-              Search patient, protocol, or command...
-            </span>
+            <Search className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
+            <span className="truncate font-normal">Search patient, protocol, or command</span>
           </span>
-          <kbd className="text-[11px] font-mono bg-slate-100 border border-slate-200 text-slate-500 rounded px-1.5 py-0.5 shrink-0">
-            ⌘K
-          </kbd>
+          <kbd className="text-body-sm font-mono bg-surface-raised border border-rule text-ink-muted rounded px-1.5 py-0.5 shrink-0">⌘K</kbd>
+        </button>
+        <button
+          type="button"
+          onClick={palette.open}
+          className="sm:hidden h-10 w-10 inline-flex items-center justify-center rounded-md text-ink-muted hover:text-ink hover:bg-hover"
+          aria-label="Search"
+        >
+          <Search className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
-      {/* RIGHT: Location, Status & Date & Theme Toggle */}
-      <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm shrink-0">
-        {/* Location Dropdown */}
-        <button
-          type="button"
-          className="flex items-center gap-1.5 text-slate-700 hover:text-slate-900 font-medium transition-colors cursor-pointer"
-        >
-          <MapPin className="h-4 w-4 text-slate-500 shrink-0" aria-hidden="true" />
-          <span>Rampur Sub-Center</span>
-          <ChevronDown className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-        </button>
-
-        {/* Shift Active Indicator */}
-        <div className="flex items-center gap-2 font-medium text-slate-700">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-          <span>Shift Active</span>
-        </div>
-
-        {/* Timestamp */}
-        <div className="hidden md:block text-slate-500 font-normal text-xs sm:text-sm">
-          {currentTime}
-        </div>
-
-        {/* Theme Toggle (Accessible + Header quick toggle) */}
+      <div className="flex items-center gap-3 sm:gap-5 text-body-sm shrink-0">
+        <span className="hidden lg:flex items-center gap-1.5 text-ink font-medium">
+          <MapPin className="h-4 w-4 text-ink-muted shrink-0" aria-hidden="true" />
+          {SESSION.facility.name}
+        </span>
+        <time className="hidden md:block text-ink-muted font-mono tabular" suppressHydrationWarning>{now}</time>
         <button
           type="button"
           onClick={toggleTheme}
-          aria-label="Toggle Theme"
-          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+          aria-label={isDark ? "Switch to day theme" : "Switch to night theme"}
+          className="h-9 w-9 inline-flex items-center justify-center text-ink-muted hover:text-ink hover:bg-hover rounded-md transition-colors"
         >
-          {isDark ? (
-            <Sun className="h-4 w-4 text-amber-500" aria-hidden="true" />
-          ) : (
-            <Moon className="h-4 w-4 text-slate-500" aria-hidden="true" />
-          )}
+          {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
         </button>
       </div>
+
+      <MobileNav isOpen={navOpen} onClose={closeNav} />
     </header>
   );
 }

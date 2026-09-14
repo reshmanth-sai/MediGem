@@ -219,7 +219,7 @@ export function StickyPatientContextSidebar({
 
       <p className="p-2.5 rounded-control bg-surface-raised border border-rule flex items-center gap-2 text-body-sm text-ink-muted">
         <CheckCircle2 className="h-4 w-4 text-risk-low shrink-0" aria-hidden="true" />
-        <span>Saved locally to the SQLite edge volume.</span>
+        <span>Draft kept in this tab only. Nothing is written to disk.</span>
       </p>
     </Card>
   );

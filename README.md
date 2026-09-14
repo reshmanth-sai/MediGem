@@ -60,13 +60,15 @@ Crucially, MediGem includes a **Deterministic Emergency Safety Engine** that int
 
 ## 📊 Benchmark Summary Metrics
 
-| Metric | Measured Score | Target Threshold | Status |
+| Metric | Measured | Target Threshold | Status |
 |---|---|---|---|
-| **Safety Gate Pass Rate** | `100.0%` | `100.0%` | **PASS** |
-| **Schema Validation Pass Rate** | `100.0%` | `100.0%` | **PASS** |
-| **Emergency Gate Max Latency** | `0.33 ms` | `< 5.00 ms` | **PASS** |
-| **Average OCR Confidence** | `97.0%` | `> 90.0%` | **PASS** |
-| **Average Total Pipeline Latency** | `5,470.93 ms` | `< 15,000.0 ms` | **PASS** |
+| **Safety Gate Pass Rate** | `100.0%` (matching case intercepted, 5,000 evaluations) | `100.0%` | **PASS** |
+| **Schema Validation Pass Rate** | `100.0%` (80 / 80 runs validated against `ClinicalReasoningOutput`, all COMPLETED) | `100.0%` | **PASS** |
+| **Emergency Gate Latency** | `0.352 ms` median, `0.364 ms` p95 | `< 5.00 ms` | **PASS** |
+| **Average OCR Confidence** | `77.5%` (Tesseract, 2 documents with a text layer, unedited) | `> 90.0%` | **FAIL** |
+| **End-to-End Pipeline Latency** | `9,063 ms` median, `7,975` to `12,961 ms` | `< 15,000.0 ms` | **PASS** |
+
+Measured 2026-09-14 on Apple M5 with `gemma3:4b` via Ollama, 20 runs per modality across the four `sample_data/` inputs, by `evaluation/capture_landing_data.py`. The raw capture is `frontend_v2/components/landing/data/capture.json`. OCR confidence is the mean Tesseract word confidence on the two sample images that carry text and is reported as read; the model produced a schema-valid assessment on every run.
 
 ---
 
@@ -130,13 +132,31 @@ MediGem/
    pip install -r requirements.txt
    ```
 
-2. **Launch MediGem UI Application**:
+2. **Launch the Gradio application** (single-process demo UI):
    ```bash
    python app.py
    ```
    Open `http://localhost:7860` in your web browser.
 
-3. **Run Full System Evaluation**:
+3. **Or run the pipeline API and the clinical workstation** (Next.js):
+   ```bash
+   # Terminal 1: HTTP layer over the orchestrator (backend/api/app.py)
+   uvicorn backend.api.app:app --port 8000
+
+   # Terminal 2: workstation
+   cd frontend_v2
+   cp .env.example .env.local      # NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+   npm install && npm run dev
+   ```
+   Open `http://localhost:3000` for the product page and `http://localhost:3000/workstation` for the workstation. Without `NEXT_PUBLIC_API_BASE_URL` the workstation runs on bundled example cases and says so on every screen; a new intake cannot run.
+
+   API routes: `GET /health`, `GET /rules`, `POST /gate/evaluate`, `POST /analyze` (multipart: demographics, symptoms, vitals, one image with `image_type`). Interactive docs at `http://localhost:8000/docs`.
+
+   **Hosting.** A hosted build (Vercel) has no Ollama and no Python process. Two supported modes, switched by `NEXT_PUBLIC_API_BASE_URL`:
+   - *Unset:* product page plus example workstation. A new intake **replays** one of the runs recorded by `evaluation/capture_landing_data.py` (the same data the product page quotes), labelled as a replay on every screen. No infrastructure.
+   - *Set:* the workstation runs live against the API. Before exposing the API publicly, set `MEDIGEM_API_KEY` (checked on every POST as `X-API-Key`; mirror it as `NEXT_PUBLIC_API_KEY` and `MEDIGEM_API_KEY` on the site), `MEDIGEM_CORS_ORIGINS=https://<site>`, and put it behind HTTPS (Caddy is the least effort). `/analyze` is limited to `MEDIGEM_ANALYZE_PER_MINUTE` (default 6) requests per client. The API needs Python, Tesseract and Ollama with the model pulled; a run takes ~10 s on Apple silicon or a small GPU and 60-120 s on CPU-only hosts.
+
+4. **Run Full System Evaluation**:
    ```bash
    python -m evaluation.evaluator
    ```
@@ -145,10 +165,10 @@ MediGem/
 
 ## 🧪 Verification & Unit Testing
 
-Run all 56 unit tests across the entire codebase:
+Run the unit tests across the codebase:
 
 ```bash
-python -m unittest evaluation/tests/test_evaluation.py frontend/tests/test_ui.py tests/test_multimodal_engine.py tests/test_input_processing.py tests/test_reasoning_framework.py tests/test_orchestration.py tests/test_ai_provider.py tests/test_emergency_engine.py
+python -m unittest evaluation/tests/test_evaluation.py frontend/tests/test_ui.py tests/test_api.py tests/test_multimodal_engine.py tests/test_input_processing.py tests/test_reasoning_framework.py tests/test_orchestration.py tests/test_ai_provider.py tests/test_emergency_engine.py
 ```
 
 Run complete system health diagnostics:

@@ -2,25 +2,27 @@ import React from "react";
 import { Section } from "@/components/ui/Card";
 import { BodySm } from "@/components/ui/Typography";
 
-export function PromptExplorer() {
-  const promptMeta = {
-    version: "v1.0-production",
-    modelTarget: "gemma3:4b",
-    systemRole: "Senior Clinical Decision Support System for Rural Healthcare Workers",
-    safetyConstraints: "Strict non-diagnostic boundaries & mandatory referral recommendations",
-  };
+// The prompt files the backend composes from, by path. Their text lives in
+// the repository; the browser does not fetch it.
+const PROMPTS = {
+  "backend/prompts/system": ["system.md", "analysis.md", "patient.md", "referral.md"],
+  "backend/prompts/reasoning": ["base.md", "safety.md", "patient.md", "report.md", "ecg.md", "prescription.md", "wound.md"],
+};
 
+export function PromptExplorer() {
   return (
-    <Section heading="System Prompt & Instruction Context" headingAs="h3">
+    <Section heading="Prompt sources" headingAs="h3">
       <BodySm className="text-ink-muted">
-        System instruction configuration and schema guidelines for Gemma 3 4B reasoning.
+        backend/reasoning/prompt_composer.py assembles the system prompt from these files for the routed modality. Edit them in the repository; there is no runtime editor.
       </BodySm>
-      <pre
-        aria-label="System prompt configuration"
-        className="font-mono text-body-sm p-3 bg-surface-raised text-ink border border-rule rounded-control overflow-x-auto whitespace-pre"
-      >
-        <code>{JSON.stringify(promptMeta, null, 2)}</code>
-      </pre>
+      <dl className="mt-3 space-y-3 text-body-sm">
+        {Object.entries(PROMPTS).map(([dir, files]) => (
+          <div key={dir}>
+            <dt className="font-mono text-ink-muted">{dir}/</dt>
+            <dd className="font-mono text-ink pl-4">{files.join("  ")}</dd>
+          </div>
+        ))}
+      </dl>
     </Section>
   );
 }

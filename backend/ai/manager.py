@@ -60,6 +60,7 @@ class AIManager:
             response_format=response_format,
             json_mode=(response_format == ResponseFormat.JSON),
             images=images or [],
+            json_schema=schema_model.model_json_schema() if schema_model is not None else None,
         )
 
         attempts = 0
@@ -74,7 +75,10 @@ class AIManager:
                 # 2. Parse response content
                 raw_text = raw_response.raw_output or ""
                 if response_format == ResponseFormat.JSON:
-                    parsed_output = ResponseParser.parse_and_validate(raw_text, schema_model=schema_model)
+                    # The schema constrains decoding on the provider side. The
+                    # payload comes back as a plain dict; callers such as the
+                    # pipeline's OutputValidator decide how strictly to validate.
+                    parsed_output = ResponseParser.parse_and_validate(raw_text, schema_model=None)
                 else:
                     parsed_output = raw_text
 

@@ -89,14 +89,30 @@ class MedicalPipeline(BasePipeline):
             system_prompt=composed.system_prompt,
             context=None,
             response_format=ResponseFormat.JSON,
+            schema_model=ClinicalReasoningOutput,
             images=images,
         )
+
+        # A model can satisfy a JSON-mode request with a bare "{}" when it
+        # decides it must not answer. That is not an assessment. Ask once more,
+        # naming the failure, before treating the run as degraded.
+        if not self._has_payload(ai_response.parsed_output):
+            logger.warning(f"[{tx_id}] Model returned an empty payload. Retrying once with an explicit instruction.")
+            ai_response = ai_manager.generate(
+                prompt=composed.user_prompt + self.EMPTY_PAYLOAD_NUDGE,
+                system_prompt=composed.system_prompt,
+                context=None,
+                response_format=ResponseFormat.JSON,
+                schema_model=ClinicalReasoningOutput,
+                images=images,
+            )
 
         # 5. Parse & Validate Response against ClinicalReasoningOutput (WorkflowState: PARSING)
         context.update_state(WorkflowState.PARSING)
         raw_parsed = ai_response.parsed_output
 
         risk_assessment: Optional[RiskAssessment] = None
+        reasoning_json: Optional[Dict[str, Any]] = None
         summary_text = "Clinical reasoning analysis complete."
 
         try:
@@ -108,6 +124,7 @@ class MedicalPipeline(BasePipeline):
 
             summary_text = reasoning_out.assessment.clinical_summary
             r_level = reasoning_out.assessment.risk_level
+            reasoning_json = reasoning_out.model_dump(mode="json")
 
             risk_assessment = RiskAssessment(
                 risk_level=r_level,
@@ -118,24 +135,75 @@ class MedicalPipeline(BasePipeline):
             )
 
         except Exception as e:
-            logger.warning(f"[{tx_id}] Output/Safety validation note: {e}. Falling back to safe summary.")
-            if isinstance(raw_parsed, dict):
+            # No validated assessment exists. The response must say so rather
+            # than pass a placeholder off as a completed run.
+            logger.warning(f"[{tx_id}] Output/Safety validation failed: {e}. Marking run DEGRADED.")
+            degraded = True
+            summary_text = (
+                "No validated assessment was produced: the model returned an empty or invalid payload. "
+                "A health worker must review this case directly."
+            )
+            if isinstance(raw_parsed, dict) and raw_parsed:
                 summary_text = str(raw_parsed.get("summary", raw_parsed.get("analysis", summary_text)))
+        else:
+            degraded = False
 
-        context.update_state(WorkflowState.COMPLETED)
+        context.update_state(WorkflowState.DEGRADED if degraded else WorkflowState.COMPLETED)
         duration_ms = context.elapsed_ms()
 
-        logger.info(f"[{tx_id}] Pipeline '{self.name}' completed in {duration_ms}ms (State: {context.state.value}).")
+        logger.info(f"[{tx_id}] Pipeline '{self.name}' finished in {duration_ms}ms (State: {context.state.value}).")
 
         return AnalysisResponse(
             request_id=tx_id,
             summary=summary_text,
             risk_assessment=risk_assessment,
             referral_summary=None,
-            status="COMPLETED",
+            status=context.state.value,
             duration_ms=duration_ms,
             timestamp=get_current_utc_timestamp(),
+            reasoning=reasoning_json,
+            input_summary=self._input_summary(processed_input),
         )
+
+    @staticmethod
+    def _input_summary(p: Optional[ProcessedMedicalInput]) -> Optional[Dict[str, Any]]:
+        """The input stage's findings, in the shape the landing capture already documents."""
+        if p is None:
+            return None
+        q = p.quality
+        e = p.extracted_content
+        m = getattr(p, "image_metadata", None)
+        return {
+            "ocr_performed": p.summary.ocr_performed,
+            "processing_time_ms": round(p.summary.processing_time_ms, 2),
+            "quality": None
+            if q is None
+            else {
+                "blur_score": round(q.blur_score, 2),
+                "brightness_score": round(q.brightness_score, 2),
+                "contrast_score": round(q.contrast_score, 2),
+                "resolution_score": round(q.resolution_score, 3),
+                "quality_level": q.quality_level.value,
+                "warnings": list(q.warnings),
+            },
+            "extracted": None
+            if e is None
+            else {"text": e.text, "confidence": round(e.confidence, 4), "language": e.language},
+            "image": None
+            if m is None
+            else {"width": m.width, "height": m.height, "file_size_bytes": m.file_size_bytes},
+        }
+
+    EMPTY_PAYLOAD_NUDGE = (
+        "\n\n--- RETRY ---\n"
+        "Your previous reply was an empty JSON object, which is not an acceptable answer. "
+        "Return the complete ClinicalReasoningOutput object with every field populated. "
+        "Transcribing an existing prescription is verification, not a recommendation, and is required."
+    )
+
+    @staticmethod
+    def _has_payload(parsed: Any) -> bool:
+        return isinstance(parsed, dict) and len(parsed) > 0
 
 
 # Global Singleton MedicalPipeline Instance

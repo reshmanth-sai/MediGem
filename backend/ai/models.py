@@ -84,6 +84,10 @@ class InferenceRequest(BaseModel):
     response_format: ResponseFormat = Field(default=ResponseFormat.JSON, description="Desired response format.")
     stream: bool = Field(default=False, description="Flag for future token streaming.")
     images: List[str] = Field(default_factory=list, description="List of image file paths or base64 strings for multimodal input.")
+    json_schema: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="JSON schema the provider enforces at decode time. With a schema the model cannot answer with an empty object.",
+    )
     functions: List[str] = Field(default_factory=list, description="List of registered function names available to the model.")
 
 

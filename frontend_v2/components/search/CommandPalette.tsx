@@ -1,29 +1,60 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Home, PlusCircle, History, Award, Settings, Terminal, BookOpen } from "lucide-react";
+import type { Route } from "next";
+import { Search, Home, PlusCircle, History, Award, Settings, Terminal, BookOpen, type LucideIcon } from "lucide-react";
 import { ModalDialog } from "@/components/ui/Dialog";
 import { BodySm } from "@/components/ui/Typography";
 
-export function CommandPalette() {
-  const router = useRouter();
+interface CommandPaletteHandle {
+  open: () => void;
+  close: () => void;
+  toggle: () => void;
+  isOpen: boolean;
+}
+
+const CommandPaletteContext = createContext<CommandPaletteHandle | null>(null);
+
+/**
+ * Owns the palette's open state so the header button and the keyboard
+ * shortcut call the same function rather than one faking the other's event.
+ */
+export function CommandPaletteProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => setIsOpen(false), []);
+  const toggle = useCallback(() => setIsOpen((v) => !v), []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        toggle();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [toggle]);
 
-  const commands = [
-    { title: "Today's Clinical Work", route: "/", icon: Home },
+  const value = useMemo(() => ({ open, close, toggle, isOpen }), [open, close, toggle, isOpen]);
+  return <CommandPaletteContext.Provider value={value}>{children}</CommandPaletteContext.Provider>;
+}
+
+const NO_PALETTE: CommandPaletteHandle = { open: () => {}, close: () => {}, toggle: () => {}, isOpen: false };
+
+/** Outside a provider (a header rendered on its own) the handle is inert. */
+export function useCommandPalette(): CommandPaletteHandle {
+  return useContext(CommandPaletteContext) ?? NO_PALETTE;
+}
+
+export function CommandPalette() {
+  const router = useRouter();
+  const { isOpen, close } = useCommandPalette();
+  const [query, setQuery] = useState("");
+
+  const commands: { title: string; route: Route; icon: LucideIcon }[] = [
+    { title: "Clinical Workstation", route: "/workstation", icon: Home },
     { title: "New Patient Intake", route: "/new-case", icon: PlusCircle },
     { title: "Patient Queue & Archive", route: "/history", icon: History },
     { title: "Clinical Guidelines & Protocols", route: "/learning", icon: BookOpen },
@@ -35,9 +66,9 @@ export function CommandPalette() {
 
   const filtered = commands.filter((c) => c.title.toLowerCase().includes(query.toLowerCase()));
 
-  const handleNavigate = (route: string) => {
-    setIsOpen(false);
-    router.push(route as any);
+  const handleNavigate = (route: Route) => {
+    close();
+    router.push(route);
   };
 
   if (!isOpen) return null;
@@ -45,7 +76,7 @@ export function CommandPalette() {
   return (
     <ModalDialog
       isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
+      onClose={close}
       title="Command Palette"
       className="max-w-xl"
     >

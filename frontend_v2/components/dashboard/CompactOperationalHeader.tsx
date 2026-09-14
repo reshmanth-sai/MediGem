@@ -7,8 +7,16 @@ import { Card, Section } from "@/components/ui/Card";
 import { buttonVariants } from "@/components/ui/Button";
 import { MetricStat } from "@/components/ui/MetricStat";
 import { H1, Body } from "@/components/ui/Typography";
+import { SESSION, greetingFor } from "@/lib/session";
+import { caseCounters } from "@/lib/caseStats";
+import { capture } from "@/components/landing/data";
 
 export function CompactOperationalHeader() {
+  const counters = caseCounters();
+  // Measured by evaluation/capture_landing_data.py, the same figure the
+  // landing page quotes. Replaced by /health once the pipeline API is wired.
+  const gateMs = capture.summary.gate_latency_ms_median;
+  const greeting = greetingFor();
   return (
     <Card className="space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -18,19 +26,18 @@ export function CompactOperationalHeader() {
               <WifiOff className="h-3.5 w-3.5" aria-hidden="true" /> Offline ready
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-chip text-label bg-surface-raised text-ink-muted border border-rule">
-              <Cpu className="h-3.5 w-3.5" aria-hidden="true" /> Gemma 3 4B
+              <Cpu className="h-3.5 w-3.5" aria-hidden="true" /> {capture.meta.model}
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-chip text-label bg-surface-raised text-ink-muted border border-rule">
-              <ShieldCheck className="h-3.5 w-3.5 text-action" aria-hidden="true" /> Emergency gate active
-              (under 0.3ms)
+              <ShieldCheck className="h-3.5 w-3.5 text-action" aria-hidden="true" /> Emergency gate, {gateMs.toFixed(2)} ms median
             </span>
           </div>
 
           <H1>
-            Good morning, <span className="text-action">Dr. Vikram</span>
+            {greeting}, <span className="text-action">{SESSION.clinician.shortName}</span>
           </H1>
           <Body className="text-ink-muted">
-            Clinical workstation active. Primary sub-center, Rampur. Offline local engine.
+            {SESSION.facility.name} · {SESSION.clinician.role}. Assessment runs on this machine.
           </Body>
         </div>
 
@@ -46,20 +53,20 @@ export function CompactOperationalHeader() {
 
       <Section heading="Today's operational counters" headingAs="h3" className="pt-3 border-t border-rule">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 divide-y divide-rule sm:divide-y-0">
-          <MetricStat icon={Users} label="Patients today" value={14} />
+          <MetricStat icon={Users} label="Patients in queue" value={counters.total} />
           <MetricStat
             icon={AlertTriangle}
             iconClassName="text-risk-emergency"
-            label="Emergency alert"
-            value="1 critical"
+            label="Emergency"
+            value={counters.emergency === 0 ? "None" : `${counters.emergency} critical`}
           />
           <MetricStat
             icon={Clock}
             iconClassName="text-risk-moderate"
             label="Pending review"
-            value="3 cases"
+            value={`${counters.pendingReview} cases`}
           />
-          <MetricStat icon={ArrowUpRight} label="Referrals today" value="4 generated" />
+          <MetricStat icon={ArrowUpRight} label="Referrals" value={`${counters.referrals} open`} />
         </div>
       </Section>
     </Card>

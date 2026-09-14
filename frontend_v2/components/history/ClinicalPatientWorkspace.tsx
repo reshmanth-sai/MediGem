@@ -2,17 +2,22 @@
 
 import React from "react";
 import Link from "next/link";
-import { ClinicalCaseData, ConfidenceLevel, CONFIDENCE_LABELS } from "@/lib/casesData";
-import { RiskIndicator } from "@/components/ui/RiskIndicator";
-import { Button, buttonVariants } from "@/components/ui/Button";
-import { H2, H3, Label, BodySm, Data } from "@/components/ui/Typography";
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import { ClinicalCaseData, CONFIDENCE_LABELS } from "@/lib/casesData";
 import { cn } from "@/lib/utils";
 import {
   User,
-  FileText,
-  Printer,
+  MoreVertical,
+  Clock,
   ChevronRight,
+  BarChart2,
+  UserCheck,
+  Circle,
+  Triangle,
+  Shield,
+  Octagon,
+  FileText,
+  ExternalLink,
+  FileUp,
   AlertTriangle,
 } from "lucide-react";
 
@@ -21,17 +26,38 @@ interface ClinicalPatientWorkspaceProps {
   onOpenReferralModal: () => void;
 }
 
-const CONFIDENCE_BAR_FILL: Record<ConfidenceLevel, number> = {
-  HIGH: 90,
-  MEDIUM: 60,
-  LOW: 30,
-};
-
-const VITAL_TONE: Record<string, string> = {
-  alert: "bg-risk-emergency/10 border-risk-emergency/50 text-risk-emergency",
-  warning: "bg-risk-high/10 border-risk-high/50 text-risk-high",
-  normal: "bg-surface-raised border-rule text-ink",
-};
+function WorkspaceRiskBadge({ level }: { level: string }) {
+  if (level === "EMERGENCY") {
+    return (
+      <div className="flex items-center gap-1.5 text-body-sm font-semibold text-risk-emergency">
+        <Circle className="h-3.5 w-3.5 stroke-[2.5]" />
+        <span>Emergency</span>
+      </div>
+    );
+  }
+  if (level === "HIGH") {
+    return (
+      <div className="flex items-center gap-1.5 text-body-sm font-semibold text-risk-high">
+        <Triangle className="h-3.5 w-3.5 stroke-[2.5]" />
+        <span>High risk</span>
+      </div>
+    );
+  }
+  if (level === "MODERATE") {
+    return (
+      <div className="flex items-center gap-1.5 text-body-sm font-semibold text-risk-moderate">
+        <Circle className="h-3.5 w-3.5 stroke-[2.5]" />
+        <span>Moderate</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-1.5 text-body-sm font-semibold text-risk-low">
+      <Shield className="h-3.5 w-3.5 stroke-[2.5]" />
+      <span>Low risk</span>
+    </div>
+  );
+}
 
 export function ClinicalPatientWorkspace({
   patient,
@@ -39,154 +65,232 @@ export function ClinicalPatientWorkspace({
 }: ClinicalPatientWorkspaceProps) {
   if (!patient) {
     return (
-      <div className="border border-rule rounded-control bg-surface p-8 text-center space-y-3 flex flex-col items-center justify-center min-h-[460px]">
-        <div className="p-3 rounded-control bg-surface-raised border border-rule text-ink-muted">
+      <div className="border border-rule rounded-xl bg-surface p-8 text-center space-y-3 flex flex-col items-center justify-center min-h-[460px]">
+        <div className="p-3 rounded-lg bg-surface-raised border border-rule text-ink-muted">
           <User className="h-6 w-6" aria-hidden="true" />
         </div>
-        <H3>No patient selected</H3>
-        <BodySm className="text-ink-muted max-w-xs">
+        <h3 className="text-base font-bold text-ink">No patient selected</h3>
+        <p className="text-body-sm text-ink-muted max-w-xs">
           Select any patient in the queue to review vitals, assessment summary, and referral status.
-        </BodySm>
+        </p>
       </div>
     );
   }
 
   const isEmergency = patient.riskLevel === "EMERGENCY";
+  const confidenceLabel = CONFIDENCE_LABELS[patient.confidenceLevel] || "High confidence";
 
   return (
-    <div className="border border-rule rounded-control bg-surface p-5 space-y-5 sticky top-20">
-      {/* Patient Meta Header */}
-      <div className="flex items-start justify-between pb-3 border-b border-rule">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <H2>{patient.patientName}</H2>
-            <Data className="text-ink-muted">({patient.patientId})</Data>
-          </div>
-          <BodySm className="text-ink-muted">
-            {patient.age}y · {patient.gender} ·{" "}
-            <span className="text-ink font-medium">{patient.village || "Rural Sub-Center"}</span>
-          </BodySm>
-        </div>
-        <RiskIndicator level={patient.riskLevel} variant="tint" />
-      </div>
-
-      {/* Vitals Grid */}
-      <div className="space-y-2">
-        <SectionHeader title="Patient Vitals" />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {patient.vitals.map((v) => (
-            <div
-              key={v.label}
-              className={cn("p-2 rounded-control border text-center", VITAL_TONE[v.status] || VITAL_TONE.normal)}
-            >
-              <span className="text-label uppercase tracking-wider block text-ink-muted">{v.label}</span>
-              <span className="font-mono text-body-sm font-semibold block">{v.value}</span>
+    <div className="border border-rule rounded-xl bg-surface flex flex-col h-[calc(100vh-6rem)] sticky top-6 overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        {/* Patient Meta Header */}
+        <div className="space-y-3">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-ink">{patient.patientName}</h2>
+              <div className="text-body-sm font-mono text-ink-muted mt-0.5">{patient.patientId}</div>
+              <div className="text-body-sm text-ink-muted mt-0.5">
+                {patient.age}y · {patient.gender} · {patient.village || "Tamil Nadu"}
+              </div>
             </div>
-          ))}
+
+            <div className="flex items-center gap-2">
+              <WorkspaceRiskBadge level={patient.riskLevel} />
+              <button
+                type="button"
+                className="p-1 text-ink-muted hover:text-ink rounded hover:bg-surface-raised transition-colors"
+                aria-label="More options"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Chief Complaint */}
+          <div className="pt-1">
+            <span className="text-body-sm font-semibold text-ink-muted">Chief complaint</span>
+            <p className="text-body-sm font-semibold text-ink leading-snug mt-0.5">
+              {patient.chiefComplaint}
+            </p>
+          </div>
+
+          {/* Last Updated */}
+          <div className="flex items-center gap-1.5 text-body-sm text-ink-muted pt-0.5">
+            <Clock className="h-3.5 w-3.5 text-ink-muted shrink-0" />
+            <span>Last updated: 14 Sep 2026 · 10:02 AM ({patient.arrivalTime})</span>
+          </div>
         </div>
-      </div>
 
-      {/* Clinical Assessment Summary */}
-      <div className="space-y-3 border-t border-rule pt-3">
-        <SectionHeader title="Clinical Assessment" />
+        <div className="border-t border-rule" />
 
-        {/* Primary Finding */}
-        <div className="space-y-1">
-          <Label>Primary Finding</Label>
-          <p className="text-body-sm font-semibold text-ink leading-snug">
-            {patient.primaryFinding}
-          </p>
+        {/* Patient Vitals (Flat Minimalist Cards) */}
+        <div className="space-y-2.5">
+          <h3 className="text-body-sm font-bold text-ink">Patient Vitals</h3>
+          <div className="grid grid-cols-4 gap-2">
+            {patient.vitals.map((v) => {
+              const isAbnormal = v.status !== "normal";
+              const isCritical = v.status === "alert";
+              return (
+                <div
+                  key={v.label}
+                  className="border border-rule rounded-lg p-2.5 bg-surface space-y-0.5"
+                >
+                  <span className="text-[11px] font-medium text-ink-muted">{v.label}</span>
+                  <div
+                    className={cn(
+                      "text-body-sm font-bold font-mono",
+                      isCritical
+                        ? "text-risk-emergency"
+                        : isAbnormal
+                        ? "text-risk-high"
+                        : "text-ink"
+                    )}
+                  >
+                    {v.value}
+                  </div>
+                  <div
+                    className={cn(
+                      "text-body-sm",
+                      isCritical
+                        ? "text-risk-emergency font-semibold"
+                        : isAbnormal
+                        ? "text-risk-high font-medium"
+                        : "text-ink-muted"
+                    )}
+                  >
+                    {isCritical ? "Critical" : isAbnormal ? "Elevated" : "Normal"}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Assessment Confidence */}
-        <div className="space-y-1 pt-1">
+        {/* Clinical Assessment Section */}
+        <div className="space-y-3">
+          <h3 className="text-body-sm font-bold text-ink">Clinical Assessment</h3>
+
+          {/* Primary Finding Row */}
+          <Link
+            href={`/results/${patient.caseId}`}
+            className="flex items-center justify-between text-body-sm font-bold text-action hover:text-action-hover group transition-colors"
+          >
+            <span>{patient.primaryFinding}</span>
+            <ChevronRight className="h-4 w-4 text-action group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+
+          {/* Assessment Confidence & Review Status Cards */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="border border-rule rounded-lg p-2.5 bg-surface space-y-1">
+              <div className="flex items-center gap-1.5 text-body-sm font-medium text-ink-muted">
+                <BarChart2 className="h-3.5 w-3.5 text-action shrink-0" />
+                <span>Assessment Confidence</span>
+              </div>
+              <div className="flex items-center justify-between pt-0.5">
+                <span className="text-body-sm font-semibold text-ink">{confidenceLabel}</span>
+              </div>
+            </div>
+
+            <div className="border border-rule rounded-lg p-2.5 bg-surface space-y-1">
+              <div className="flex items-center gap-1.5 text-body-sm font-medium text-ink-muted">
+                <UserCheck className="h-3.5 w-3.5 text-ink-muted shrink-0" />
+                <span>Review Status</span>
+              </div>
+              <div className="flex items-center gap-1.5 pt-0.5 text-body-sm font-medium text-risk-high">
+                <span className="h-2 w-2 rounded-full bg-risk-high shrink-0" />
+                <span>Requires clinician review</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Clinical Summary */}
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <BodySm className="text-ink-muted">Assessment Confidence:</BodySm>
-            <BodySm className="font-semibold text-ink font-mono">{CONFIDENCE_LABELS[patient.confidenceLevel]}</BodySm>
+            <h3 className="text-body-sm font-bold text-ink">Clinical Summary</h3>
+            <ChevronRight className="h-3.5 w-3.5 text-ink-muted" />
           </div>
-          <div className="w-full bg-surface-raised h-1.5 rounded-chip overflow-hidden border border-rule">
-            <div
-              className={cn("h-full rounded-chip", isEmergency ? "bg-risk-emergency" : "bg-action")}
-              style={{ width: `${CONFIDENCE_BAR_FILL[patient.confidenceLevel]}%` }}
-            />
-          </div>
-          {patient.requiresHumanReview && (
-            <Label className="text-ink-muted normal-case">Requires clinician review</Label>
+          <p className="text-body-sm text-ink-muted leading-relaxed font-normal">
+            {patient.clinicalSummary}
+          </p>
+
+          {/* Emergency / Critical Safety Callout */}
+          {(isEmergency || patient.riskLevel === "HIGH") && (
+            <div className="p-3 rounded-lg bg-risk-emergency/5 border border-risk-emergency/40 text-risk-emergency space-y-1 mt-2">
+              <div className="font-semibold text-body-sm flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>Safety Screen: Immediate Escalation</span>
+              </div>
+              <p className="text-body-sm text-ink leading-normal">
+                High acute presentation requiring STAT referral protocol to tertiary hospital.
+              </p>
+            </div>
           )}
         </div>
 
-        {/* Summary */}
-        <div className="space-y-1 border-t border-rule pt-2">
-          <Label>Clinical Summary</Label>
-          <p className="text-body-sm text-ink leading-relaxed font-sans">{patient.clinicalSummary}</p>
-        </div>
-
-        {/* Red Flags / Emergency Warnings */}
-        {(isEmergency || patient.riskLevel === "HIGH") && (
-          <div className="p-2.5 rounded-control bg-risk-emergency/10 border border-risk-emergency/40 text-risk-emergency space-y-1">
-            <div className="font-semibold text-body-sm flex items-center gap-1.5">
-              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>Safety Screen: Immediate Escalation</span>
+        {/* Assessment Pipeline with Colored Dots */}
+        <div className="space-y-2.5">
+          <h3 className="text-body-sm font-bold text-ink">Assessment Pipeline</h3>
+          <div className="space-y-2 text-body-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" />
+                <span className="text-ink">Patient intake recorded</span>
+              </div>
+              <span className="font-mono text-ink-muted">09:12</span>
             </div>
-            <p className="text-body-sm text-ink leading-normal">
-              High acute presentation requiring STAT referral protocol to tertiary hospital.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Clinical Activity Progression */}
-      <div className="space-y-2 border-t border-rule pt-3">
-        <SectionHeader title="Clinical Progression" />
-        <div className="space-y-1.5 text-body-sm text-ink">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" aria-hidden="true" />
-            <span>1. Patient intake ({patient.village || "Rural clinic"}) recorded</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" aria-hidden="true" />
-            <span>2. Document text and image extraction verified</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-action shrink-0" aria-hidden="true" />
-            <span>3. Multimodal assessment completed</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" aria-hidden="true" />
-            <span>4. Deterministic safety screening verified</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" />
+                <span className="text-ink">Document text and image extraction verified</span>
+              </div>
+              <span className="font-mono text-ink-muted">09:14</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" />
+                <span className="text-ink">Multimodal assessment completed</span>
+              </div>
+              <span className="font-mono text-ink-muted">09:16</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-action shrink-0" />
+                <span className="text-ink">Deterministic safety screening verified</span>
+              </div>
+              <span className="font-mono text-ink-muted">09:16</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Actions Toolbar */}
-      <div className="space-y-2 pt-3 border-t border-rule">
-        <Button
-          variant={isEmergency ? "danger" : "primary"}
-          className="w-full"
-          leftIcon={<FileText className="h-4 w-4" />}
-          onClick={onOpenReferralModal}
-        >
-          Generate Referral Memo
-        </Button>
-
-        <div className="flex gap-2">
+      {/* Sticky Actions Footer (Mockup: 3 buttons on one row) */}
+      <div className="p-3 border-t border-rule bg-surface shrink-0">
+        <div className="grid grid-cols-12 gap-2">
+          <button
+            type="button"
+            className="col-span-5 bg-action hover:bg-action-hover text-on-action px-3 py-2 rounded-lg text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            <span className="truncate">Update Care Plan</span>
+          </button>
+          
           <Link
             href={`/results/${patient.caseId}`}
-            className={buttonVariants({
-              variant: "secondary",
-              className: "flex-1 w-full",
-            })}
+            className="col-span-4 border border-rule bg-surface hover:bg-surface-raised text-ink px-2.5 py-2 rounded-lg text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
-            Open Full Case
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            <ExternalLink className="h-3.5 w-3.5 text-ink-muted shrink-0" />
+            <span className="truncate">Open Full Case</span>
           </Link>
-          <Button
-            variant="secondary"
-            aria-label="Print patient file"
-            onClick={() => window.print()}
+
+          <button
+            type="button"
+            onClick={onOpenReferralModal}
+            className="col-span-3 border border-rule bg-surface hover:bg-surface-raised text-ink px-2 py-2 rounded-lg text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
-            <Printer className="h-4 w-4" aria-hidden="true" />
-          </Button>
+            <FileUp className="h-3.5 w-3.5 text-ink-muted shrink-0" />
+            <span className="truncate">Referral Memo</span>
+          </button>
         </div>
       </div>
     </div>

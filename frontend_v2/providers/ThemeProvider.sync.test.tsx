@@ -32,7 +32,7 @@ describe("ThemeProvider cross-consumer sync", () => {
       </ThemeProvider>
     );
 
-    const toggleButton = () => screen.getByLabelText("Toggle Theme");
+    const toggleButton = () => screen.getByRole("button", { name: /switch to (day|night) theme/i });
 
     // Starting state is Day: Header (a separate consumer of useTheme) shows
     // the Moon icon, not Sun, and <html> carries no theme-night class.

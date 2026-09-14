@@ -1,6 +1,6 @@
 """Analysis request and response schemas for MediGem backend workflows."""
 
-from typing import Optional
+from typing import Any, Dict, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.schemas.medical_image import MedicalImage
@@ -113,4 +113,16 @@ class AnalysisResponse(BaseModel):
         default=None,
         description="ISO-8601 completion timestamp.",
         examples=["2026-07-30T10:00:01Z"],
+    )
+    reasoning: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description=(
+            "The validated ClinicalReasoningOutput as JSON, present only when the run "
+            "COMPLETED. Kept as a plain dict so this schema does not import the "
+            "reasoning package."
+        ),
+    )
+    input_summary: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Quality assessment, OCR result and image metadata from the input stage, when a file was processed.",
     )

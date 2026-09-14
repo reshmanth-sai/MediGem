@@ -12,7 +12,11 @@ class SafetyGuard:
     """Layered safety enforcement system scanning AI outputs for prohibited claims or drug dosages."""
 
     PROHIBITED_DOSAGE_PATTERNS: List[re.Pattern] = [
-        re.compile(r"\b\d+\s*(mg|mcg|g|ml| tablets?| capsules?)\b", re.IGNORECASE),
+        # A quantity followed by a dose unit. Not a decimal's fractional part
+        # ("13.8 g/dL" must not read as "8 g"), and not a concentration: a
+        # unit followed by "/" is a lab value (g/dL, mg/dL, mmol/L), which
+        # the model is required to report, not a dose.
+        re.compile(r"(?<![\d.])\d+(?:\.\d+)?\s*(mg|mcg|g|ml|tablets?|capsules?)\b(?!\s*/)", re.IGNORECASE),
         re.compile(r"\bprescribe\s+[a-z]+", re.IGNORECASE),
         re.compile(r"\bdose:\s*\d+", re.IGNORECASE),
     ]

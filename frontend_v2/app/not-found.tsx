@@ -14,7 +14,7 @@ export default function NotFound() {
           icon={FileQuestion}
           title="Page not found"
           description="The clinical workspace page you requested does not exist or has been relocated."
-          action={{ label: "Return to Dashboard", href: "/" }}
+          action={{ label: "Return to Dashboard", href: "/workstation" }}
         />
       </div>
     </div>

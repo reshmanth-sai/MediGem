@@ -29,7 +29,12 @@ import { AIExecutionPipeline } from "@/components/new-case/AIExecutionPipeline";
 
 import { useCaseDraft, type IntakeStep } from "@/lib/store/caseDraft";
 import { stepSchemas } from "@/lib/schemas/patient";
-import { calculateCustomUrgencyScore, type ClinicalCaseData } from "@/lib/casesData";
+import { type ClinicalCaseData } from "@/lib/casesData";
+import { SESSION } from "@/lib/session";
+import { analyze, imageTypeFor } from "@/services/analysis.service";
+import { mapAnalysisToCase } from "@/lib/mapAnalysis";
+import { isApiConfigured } from "@/lib/api-client";
+import { REPLAY_OPTIONS, CAPTURED_AT, replayRun, type ReplayId } from "@/lib/replay";
 import {
   AGE_NOT_RECORDED,
   buildErrorSummary,
@@ -74,6 +79,8 @@ export default function NewCasePage() {
   // Whether the reasoning overlay is on screen. Not part of the draft, so it
   // stays local: nothing about it needs to survive a route change.
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  // Without an API, the intake replays one recorded run; this is which.
+  const [replayId, setReplayId] = useState<ReplayId | null>(null);
   const [summaryVisible, setSummaryVisible] = useState(false);
   const [failedAdvances, setFailedAdvances] = useState(0);
   const summaryRef = useRef<HTMLDivElement>(null);
@@ -211,84 +218,93 @@ export default function NewCasePage() {
     goToStep(5);
   }, [updatePatient, updateSymptoms, goToStep]);
 
-  const handleAnalysisComplete = useCallback(() => {
-    const vitals: ClinicalCaseData["vitals"] = [
-      {
-        label: "HR",
-        value: displayVital(patient.hrBpm, "bpm"),
-        status: (patient.hrBpm ?? 0) > 100 ? "alert" : "normal",
-      },
-      {
-        label: "BP",
-        value:
-          patient.systolicBp === undefined || patient.diastolicBp === undefined
-            ? "Not recorded"
-            : `${patient.systolicBp}/${patient.diastolicBp} mmHg`,
-        status: (patient.systolicBp ?? 0) > 140 ? "warning" : "normal",
-      },
-      {
-        label: "Temp",
-        value: displayVital(patient.tempCelsius, "C"),
-        status: (patient.tempCelsius ?? 0) > 38.0 ? "warning" : "normal",
-      },
-      {
-        label: "SpO2",
-        value: displayVital(patient.spO2Percent, "percent"),
-        status: (patient.spO2Percent ?? 100) < 94 ? "alert" : "normal",
-      },
-    ];
+  // One request to the pipeline API. The overlay owns the request lifecycle
+  // (abort, retry); this builds the input from the draft and maps the answer
+  // into the case the results route renders. No result is produced locally.
+  const runAnalysis = useCallback(
+    async (signal: AbortSignal): Promise<ClinicalCaseData> => {
+      const vitals: ClinicalCaseData["vitals"] = [
+        { label: "HR", value: displayVital(patient.hrBpm, "bpm"), status: (patient.hrBpm ?? 0) > 100 ? "alert" : "normal" },
+        {
+          label: "BP",
+          value:
+            patient.systolicBp === undefined || patient.diastolicBp === undefined
+              ? "Not recorded"
+              : `${patient.systolicBp}/${patient.diastolicBp} mmHg`,
+          status: (patient.systolicBp ?? 0) > 140 ? "warning" : "normal",
+        },
+        { label: "Temp", value: displayVital(patient.tempCelsius, "C"), status: (patient.tempCelsius ?? 0) > 38.0 ? "warning" : "normal" },
+        { label: "SpO2", value: displayVital(patient.spO2Percent, "percent"), status: (patient.spO2Percent ?? 100) < 94 ? "alert" : "normal" },
+      ];
 
-    const calc = calculateCustomUrgencyScore(
-      vitals.slice(0, 2),
-      symptoms.symptoms
-    );
+      // The pipeline takes one image per request; send the first upload and
+      // list the rest on the case so nothing is silently dropped.
+      const first = uploads.find((u) => imageTypeFor(u.type) !== null);
+      const historyNotes = Object.entries(history)
+        .filter(([, v]) => v && String(v).trim())
+        .map(([k, v]) => `${k}: ${String(v).trim()}`)
+        .join("\n");
+      const notes = [patient.chiefComplaint, symptoms.duration && `Duration: ${symptoms.duration}`, symptoms.severity && `Severity: ${symptoms.severity}`, historyNotes]
+        .filter(Boolean)
+        .join("\n");
 
-    const recordedAge = isAgeRecorded(patient.age) ? patient.age : 0;
+      const intake = {
+        caseId: CASE_ID,
+        patientId: patient.patientId || "P-CUSTOM",
+        patientName: patient.patientName || "Current patient intake",
+        age: isAgeRecorded(patient.age) ? patient.age : 0,
+        gender: patient.gender || "Not recorded",
+        village: patient.location || SESSION.facility.name,
+        chiefComplaint: patient.chiefComplaint,
+        symptoms: symptoms.symptoms,
+        vitals,
+        documents: uploads.map((u) => u.file.name),
+      };
+      if (replayId) return replayRun(replayId, intake, signal);
 
-    const customCase: ClinicalCaseData = {
-      caseId: CASE_ID,
-      patientId: patient.patientId || "P-CUSTOM",
-      patientName: patient.patientName || "Current patient intake",
-      age: recordedAge,
-      gender: patient.gender || "Not recorded",
-      arrivalTime: "Arrived just now",
-      assignedWorker: "Priya Sharma (ANM)",
-      activeUser: "Dr. Vikram Patel (CHO)",
-      village: patient.location || "Rampur Sub-Center",
-      riskLevel: calc.riskLevel,
-      urgencyScore: calc.urgencyScore,
-      primaryFinding: calc.primaryFinding,
-      clinicalSummary: `Intake assessment for ${
-        patient.patientName || "this patient"
-      }, ${isAgeRecorded(patient.age) ? `${patient.age} years` : "age not recorded"}, ${
-        patient.gender || "gender not recorded"
-      }. Chief complaint: ${patient.chiefComplaint}. Vitals: HR ${displayVital(
-        patient.hrBpm,
-        "bpm"
-      )}, temperature ${displayVital(
-        patient.tempCelsius,
-        "C"
-      )}, oxygen saturation ${displayVital(patient.spO2Percent, "percent")}.`,
-      recommendedAction: calc.recommendedAction,
-      confidenceLevel: calc.confidenceLevel,
-      requiresHumanReview: calc.requiresHumanReview,
-      supportingFindings: calc.supportingFindings,
-      differentialConsiderations: calc.differentialConsiderations,
-      recommendedInvestigations: calc.recommendedInvestigations,
-      clinicalRationale: calc.clinicalRationale,
-      disposition: calc.disposition,
-      vitals,
-      chiefComplaint: patient.chiefComplaint,
-      symptoms: symptoms.symptoms,
-      documents: uploads.map((u) => u.file.name),
-    };
+      const res = await analyze({
+        patientId: patient.patientId || undefined,
+        age: isAgeRecorded(patient.age) ? patient.age : 0,
+        gender: patient.gender || "Not recorded",
+        symptoms: symptoms.symptoms,
+        notes,
+        vitals: {
+          heart_rate_bpm: patient.hrBpm,
+          blood_pressure_sys: patient.systolicBp,
+          blood_pressure_dia: patient.diastolicBp,
+          spo2_percent: patient.spO2Percent,
+          temperature_c: patient.tempCelsius,
+        },
+        image: first ? { file: first.file, type: imageTypeFor(first.type)! } : undefined,
+        signal,
+      });
 
-    // The completed case travels in the draft store. No sessionStorage, so
-    // nothing about the case is serialised into browser storage on the way to
-    // the results route.
-    setResult(customCase);
-    router.push(`/results/${CASE_ID}`);
-  }, [patient, symptoms, uploads, setResult, router]);
+      return mapAnalysisToCase(res, intake);
+    },
+    [patient, symptoms, history, uploads, replayId]
+  );
+
+  const handleAnalysisComplete = useCallback(
+    (result: ClinicalCaseData) => {
+      // The completed case travels in the draft store, which persists `result`
+      // to sessionStorage only (see lib/store/caseDraft.ts) so a reload of the
+      // results route does not lose it. Nothing is written to localStorage.
+      setResult(result);
+      setIsAnalyzing(false);
+      router.push(`/results/${CASE_ID}`);
+    },
+    [setResult, router]
+  );
+
+  const cancelAnalysis = useCallback(() => {
+    setIsAnalyzing(false);
+    setReplayId(null);
+  }, []);
+  const apiConfigured = isApiConfigured();
+  const startReplay = useCallback((id: ReplayId) => {
+    setReplayId(id);
+    setIsAnalyzing(true);
+  }, []);
 
   const progressPct = Math.round((step / 5) * 100);
   const showSummary = summaryVisible && summaryEntries.length > 0;
@@ -316,7 +332,7 @@ export default function NewCasePage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/workstation")}
               leftIcon={<X className="h-4 w-4" aria-hidden="true" />}
             >
               Cancel
@@ -439,13 +455,41 @@ export default function NewCasePage() {
                     Next step
                   </Button>
                 ) : (
-                  <Button
-                    onClick={() => setIsAnalyzing(true)}
-                    aria-label="Run clinical reasoning"
-                    leftIcon={<Stethoscope className="h-4 w-4" aria-hidden="true" />}
-                  >
-                    Run clinical assessment
-                  </Button>
+                  apiConfigured ? (
+                    <Button
+                      onClick={() => setIsAnalyzing(true)}
+                      aria-label="Run clinical reasoning"
+                      leftIcon={<Stethoscope className="h-4 w-4" aria-hidden="true" />}
+                    >
+                      Run clinical assessment
+                    </Button>
+                  ) : (
+                    <details className="relative">
+                      <summary
+                        className="list-none [&::-webkit-details-marker]:hidden cursor-pointer inline-flex items-center gap-2 h-11 px-4 rounded-control bg-action text-on-action text-body-sm font-semibold hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                        aria-label="Replay a recorded run"
+                      >
+                        <PlayCircle className="h-4 w-4" aria-hidden="true" />
+                        Replay a recorded run
+                      </summary>
+                      <div className="absolute right-0 z-20 mt-2 w-[min(28rem,90vw)] rounded-control border border-rule bg-surface p-2 space-y-1">
+                        <p className="px-2 py-1 text-body-sm text-ink-muted">
+                          No pipeline API in this build. Replay a run measured on {CAPTURED_AT}; the assessment shown is of the recorded sample, not of this patient.
+                        </p>
+                        {REPLAY_OPTIONS.map((o) => (
+                          <button
+                            key={o.id}
+                            type="button"
+                            onClick={() => startReplay(o.id)}
+                            className="w-full text-left px-2 py-2 rounded-control hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                          >
+                            <span className="block text-body-sm font-semibold text-ink">{o.label}</span>
+                            <span className="block text-body-sm text-ink-muted font-mono">{o.detail}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  )
                 )}
               </div>
             </div>
@@ -463,7 +507,7 @@ export default function NewCasePage() {
         </div>
       </div>
 
-      {isAnalyzing && <AIExecutionPipeline onComplete={handleAnalysisComplete} />}
+      {isAnalyzing && <AIExecutionPipeline run={runAnalysis} onComplete={handleAnalysisComplete} onCancel={cancelAnalysis} />}
     </AppShell>
   );
 }

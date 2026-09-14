@@ -19,22 +19,55 @@ vi.mock("@/components/layout/AppShell", () => ({
   AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+// The pipeline API is stubbed at the service boundary. The fixture is a real
+// EMERGENCY_INTERCEPTED answer shape, so the mapping and routing that follow
+// are exercised on what the backend actually returns.
+const analyzeMock = vi.fn();
+vi.mock("@/lib/api-client", async (orig) => ({
+  ...(await orig<typeof import("@/lib/api-client")>()),
+  isApiConfigured: () => true,
+}));
+vi.mock("@/services/analysis.service", async (orig) => ({
+  ...(await orig<typeof import("@/services/analysis.service")>()),
+  analyze: (...args: unknown[]) => analyzeMock(...args),
+}));
+
+const INTERCEPTED_RESPONSE = {
+  request_id: "REQ-TEST",
+  summary: "EMERGENCY GATE INTERCEPTION: chest pain",
+  risk_assessment: {
+    risk_level: "EMERGENCY",
+    urgency_score: 9.5,
+    risk_flags: ["chest pain"],
+    rationale: "Triggered rule R-CARDIAC-01",
+    recommended_action: "CALL_AMBULANCE",
+  },
+  referral_summary: null,
+  status: "EMERGENCY_INTERCEPTED",
+  duration_ms: 3.2,
+  timestamp: "2026-09-14T00:00:00Z",
+  reasoning: null,
+  input_summary: null,
+};
+
 function nextStepButton() {
   return screen.getByRole("button", { name: /next step/i });
 }
 
 /**
- * Drive the reasoning overlay to completion. Each stage is one timer, and
- * React only runs the queued state update when act flushes, so the clock is
- * advanced in stage-sized steps rather than in one jump.
+ * Let the stubbed request resolve, then confirm the overlay's result by
+ * pressing its open button, which is what hands the case to the results route.
  */
 async function runPipelineToCompletion() {
-  for (let i = 0; i < 10; i += 1) {
-    // eslint-disable-next-line no-await-in-loop
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
-    });
-  }
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+  const open = await screen.findByRole("button", { name: /open (referral|assessment)/i });
+  fireEvent.click(open);
+  await act(async () => {
+    await Promise.resolve();
+  });
 }
 
 async function clickNext() {
@@ -70,6 +103,7 @@ describe("intake wizard", () => {
   });
 
   afterEach(() => {
+    analyzeMock.mockReset();
     vi.useRealTimers();
   });
 
@@ -267,9 +301,9 @@ describe("intake wizard", () => {
   });
 
   describe("handing the finished case to the results route", () => {
-    it("puts the result in the draft store and routes, without sessionStorage", async () => {
+    it("puts the result in the draft store, persists only to sessionStorage, and routes", async () => {
       const setItem = vi.spyOn(Storage.prototype, "setItem");
-      vi.useFakeTimers();
+      analyzeMock.mockResolvedValue(INTERCEPTED_RESPONSE);
 
       useCaseDraft.getState().updatePatient({
         patientName: "Sunita Devi",
@@ -301,16 +335,31 @@ describe("intake wizard", () => {
       expect(result?.patientName).toBe("Sunita Devi");
       expect(result?.age).toBe(62);
       expect(result?.symptoms).toEqual(["Chest tightness"]);
+      expect(result?.riskLevel).toBe("EMERGENCY");
+      expect(result?.status).toBe("EMERGENCY_INTERCEPTED");
+      expect(result?.recommendedAction).toMatch(/call ambulance/i);
+      expect(analyzeMock).toHaveBeenCalledTimes(1);
+      const sent = analyzeMock.mock.calls[0][0];
+      expect(sent.symptoms).toEqual(["Chest tightness"]);
+      expect(sent.vitals.heart_rate_bpm).toBe(112);
       expect(push).toHaveBeenCalledWith("/results/CASE-CUSTOM");
+      // The finished result survives a reload of /results/CASE-CUSTOM via
+      // sessionStorage (tab-scoped). localStorage must stay untouched so no
+      // clinical data is left on disk indefinitely.
+      const localSet = vi.spyOn(window.localStorage, "setItem");
       expect(
-        setItem.mock.calls.some(([key]) => String(key).includes("medigem"))
+        setItem.mock.calls.some(([key]) => String(key).includes("medigem-case-draft"))
+      ).toBe(true);
+      expect(
+        localSet.mock.calls.some(([key]) => String(key).includes("medigem-case-draft"))
       ).toBe(false);
 
+      localSet.mockRestore();
       setItem.mockRestore();
     });
 
     it("reports an unrecorded vital as not recorded rather than as undefined", async () => {
-      vi.useFakeTimers();
+      analyzeMock.mockResolvedValue(INTERCEPTED_RESPONSE);
 
       useCaseDraft.getState().updatePatient({
         patientName: "Sunita Devi",

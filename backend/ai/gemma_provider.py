@@ -1,7 +1,7 @@
 """Gemma AI Provider implementation connecting to local Ollama inference server."""
 
 import time
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 import ollama
 import requests
 
@@ -111,11 +111,21 @@ class GemmaProvider(BaseAIProvider):
         options = {
             "temperature": request.temperature,
             "num_predict": request.max_tokens,
+            # A composed clinical prompt with an image runs past Ollama's 2048
+            # token default; give the model room for the prompt and the reply.
+            "num_ctx": 8192,
         }
 
-        format_setting = "json" if (request.json_mode or request.response_format == ResponseFormat.JSON) else None
+        # Prefer schema-constrained decoding: with a schema the model must emit
+        # every required key, so a bare "{}" is not a possible answer. Plain JSON
+        # mode remains the fallback when no schema is supplied.
+        wants_json = request.json_mode or request.response_format == ResponseFormat.JSON
+        format_setting: Any = None
+        if wants_json:
+            format_setting = request.json_schema or "json"
 
-        logger.info(f"[{tx_id}] Executing Gemma inference (Model={self.model_name}, Format={format_setting or 'text'})")
+        format_label = "schema" if isinstance(format_setting, dict) else (format_setting or "text")
+        logger.info(f"[{tx_id}] Executing Gemma inference (Model={self.model_name}, Format={format_label})")
 
         try:
             res = self._client.chat(

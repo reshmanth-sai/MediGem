@@ -12,12 +12,12 @@ interface SettingsCategoryNavProps {
 
 export function SettingsCategoryNav({ activeTab, setActiveTab }: SettingsCategoryNavProps) {
   const categories = [
-    { id: "ai", label: "Clinical Decision Parameters", icon: Sliders, desc: "Confidence threshold, reasoning detail, model selection" },
-    { id: "storage", label: "Offline Storage & Backup", icon: HardDrive, desc: "SQLite cache, database backup, clear temp files" },
+    { id: "ai", label: "Clinical Reasoning", icon: Sliders, desc: "Gate, model and output contract, as configured" },
+    { id: "storage", label: "Data on this device", icon: HardDrive, desc: "What this tab keeps, and how to clear it" },
     { id: "accessibility", label: "Accessibility & Human Factors", icon: Eye, desc: "Reduced motion, high contrast, font scaling" },
     { id: "appearance", label: "Appearance & Visual Themes", icon: Sun, desc: "Dark, light, and healthcare night mode" },
-    { id: "security", label: "Privacy & Security Center", icon: ShieldCheck, desc: "AES encryption, PIN lock, audit logging" },
-    { id: "diagnostics", label: "Device & System Diagnostics", icon: Cpu, desc: "CPU, VRAM, inference latency, DB integrity" },
+    { id: "security", label: "Privacy & Security", icon: ShieldCheck, desc: "What is and is not in place" },
+    { id: "diagnostics", label: "System Diagnostics", icon: Cpu, desc: "API, model and gate readouts with their sources" },
     { id: "about", label: "About & Licenses", icon: Info, desc: "Version info, safety rules, support contact" },
   ];
 

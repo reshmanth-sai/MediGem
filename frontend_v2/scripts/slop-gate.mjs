@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { globSync } from "node:fs";
 import { execSync } from "node:child_process";
 
@@ -33,7 +33,11 @@ const RULES = [
     // the code that needs both themes' values at the same time (the theme
     // swatches cannot use a CSS variable, which would only ever resolve to
     // whichever theme is currently active). Everywhere else, use the tokens.
-    allow: ["styles/globals.css", "lib/tokens.ts"],
+    // styles/landing.css is the landing page palette, scoped under .landing
+    // and separate from the workstation tokens on purpose.
+    // app/opengraph-image.tsx renders at the edge with no stylesheet, so it
+    // repeats the landing palette literally.
+    allow: ["styles/globals.css", "lib/tokens.ts", "styles/landing.css", "app/opengraph-image.tsx"],
   },
   // Spec section 6: a surface carries either a border or a shadow, never
   // both, and a shadow only where the layer genuinely floats above the page
@@ -73,7 +77,7 @@ const PATHSPECS = [
 
 const files = [
   ...new Set(
-    execSync(`git ls-files ${PATHSPECS.map((p) => `'${p}'`).join(" ")}`, {
+    execSync(`git ls-files --cached --others --exclude-standard ${PATHSPECS.map((p) => `'${p}'`).join(" ")}`, {
       encoding: "utf8",
     })
       .split("\n")
@@ -84,6 +88,8 @@ const files = [
 let failures = 0;
 for (const file of files) {
   if (file.endsWith(".test.ts") || file.endsWith(".test.tsx")) continue;
+  // ls-files still lists a deletion that is staged but not yet committed.
+  if (!existsSync(file)) continue;
   const lines = readFileSync(file, "utf8").split("\n");
   lines.forEach((line, i) => {
     for (const rule of RULES) {

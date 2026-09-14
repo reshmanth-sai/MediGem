@@ -1,3 +1,10 @@
+import type { z } from "zod";
+import type { ReasoningOutput } from "@/components/landing/data/schema";
+import type { InputSummary } from "@/lib/schemas/analysis";
+
+type ReasoningOutputData = z.infer<typeof ReasoningOutput>;
+type InputSummaryData = z.infer<typeof InputSummary>;
+
 export interface VitalSign {
   label: string;
   value: string;
@@ -64,8 +71,20 @@ export interface CaseProvenance {
   analysisTime: string;
 }
 
+/** The pipeline's validated output and input-stage findings, attached to a case that came from the API. */
+export interface PipelineRecord {
+  requestId: string;
+  status: string;
+  durationMs: number | null;
+  reasoning: ReasoningOutputData | null;
+  inputSummary: InputSummaryData | null;
+  gateSummary: string | null;
+  /** Present when this case replays a captured run rather than a live request. */
+  replay?: { capturedAt: string; sourceFile: string; label: string };
+}
+
 export interface ClinicalCaseData {
-  caseId?: string;
+  caseId: string;
   patientId: string;
   patientName: string;
   age: number;
@@ -100,85 +119,7 @@ export interface ClinicalCaseData {
   keyObservations?: KeyObservation[];
   safetyScreening?: SafetyScreening;
   provenance?: CaseProvenance;
-}
-
-export function calculateCustomUrgencyScore(
-  vitals: VitalSign[],
-  symptoms: string[] = []
-): {
-  riskLevel: "EMERGENCY" | "HIGH" | "MODERATE" | "LOW";
-  urgencyScore: number;
-  primaryFinding: string;
-  recommendedAction: string;
-  confidenceLevel: ConfidenceLevel;
-  requiresHumanReview: boolean;
-  supportingFindings: SupportingFinding[];
-  differentialConsiderations: string[];
-  recommendedInvestigations: string[];
-  clinicalRationale: string[];
-  disposition: CaseDisposition;
-} {
-  let score = 5.0;
-  const isSevere = symptoms.some(s => s.toLowerCase().includes("chest") || s.toLowerCase().includes("dyspnea"));
-  if (isSevere) {
-    score += 2.5;
-  }
-  if (vitals.some(v => v.status === "alert")) {
-    score += 2.0;
-  }
-
-  const riskLevel = score >= 9.0 ? "EMERGENCY" : score >= 7.5 ? "HIGH" : score >= 5.5 ? "MODERATE" : "LOW";
-  const primaryFinding = isSevere
-    ? "Elevated Physiological Parameters with Anginal Symptoms"
-    : "Mild Physiological Parameter Variance";
-  const recommendedAction = isSevere
-    ? "Schedule routine 12-lead ECG review with cardiology specialist within 48 hours & monitor vitals Q4H."
-    : "Continue routine clinical observation and monitor vital signs every 8 hours.";
-
-  const supportingFindings: SupportingFinding[] = isSevere
-    ? [
-        { source: "Vitals", observation: "Heart rate and blood pressure trending outside reference range at intake." },
-        { source: "Symptom history", observation: "Chest tightness and palpitations reported by patient." },
-      ]
-    : [
-        { source: "Vitals", observation: "Vital signs recorded within or close to reference range at intake." },
-      ];
-
-  const differentialConsiderations = isSevere
-    ? ["Stable angina", "Anxiety-related chest tightness", "Musculoskeletal chest pain"]
-    : ["Physiological variance without pathological correlate", "Early-stage viral illness"];
-
-  const recommendedInvestigations = isSevere
-    ? ["12-lead ECG", "Troponin panel", "Chest X-ray"]
-    : ["Routine vitals recheck in 8 hours", "Basic metabolic panel if symptoms persist"];
-
-  const clinicalRationale = isSevere
-    ? [
-        "Symptom pattern and vital sign trend are consistent with a cardiac origin warranting further workup.",
-        "Absence of confirmatory ECG findings at intake supports a non-emergent referral pathway pending review.",
-      ]
-    : [
-        "Vital sign pattern does not meet threshold for urgent escalation.",
-        "Continued observation is appropriate given the absence of alert-level findings.",
-      ];
-
-  const disposition: CaseDisposition = isSevere
-    ? { needsReferral: true, urgency: "Routine referral within 48 hours", nextStep: "Schedule cardiology consultation and repeat vitals in 4 hours." }
-    : { needsReferral: false, urgency: "Routine follow-up", nextStep: "Continue observation and reassess at next scheduled visit." };
-
-  return {
-    riskLevel,
-    urgencyScore: Math.min(9.9, Number(score.toFixed(1))),
-    primaryFinding,
-    recommendedAction,
-    confidenceLevel: isSevere ? "MEDIUM" : "HIGH",
-    requiresHumanReview: true,
-    supportingFindings,
-    differentialConsiderations,
-    recommendedInvestigations,
-    clinicalRationale,
-    disposition,
-  };
+  pipeline?: PipelineRecord;
 }
 
 export const PRESET_CASES: Record<string, ClinicalCaseData> = {

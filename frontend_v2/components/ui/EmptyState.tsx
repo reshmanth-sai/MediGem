@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import React from "react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +15,7 @@ import { Button, buttonVariants } from "@/components/ui/Button";
  */
 export type EmptyStateAction =
   | { label: string; onClick: () => void; href?: never }
-  | { label: string; href: string; onClick?: never };
+  | { label: string; href: Route; onClick?: never };
 
 export interface EmptyStateProps {
   /** Lucide icon component to display. Rendered at 32px with strokeWidth 1.75. */

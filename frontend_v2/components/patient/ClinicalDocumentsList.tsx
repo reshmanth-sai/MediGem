@@ -38,10 +38,10 @@ export function ClinicalDocumentsList({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-base sm:text-lg font-bold text-slate-900">
+        <h2 className="text-base sm:text-lg font-bold text-ink">
           Uploaded Documents ({docList.length})
         </h2>
-        <label className="text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1 cursor-pointer">
+        <label className="text-body-sm font-medium text-action hover:underline inline-flex items-center gap-1 cursor-pointer">
           <Plus className="w-3.5 h-3.5" />
           <span>Add file</span>
           <input
@@ -55,45 +55,45 @@ export function ClinicalDocumentsList({
 
       {/* Structured Document Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs sm:text-sm">
+        <table className="w-full text-left text-body-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-slate-500 font-medium">
-              <th className="py-2.5 pl-0 pr-4 font-normal">Name</th>
+            <tr className="border-b border-rule text-ink-muted font-medium bg-surface-raised">
+              <th className="py-2.5 pl-2 pr-4 font-normal">Name</th>
               <th className="py-2.5 px-4 font-normal">Type</th>
               <th className="py-2.5 px-4 font-normal">Size</th>
               <th className="py-2.5 px-4 font-normal">Uploaded</th>
-              <th className="py-2.5 pl-4 pr-1 text-right font-normal"></th>
+              <th className="py-2.5 pl-4 pr-2 text-right font-normal"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-rule">
             {docList.map((doc) => {
               const isPdf = doc.type.toLowerCase().includes("pdf") || doc.name.endsWith(".pdf");
               return (
-                <tr key={doc.name} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 pl-0 pr-4">
+                <tr key={doc.name} className="hover:bg-hover transition-colors">
+                  <td className="py-3.5 pl-2 pr-4">
                     <div className="flex items-center gap-3">
                       {isPdf ? (
-                        <div className="w-8 h-8 rounded bg-red-50 text-red-500 flex items-center justify-center shrink-0 border border-red-100">
+                        <div className="w-8 h-8 rounded bg-risk-emergency-subtle text-risk-emergency flex items-center justify-center shrink-0 border border-risk-emergency-border">
                           <FileText className="w-4 h-4" />
                         </div>
                       ) : (
-                        <div className="w-8 h-8 rounded bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100">
+                        <div className="w-8 h-8 rounded bg-action-subtle text-action flex items-center justify-center shrink-0 border border-action/20">
                           <ImageIcon className="w-4 h-4" />
                         </div>
                       )}
-                      <span className="font-medium text-slate-900">
+                      <span className="font-medium text-ink">
                         {doc.name}
                       </span>
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 text-slate-500">{doc.type}</td>
-                  <td className="py-3.5 px-4 text-slate-500">{doc.size}</td>
-                  <td className="py-3.5 px-4 text-slate-500">{doc.uploadedTime}</td>
-                  <td className="py-3.5 pl-4 pr-1 text-right">
+                  <td className="py-3.5 px-4 text-ink-muted">{doc.type}</td>
+                  <td className="py-3.5 px-4 text-ink-muted">{doc.size}</td>
+                  <td className="py-3.5 px-4 text-ink-muted">{doc.uploadedTime}</td>
+                  <td className="py-3.5 pl-4 pr-2 text-right">
                     <button
                       type="button"
                       aria-label={`Options for ${doc.name}`}
-                      className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors"
+                      className="p-1 text-ink-muted hover:text-ink rounded transition-colors cursor-pointer"
                     >
                       <MoreVertical className="w-4 h-4" />
                     </button>

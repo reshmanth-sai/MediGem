@@ -35,7 +35,7 @@ export function AboutSystem() {
           </div>
           <div className="flex justify-between">
             <span className="text-ink-muted">Local Database:</span>
-            <span className="text-ink font-semibold">SQLite Edge Engine (Encrypted)</span>
+            <span className="text-ink font-semibold">None (in-memory draft, tab-scoped result)</span>
           </div>
           <div className="flex justify-between">
             <span className="text-ink-muted">License:</span>
@@ -46,7 +46,7 @@ export function AboutSystem() {
         <div className="p-3 rounded-control bg-action-subtle border border-rule text-action flex items-center space-x-2">
           <ShieldCheck className="h-5 w-5 shrink-0" aria-hidden="true" />
           <p>
-            Certified for 100% offline deployment in rural health sub-centers, mobile clinics, and remote health posts.
+            Built for offline use in rural sub-centres. Not a certified medical device.
           </p>
         </div>
       </div>
