@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import Link from "next/link";
 import { X } from "lucide-react";
 import { BrandMark, ClinicianCard, NavGroups } from "./Sidebar";
 
@@ -54,8 +55,9 @@ export function MobileNav({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
           </div>
           <NavGroups onNavigate={onClose} />
         </div>
-        <div className="pt-4 border-t border-rule">
+        <div className="pt-4 border-t border-rule space-y-3">
           <ClinicianCard />
+          <Link href="/" onClick={onClose} className="block px-1 text-body-sm text-ink-muted hover:text-ink">Product page</Link>
         </div>
       </div>
     </div>

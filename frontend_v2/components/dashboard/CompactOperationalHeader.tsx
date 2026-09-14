@@ -42,7 +42,7 @@ export function CompactOperationalHeader() {
         </div>
 
         <div className="shrink-0">
-          <Link href="/new-case" className={buttonVariants({ size: "lg" })}>
+          <Link href="/new-case" className={buttonVariants({ size: "lg", variant: "secondary" })}>
             <span className="inline-flex" aria-hidden="true">
               <PlusCircle className="h-4 w-4" />
             </span>

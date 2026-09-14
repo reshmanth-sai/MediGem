@@ -1,157 +1,230 @@
 "use client";
 
-import type { Route } from "next";
-
-import React, { useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SESSION } from "@/lib/session";
+import { useApiHealth } from "@/hooks/useApiHealth";
 import { NAVIGATION, isNavActive, type NavigationItem } from "./navigation";
+
+/*
+ * The primary rail. One <nav> landmark with a labelled list per group, an
+ * inset bar for the current page instead of a filled pill, the intake action
+ * at the top because it is the workstation's main verb, and the clinician,
+ * facility and pipeline state at the bottom, all read from their sources.
+ *
+ * Collapsed, every link keeps a real accessible name (aria-label) and shows
+ * it as a tooltip on hover and on keyboard focus.
+ */
+
+const COLLAPSED_KEY = "medigem-rail-collapsed";
+
+/** The product's mark: one PQRST beat, the same trace as the product page. */
+export function EcgMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 24" width="40" height="24" aria-hidden="true" className={className} fill="none">
+      <polyline
+        points="0,15 12,15 15,15 17,13 19,17 21,3 23,21 25,15 28,15 31,11 34,15 40,15"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
 
 export function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/workstation" className="flex items-center gap-3 min-w-0 group">
-      <div className="h-8 w-8 rounded-lg bg-action-subtle text-action flex items-center justify-center shrink-0 border border-action/20">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </div>
-      {!compact && (
-        <div>
-          <span className="text-[17px] font-bold text-ink tracking-tight leading-tight block">MediGem</span>
-          <span className="text-body-sm text-ink-muted font-normal leading-none mt-0.5 block">Care, Connected.</span>
-        </div>
-      )}
+    <Link
+      href="/workstation"
+      className={cn("flex items-center gap-2.5 min-w-0 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus", compact && "justify-center")}
+      aria-label="MediGem, workstation home"
+    >
+      <EcgMark className="text-risk-high shrink-0" />
+      {!compact && <span className="text-[17px] font-semibold text-ink tracking-tight leading-none">MediGem</span>}
     </Link>
   );
 }
 
-export function NavItem({
-  item,
-  isActive,
-  collapsed = false,
-  onNavigate,
-}: {
-  item: NavigationItem;
-  isActive: boolean;
-  collapsed?: boolean;
-  onNavigate?: () => void;
-}) {
+export function NavItem({ item, isActive, collapsed = false, onNavigate }: { item: NavigationItem; isActive: boolean; collapsed?: boolean; onNavigate?: () => void }) {
   const Icon = item.icon;
+  const name = item.short ?? item.label;
   return (
-    <Link
-      href={item.href as Route}
-      title={item.label}
-      aria-current={isActive ? "page" : undefined}
-      onClick={onNavigate}
-      className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-    >
-      <div
+    <li>
+      <Link
+        href={item.href}
+        aria-current={isActive ? "page" : undefined}
+        aria-label={collapsed ? name : undefined}
+        onClick={onNavigate}
         className={cn(
-          "h-10 flex items-center gap-3 px-3 text-sm transition-colors duration-150 rounded-lg",
-          isActive ? "bg-action-subtle text-action font-semibold" : "text-ink-muted hover:bg-hover hover:text-ink font-normal"
+          "group/nav relative flex items-center gap-3 h-11 rounded-control text-body-sm transition-colors",
+          "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
+          collapsed ? "justify-center px-0" : "px-3",
+          isActive ? "text-ink font-semibold bg-surface-sunken" : "text-ink-muted hover:text-ink hover:bg-hover"
         )}
       >
-        <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-action" : "text-ink-muted")} aria-hidden="true" />
+        {/* Current-page bar. Colour, not just weight, so it reads at a glance. */}
+        <span aria-hidden="true" className={cn("absolute left-0 top-2 bottom-2 w-0.5 rounded-full", isActive ? "bg-risk-high" : "bg-transparent")} />
+        <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-ink" : "text-ink-muted group-hover/nav:text-ink")} aria-hidden="true" />
         {!collapsed && <span className="truncate">{item.label}</span>}
-      </div>
-    </Link>
+        {collapsed && (
+          <span
+            role="tooltip"
+            className="pointer-events-none absolute left-full ml-2 z-50 whitespace-nowrap rounded-control border border-rule bg-surface px-2 py-1 text-body-sm text-ink opacity-0 group-hover/nav:opacity-100 group-focus-visible/nav:opacity-100"
+          >
+            {name}
+          </span>
+        )}
+      </Link>
+    </li>
   );
 }
 
-/** The grouped navigation lists, shared by the sidebar and the mobile drawer. */
+/** The grouped lists, shared by the rail and the phone drawer. */
 export function NavGroups({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const base = useId();
   return (
-    <>
-      {NAVIGATION.map((group) => (
-        <div key={group.label} className="space-y-1">
-          {!collapsed && (
-            <p className="text-body-sm font-semibold uppercase tracking-wider text-ink-subtle px-3 pb-1">{group.label}</p>
-          )}
-          <nav aria-label={`${group.label} navigation`} className="space-y-0.5">
-            {group.items.map((item) => (
-              <NavItem
-                key={item.label}
-                item={item}
-                isActive={isNavActive(pathname, item.href)}
-                collapsed={collapsed}
-                onNavigate={onNavigate}
-              />
-            ))}
-          </nav>
-        </div>
-      ))}
-    </>
+    <nav aria-label="Primary" className="flex flex-col gap-5">
+      {NAVIGATION.map((group) => {
+        const headingId = `${base}-${group.id}`;
+        return (
+          <div key={group.id}>
+            <h2 id={headingId} className={cn("text-label text-ink-muted px-3 pb-1.5", collapsed && "sr-only")}>
+              {group.label}
+            </h2>
+            <ul aria-labelledby={headingId} className="space-y-0.5 list-none m-0 p-0">
+              {group.items.map((item) => (
+                <NavItem key={item.href} item={item} isActive={isNavActive(pathname, item.href)} collapsed={collapsed} onNavigate={onNavigate} />
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </nav>
   );
 }
 
 export function ClinicianCard({ compact = false }: { compact?: boolean }) {
   const c = SESSION.clinician;
+  const api = useApiHealth();
+  const dot = api.state === "up" ? "bg-risk-low" : api.state === "down" ? "bg-risk-emergency" : "bg-ink-subtle";
+  const apiText = api.state === "up" ? "Pipeline API up" : api.state === "down" ? "Pipeline API not reachable" : api.state === "checking" ? "Checking pipeline API" : "Replay mode, no API";
   return (
-    <div className={cn("flex items-center gap-3", compact ? "justify-center" : "px-2 py-1.5")}>
-      <div
-        className="h-9 w-9 rounded-full bg-action-subtle border border-action/20 flex items-center justify-center text-body-sm font-semibold text-action shrink-0"
-        aria-hidden={!compact}
-        title={compact ? `${c.name}, ${c.role}` : undefined}
-      >
-        {c.initials}
+    <div className={cn("flex items-center gap-3", compact ? "justify-center" : "px-1")} title={compact ? `${c.name}, ${c.role} · ${apiText}` : undefined}>
+      <div className="relative shrink-0">
+        <div className="h-9 w-9 rounded-full bg-surface-sunken border border-rule flex items-center justify-center text-body-sm font-semibold text-ink" aria-hidden="true">
+          {c.initials}
+        </div>
+        <span className={cn("absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface", dot)} aria-hidden="true" />
       </div>
       {!compact && (
         <div className="min-w-0 flex-1">
           <p className="text-body-sm font-semibold text-ink truncate">{c.name}</p>
-          <p className="text-body-sm text-ink-muted truncate">{c.role}</p>
+          <p className="text-body-sm text-ink-muted truncate">
+            {c.roleShort} · {SESSION.facility.name}
+          </p>
         </div>
       )}
+      <span className="sr-only">{apiText}</span>
     </div>
   );
 }
 
 export function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const railId = useId();
+
+  // Remembered per browser. Read after mount so the server and first client
+  // paint agree; a rail that snaps closed a frame later is better than a
+  // hydration mismatch.
+  useEffect(() => {
+    try {
+      setCollapsed(window.localStorage.getItem(COLLAPSED_KEY) === "1");
+    } catch {
+      // Storage unavailable; stay expanded.
+    }
+  }, []);
+  const toggle = () => {
+    setCollapsed((v) => {
+      try {
+        window.localStorage.setItem(COLLAPSED_KEY, v ? "0" : "1");
+      } catch {
+        // ignore
+      }
+      return !v;
+    });
+  };
 
   return (
     <aside
-      aria-label="Primary navigation"
+      id={railId}
+      aria-label="Sidebar"
       className={cn(
-        "bg-surface border-r border-rule py-5 flex-col justify-between hidden md:flex shrink-0 min-h-screen select-none transition-all duration-150 relative z-30",
-        isCollapsed ? "w-[68px] px-2" : "w-[240px] px-3.5"
+        "bg-surface border-r border-rule hidden md:flex flex-col shrink-0 min-h-screen sticky top-0 max-h-screen transition-[width] duration-150",
+        collapsed ? "w-16 px-2" : "w-60 px-3"
       )}
     >
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between min-h-[44px] px-1.5">
-          {!isCollapsed ? (
-            <>
-              <BrandMark />
-              <button
-                type="button"
-                onClick={() => setIsCollapsed(true)}
-                className="h-7 w-7 flex items-center justify-center rounded-md text-ink-muted hover:text-ink hover:bg-hover transition-colors"
-                aria-label="Collapse sidebar"
-              >
-                <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsCollapsed(false)}
-              className="h-8 w-8 mx-auto text-action hover:bg-action-subtle rounded-md flex items-center justify-center transition-colors"
-              aria-label="Expand sidebar"
-            >
-              <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
-            </button>
-          )}
-        </div>
-
-        <NavGroups collapsed={isCollapsed} />
+      <div className={cn("flex items-center h-16 border-b border-rule", collapsed ? "justify-center" : "justify-between px-1")}>
+        <BrandMark compact={collapsed} />
+        {!collapsed && (
+          <button
+            type="button"
+            onClick={toggle}
+            aria-expanded={!collapsed}
+            aria-controls={railId}
+            className="h-9 w-9 flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            aria-label="Collapse sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
-      <div className="pt-4 border-t border-rule">
-        <ClinicianCard compact={isCollapsed} />
+      <div className="py-4">
+        <Link
+          href={"/new-case" as Route}
+          aria-label={collapsed ? "New patient intake" : undefined}
+          className={cn(
+            "flex items-center gap-2 h-11 rounded-control bg-action text-on-action text-body-sm font-semibold hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+            collapsed ? "justify-center" : "px-3"
+          )}
+        >
+          <PlusCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          {!collapsed && <span>New patient intake</span>}
+        </Link>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <NavGroups collapsed={collapsed} />
+      </div>
+
+      <div className="border-t border-rule py-4 space-y-3">
+        <ClinicianCard compact={collapsed} />
+        {collapsed ? (
+          <button
+            type="button"
+            onClick={toggle}
+            aria-expanded={false}
+            aria-controls={railId}
+            className="mx-auto h-9 w-9 flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            aria-label="Expand sidebar"
+          >
+            <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
+          </button>
+        ) : (
+          <div className="flex items-center justify-between px-1 text-body-sm text-ink-muted">
+            <Link href="/" className="hover:text-ink underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
+              Product page
+            </Link>
+            <span className="font-mono">v2</span>
+          </div>
+        )}
       </div>
     </aside>
   );
