@@ -9,7 +9,7 @@ import { PipelineWorkflow } from "@/components/dashboard/PipelineWorkflow";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { EducationalTips } from "@/components/dashboard/EducationalTips";
 import { Footer } from "@/components/dashboard/Footer";
-import { H1, Body } from "@/components/ui/Typography";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import { BookOpen, ShieldCheck, Award, HeartPulse, Layers, WifiOff } from "lucide-react";
 
@@ -54,24 +54,12 @@ export default function LearningPage() {
   return (
     <AppShell>
       <div className="space-y-8 max-w-7xl mx-auto pb-12">
-        {/* Learning hub header */}
-        <div className="rounded-card border border-rule bg-surface p-8 space-y-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-chip text-label bg-action-subtle text-action border border-action/30">
-              <BookOpen className="h-3.5 w-3.5" aria-hidden="true" /> Clinical guidelines &amp; protocols
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-chip text-label bg-surface-raised text-ink-muted border border-rule">
-              <WifiOff className="h-3.5 w-3.5" aria-hidden="true" /> Offline reference
-            </span>
-          </div>
-
-          <div className="space-y-3 max-w-3xl">
-            <H1 className="text-display">Clinical Guidelines &amp; Protocols Hub</H1>
-            <Body className="text-ink-muted">
-              Reference specifications for rural triage protocols, multimodal clinical document
-              ingestion, deterministic safety screening, and primary care decision workflows.
-            </Body>
-          </div>
+        <div className="space-y-5">
+          <PageHeader
+            title="Protocols and guidelines"
+            subtitle="Rural triage protocols, document handling, the deterministic safety screen, and primary-care decision workflows. Reference only; the clinician decides."
+            meta={["offline reference"]}
+          />
 
           {/* Section tabs */}
           <div

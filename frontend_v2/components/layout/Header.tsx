@@ -38,7 +38,7 @@ export function Header() {
         <button
           type="button"
           onClick={() => setNavOpen(true)}
-          className="md:hidden h-10 w-10 -ml-2 inline-flex items-center justify-center rounded-md text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="md:hidden h-10 w-10 -ml-2 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           aria-label="Open navigation"
           aria-expanded={navOpen}
         >
@@ -49,7 +49,7 @@ export function Header() {
         <button
           type="button"
           onClick={palette.open}
-          className="hidden sm:flex w-full max-w-sm items-center justify-between gap-3 px-3.5 h-10 bg-surface-sunken border border-rule rounded-lg text-ink-muted hover:border-rule-strong transition-colors text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="hidden sm:flex w-full max-w-sm items-center justify-between gap-3 px-3.5 h-10 bg-surface-sunken border border-rule rounded-card text-ink-muted hover:border-rule-strong transition-colors text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           aria-label="Search patients, protocols, or commands"
           aria-keyshortcuts="Meta+K Control+K"
         >
@@ -62,7 +62,7 @@ export function Header() {
         <button
           type="button"
           onClick={palette.open}
-          className="sm:hidden h-10 w-10 inline-flex items-center justify-center rounded-md text-ink-muted hover:text-ink hover:bg-hover"
+          className="sm:hidden h-10 w-10 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover"
           aria-label="Search"
         >
           <Search className="h-4 w-4" aria-hidden="true" />
@@ -79,7 +79,7 @@ export function Header() {
           type="button"
           onClick={toggleTheme}
           aria-label={isDark ? "Switch to day theme" : "Switch to night theme"}
-          className="h-9 w-9 inline-flex items-center justify-center text-ink-muted hover:text-ink hover:bg-hover rounded-md transition-colors"
+          className="h-9 w-9 inline-flex items-center justify-center text-ink-muted hover:text-ink hover:bg-hover rounded-control transition-colors"
         >
           {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
         </button>

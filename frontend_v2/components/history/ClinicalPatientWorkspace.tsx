@@ -65,8 +65,8 @@ export function ClinicalPatientWorkspace({
 }: ClinicalPatientWorkspaceProps) {
   if (!patient) {
     return (
-      <div className="border border-rule rounded-xl bg-surface p-8 text-center space-y-3 flex flex-col items-center justify-center min-h-[460px]">
-        <div className="p-3 rounded-lg bg-surface-raised border border-rule text-ink-muted">
+      <div className="border border-rule rounded-card bg-surface p-8 text-center space-y-3 flex flex-col items-center justify-center min-h-[460px]">
+        <div className="p-3 rounded-card bg-surface-raised border border-rule text-ink-muted">
           <User className="h-6 w-6" aria-hidden="true" />
         </div>
         <h3 className="text-base font-bold text-ink">No patient selected</h3>
@@ -81,7 +81,7 @@ export function ClinicalPatientWorkspace({
   const confidenceLabel = CONFIDENCE_LABELS[patient.confidenceLevel] || "High confidence";
 
   return (
-    <div className="border border-rule rounded-xl bg-surface flex flex-col h-[calc(100vh-6rem)] sticky top-6 overflow-hidden">
+    <div className="border border-rule rounded-card bg-surface flex flex-col max-h-[calc(100vh-6rem)] sticky top-24 overflow-hidden">
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         {/* Patient Meta Header */}
         <div className="space-y-3">
@@ -117,7 +117,7 @@ export function ClinicalPatientWorkspace({
           {/* Last Updated */}
           <div className="flex items-center gap-1.5 text-body-sm text-ink-muted pt-0.5">
             <Clock className="h-3.5 w-3.5 text-ink-muted shrink-0" />
-            <span>Last updated: 14 Sep 2026 · 10:02 AM ({patient.arrivalTime})</span>
+            <span>{patient.arrivalTime}{patient.lastVisit ? ` · last visit ${patient.lastVisit}` : ""}</span>
           </div>
         </div>
 
@@ -133,7 +133,7 @@ export function ClinicalPatientWorkspace({
               return (
                 <div
                   key={v.label}
-                  className="border border-rule rounded-lg p-2.5 bg-surface space-y-0.5"
+                  className="border border-rule rounded-card p-2.5 bg-surface space-y-0.5"
                 >
                   <span className="text-[11px] font-medium text-ink-muted">{v.label}</span>
                   <div
@@ -181,7 +181,7 @@ export function ClinicalPatientWorkspace({
 
           {/* Assessment Confidence & Review Status Cards */}
           <div className="grid grid-cols-2 gap-2.5">
-            <div className="border border-rule rounded-lg p-2.5 bg-surface space-y-1">
+            <div className="border border-rule rounded-card p-2.5 bg-surface space-y-1">
               <div className="flex items-center gap-1.5 text-body-sm font-medium text-ink-muted">
                 <BarChart2 className="h-3.5 w-3.5 text-action shrink-0" />
                 <span>Assessment Confidence</span>
@@ -191,7 +191,7 @@ export function ClinicalPatientWorkspace({
               </div>
             </div>
 
-            <div className="border border-rule rounded-lg p-2.5 bg-surface space-y-1">
+            <div className="border border-rule rounded-card p-2.5 bg-surface space-y-1">
               <div className="flex items-center gap-1.5 text-body-sm font-medium text-ink-muted">
                 <UserCheck className="h-3.5 w-3.5 text-ink-muted shrink-0" />
                 <span>Review Status</span>
@@ -216,7 +216,7 @@ export function ClinicalPatientWorkspace({
 
           {/* Emergency / Critical Safety Callout */}
           {(isEmergency || patient.riskLevel === "HIGH") && (
-            <div className="p-3 rounded-lg bg-risk-emergency/5 border border-risk-emergency/40 text-risk-emergency space-y-1 mt-2">
+            <div className="p-3 rounded-card bg-risk-emergency/5 border border-risk-emergency/40 text-risk-emergency space-y-1 mt-2">
               <div className="font-semibold text-body-sm flex items-center gap-1.5">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 <span>Safety Screen: Immediate Escalation</span>
@@ -228,40 +228,6 @@ export function ClinicalPatientWorkspace({
           )}
         </div>
 
-        {/* Assessment Pipeline with Colored Dots */}
-        <div className="space-y-2.5">
-          <h3 className="text-body-sm font-bold text-ink">Assessment Pipeline</h3>
-          <div className="space-y-2 text-body-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" />
-                <span className="text-ink">Patient intake recorded</span>
-              </div>
-              <span className="font-mono text-ink-muted">09:12</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" />
-                <span className="text-ink">Document text and image extraction verified</span>
-              </div>
-              <span className="font-mono text-ink-muted">09:14</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-risk-low shrink-0" />
-                <span className="text-ink">Multimodal assessment completed</span>
-              </div>
-              <span className="font-mono text-ink-muted">09:16</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-action shrink-0" />
-                <span className="text-ink">Deterministic safety screening verified</span>
-              </div>
-              <span className="font-mono text-ink-muted">09:16</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Sticky Actions Footer (Mockup: 3 buttons on one row) */}
@@ -269,7 +235,7 @@ export function ClinicalPatientWorkspace({
         <div className="grid grid-cols-12 gap-2">
           <button
             type="button"
-            className="col-span-5 bg-action hover:bg-action-hover text-on-action px-3 py-2 rounded-lg text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="col-span-5 bg-action hover:bg-action-hover text-on-action px-3 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <FileText className="h-3.5 w-3.5" />
             <span className="truncate">Update Care Plan</span>
@@ -277,7 +243,7 @@ export function ClinicalPatientWorkspace({
           
           <Link
             href={`/results/${patient.caseId}`}
-            className="col-span-4 border border-rule bg-surface hover:bg-surface-raised text-ink px-2.5 py-2 rounded-lg text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="col-span-4 border border-rule bg-surface hover:bg-surface-raised text-ink px-2.5 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5 text-ink-muted shrink-0" />
             <span className="truncate">Open Full Case</span>
@@ -286,7 +252,7 @@ export function ClinicalPatientWorkspace({
           <button
             type="button"
             onClick={onOpenReferralModal}
-            className="col-span-3 border border-rule bg-surface hover:bg-surface-raised text-ink px-2 py-2 rounded-lg text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="col-span-3 border border-rule bg-surface hover:bg-surface-raised text-ink px-2 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <FileUp className="h-3.5 w-3.5 text-ink-muted shrink-0" />
             <span className="truncate">Referral Memo</span>

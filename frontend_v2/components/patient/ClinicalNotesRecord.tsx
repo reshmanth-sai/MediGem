@@ -77,7 +77,7 @@ export function ClinicalNotesRecord({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
-            className="w-full mt-1.5 p-3 border border-rule rounded-lg text-body-sm text-ink bg-surface-sunken leading-relaxed focus:border-action focus:outline-none focus:ring-1 focus:ring-action"
+            className="w-full mt-1.5 p-3 border border-rule rounded-card text-body-sm text-ink bg-surface-sunken leading-relaxed focus:border-action focus:outline-none focus:ring-1 focus:ring-action"
             aria-label="Edit history of present illness"
           />
         ) : (

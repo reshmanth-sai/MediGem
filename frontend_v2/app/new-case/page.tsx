@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, Save, X, PlayCircle, Stethoscope } from "lucide-
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { ErrorSummary } from "@/components/ui/ErrorSummary";
-import { H1, BodySm } from "@/components/ui/Typography";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { IntakeStepper } from "@/components/new-case/IntakeStepper";
 import { StickyPatientContextSidebar } from "@/components/new-case/StickyPatientContextSidebar";
@@ -312,14 +312,10 @@ export default function NewCasePage() {
   return (
     <AppShell>
       <div className="space-y-4 max-w-[1600px] mx-auto pb-16">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-rule pb-3">
-          <div className="space-y-1">
-            <H1>Guided clinical patient intake</H1>
-            <BodySm className="text-ink-muted">
-              Standardized rural intake protocol with offline decision support.
-            </BodySm>
-          </div>
-
+        <PageHeader
+          title="New patient intake"
+          subtitle="Five steps: patient, symptoms, history, documents, review. The assessment runs when you finish."
+          actions={
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
@@ -338,7 +334,8 @@ export default function NewCasePage() {
               Cancel
             </Button>
           </div>
-        </div>
+          }
+        />
 
         <IntakeStepper
           currentStep={step}

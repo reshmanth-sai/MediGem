@@ -61,6 +61,7 @@ export const copy = {
     sub: "No uplink required.",
     cta: "Open MediGem workstation",
     ctaShort: "Open workstation",
+    shot: "The workstation, as it runs. Synthetic patients; every figure on screen is measured or derived.",
     tagline: "Care. Connected.",
   },
 } as const;

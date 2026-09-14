@@ -47,7 +47,7 @@ export function MobileNav({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
             <button
               type="button"
               onClick={onClose}
-              className="h-9 w-9 flex items-center justify-center rounded-md text-ink-muted hover:text-ink hover:bg-hover"
+              className="h-9 w-9 flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover"
               aria-label="Close navigation"
             >
               <X className="h-4 w-4" aria-hidden="true" />

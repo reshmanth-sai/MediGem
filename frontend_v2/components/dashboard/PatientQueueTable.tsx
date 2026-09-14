@@ -14,15 +14,15 @@ export function PatientQueueTable() {
   const f = useCaseFilter(cases);
 
   return (
-    <section className="clinical-panel p-5 space-y-4 bg-surface border border-rule" aria-label="Patient Queue">
+    <section className="space-y-4 pt-2 border-t border-rule" aria-label="Patient queue">
       <SectionHeader
-        title="Patient Queue & Clinical Census"
+        title="Patient queue"
         badge={
-          <span className="text-body-sm font-mono px-2 py-0.5 rounded-[2px] bg-surface-raised border border-rule text-ink-muted">
+          <span className="text-body-sm font-mono px-2 py-0.5 rounded-card bg-surface-raised border border-rule text-ink-muted">
             {f.filtered.length === cases.length ? `${cases.length} in queue` : `${f.filtered.length} of ${cases.length}`}
           </span>
         }
-        subtitle="Prioritized by deterministic clinical emergency and triage severity"
+        subtitle="Ordered by the emergency gate first, then triage severity"
       />
       <CaseFilterBar query={f.query} onQueryChange={f.setQuery} risk={f.risk} onRiskChange={f.setRisk} />
       <CaseTable

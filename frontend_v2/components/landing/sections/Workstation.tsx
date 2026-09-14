@@ -22,6 +22,12 @@ export function Workstation({ reduced }: { reduced: boolean }) {
         <span aria-hidden="true">&rarr;</span>
       </Link>
 
+      <figure className="ws-shot">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/landing/workstation.webp" width="1800" height="1125" alt="The MediGem workstation: an emergency alert, the day's counters, and the patient queue ordered by the safety gate." loading="lazy" decoding="async" />
+        <figcaption className="t-mono">{copy.workstation.shot}</figcaption>
+      </figure>
+
 
       <footer className="foot">
         <div className="foot-mark" aria-hidden="true">MediGem</div>

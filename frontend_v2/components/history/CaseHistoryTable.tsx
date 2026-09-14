@@ -4,9 +4,9 @@ import React from "react";
 import { type ClinicalCaseData } from "@/lib/casesData";
 import { allCases } from "@/lib/caseStats";
 import { filterCases, RISK_FILTERS, type RiskFilter } from "@/lib/caseFilter";
-import { CaseTable, OpenCaseAction, columns } from "@/components/cases/CaseTable";
+import { CaseTable, columns } from "@/components/cases/CaseTable";
 
-const COLS = [columns.patient, columns.complaint, columns.priorityScore, columns.confidence];
+const COLS = [columns.patient, columns.complaint, columns.priorityScore];
 
 interface CaseHistoryTableProps {
   searchQuery: string;
@@ -61,7 +61,6 @@ export function CaseHistoryTable({
         caption="Case history"
         selectedCaseId={selectedPatientId}
         onSelect={onSelectPatient}
-        renderAction={(c) => <OpenCaseAction c={c} label="View" />}
         onClearFilters={onClearFilters}
         emptyTitle="No cases in history"
         emptyDescription="Cases will appear here once patient intakes have been recorded."

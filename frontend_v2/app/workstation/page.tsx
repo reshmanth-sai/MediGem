@@ -11,11 +11,8 @@ import { AIStatusRibbon } from "@/components/dashboard/AIStatusRibbon";
 export default function ClinicalWorkstationDashboard() {
   return (
     <AppShell>
-      <div className="space-y-6 max-w-7xl mx-auto pb-16">
-        {/* Section 1: Persistent Emergency Alert Banner (Critical Intercept) */}
+      <div className="space-y-8 max-w-7xl mx-auto pb-16">
         <EmergencyAlertBanner />
-
-        {/* Section 2: Compact Operational Header with shift counters */}
         <CompactOperationalHeader />
 
         {/* Section 3: Patient Intake & Clinical Queue Centerpiece */}

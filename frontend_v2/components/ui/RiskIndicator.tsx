@@ -2,7 +2,6 @@ import React from "react";
 import { Circle, Octagon, Shield, Triangle, type LucideIcon } from "lucide-react";
 import type { RiskLevel } from "@/types/analysis";
 import { cn } from "@/lib/utils";
-import { Data } from "@/components/ui/Typography";
 
 /**
  * The single source of truth for how clinical risk is ever displayed.
@@ -83,7 +82,9 @@ export function RiskIndicator({ level, variant = "tint", showScore, className }:
       <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
       <span>{label}</span>
       {typeof showScore === "number" && (
-        <Data className={cn("text-inherit", variant === "solid" && "text-on-action")}>{showScore}</Data>
+        <span className={cn("font-mono tabular text-body-sm font-normal text-ink-muted", variant === "solid" && "text-on-action")} aria-label={`urgency ${showScore.toFixed(1)} of 10`}>
+          {showScore.toFixed(1)}
+        </span>
       )}
     </span>
   );

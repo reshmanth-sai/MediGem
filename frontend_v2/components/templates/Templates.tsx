@@ -1,21 +1,21 @@
 import React from "react";
-import { H1, Body } from "@/components/ui/Typography";
+import { H1 } from "@/components/ui/Typography";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export function DashboardTemplate({
   title,
   subtitle,
+  actions,
   children,
 }: {
   title: string;
   subtitle?: string;
+  actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <H1>{title}</H1>
-        {subtitle && <Body className="text-ink-muted">{subtitle}</Body>}
-      </div>
+      <PageHeader title={title} subtitle={subtitle} actions={actions} />
       <div className="space-y-6">{children}</div>
     </div>
   );

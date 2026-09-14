@@ -115,7 +115,7 @@ export function AssessmentReportPanel({
           <button
             type="button"
             onClick={onOpenReferralModal}
-            className="h-10 px-3.5 bg-action hover:bg-action-hover text-on-action font-medium text-body-sm rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-3.5 bg-action hover:bg-action-hover text-on-action font-medium text-body-sm rounded-card flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
             <span>Approve referral</span>
@@ -125,7 +125,7 @@ export function AssessmentReportPanel({
           <button
             type="button"
             onClick={onModifyAssessment}
-            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <Edit3 className="h-4 w-4 text-ink-muted" aria-hidden="true" />
             <span>Modify assessment</span>
@@ -135,7 +135,7 @@ export function AssessmentReportPanel({
           <button
             type="button"
             onClick={onRejectAssessment}
-            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <XCircle className="h-4 w-4 text-ink-muted" aria-hidden="true" />
             <span>Reject assessment</span>
@@ -148,7 +148,7 @@ export function AssessmentReportPanel({
               if (onAddNote) onAddNote();
               else setShowNoteInput((v) => !v);
             }}
-            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <FileEdit className="h-4 w-4 text-ink-muted" aria-hidden="true" />
             <span>Add clinician note</span>
@@ -162,7 +162,7 @@ export function AssessmentReportPanel({
               onChange={(e) => setNoteText(e.target.value)}
               placeholder="Enter clinician observation or note..."
               rows={3}
-              className="w-full p-2.5 text-body-sm border border-rule rounded-lg bg-surface-sunken text-ink focus:outline-none focus:border-action focus:ring-1 focus:ring-action"
+              className="w-full p-2.5 text-body-sm border border-rule rounded-card bg-surface-sunken text-ink focus:outline-none focus:border-action focus:ring-1 focus:ring-action"
             />
             <div className="flex justify-end gap-2">
               <button
@@ -179,7 +179,7 @@ export function AssessmentReportPanel({
                   setShowNoteInput(false);
                   setNoteText("");
                 }}
-                className="px-3 py-1 text-body-sm bg-action text-on-action rounded-md font-medium hover:bg-action-hover cursor-pointer"
+                className="px-3 py-1 text-body-sm bg-action text-on-action rounded-control font-medium hover:bg-action-hover cursor-pointer"
               >
                 Save note
               </button>

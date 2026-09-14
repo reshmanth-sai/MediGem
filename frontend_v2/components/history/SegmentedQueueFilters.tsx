@@ -76,7 +76,7 @@ export function SegmentedQueueFilters({
             placeholder="Search patients, symptoms, or protocols..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 text-body-sm bg-surface border border-rule rounded-lg text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-action focus:border-action transition-colors"
+            className="w-full pl-9 pr-4 py-1.5 text-body-sm bg-surface border border-rule rounded-card text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-action focus:border-action transition-colors"
             aria-label="Search patient queue"
           />
         </div>
@@ -96,7 +96,7 @@ export function SegmentedQueueFilters({
                 onClick={() => setSelectedStatus(s.id)}
                 aria-pressed={isActive}
                 className={cn(
-                  "px-3 py-1 rounded-md transition-colors font-medium text-body-sm",
+                  "px-3 py-1 rounded-control transition-colors font-medium text-body-sm",
                   isActive
                     ? "bg-action/10 text-action border border-action/20 font-semibold"
                     : "text-ink-muted hover:text-ink hover:bg-surface-raised"
@@ -124,7 +124,7 @@ export function SegmentedQueueFilters({
               onClick={() => toggleRisk(rc.id)}
               aria-pressed={isActive}
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-body-sm font-medium transition-all",
+                "flex items-center gap-2 px-3 py-1.5 rounded-card border text-body-sm font-medium transition-all",
                 isActive
                   ? rc.id === "EMERGENCY"
                     ? "bg-risk-emergency/10 border-risk-emergency text-risk-emergency ring-1 ring-risk-emergency"

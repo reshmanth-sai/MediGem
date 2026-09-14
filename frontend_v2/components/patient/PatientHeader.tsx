@@ -48,12 +48,12 @@ export function PatientHeader({
             <h1 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
               {caseData.patientName}
             </h1>
-            <span className="px-2.5 py-1 text-body-sm font-mono font-medium text-ink-muted bg-surface-sunken rounded-md border border-rule">
+            <span className="px-2.5 py-1 text-body-sm font-mono font-medium text-ink-muted bg-surface-sunken rounded-control border border-rule">
               {caseData.patientId}
             </span>
             <span
               className={cn(
-                "px-2.5 py-1 text-body-sm font-medium rounded-[2px] inline-flex items-center gap-1.5 border",
+                "px-2.5 py-1 text-body-sm font-medium rounded-card inline-flex items-center gap-1.5 border",
                 caseData.riskLevel === "EMERGENCY"
                   ? "text-risk-emergency bg-risk-emergency-subtle border-risk-emergency-border"
                   : caseData.riskLevel === "HIGH"
@@ -109,7 +109,7 @@ export function PatientHeader({
           <button
             type="button"
             onClick={onEditPatient}
-            className="h-9 px-3.5 border border-rule bg-surface text-ink hover:bg-hover text-body-sm font-medium rounded-lg inline-flex items-center gap-2 transition-colors cursor-pointer"
+            className="h-9 px-3.5 border border-rule bg-surface text-ink hover:bg-hover text-body-sm font-medium rounded-card inline-flex items-center gap-2 transition-colors cursor-pointer"
           >
             <Edit3 className="h-4 w-4 text-ink-muted" aria-hidden="true" />
             <span>Edit patient</span>
@@ -117,7 +117,7 @@ export function PatientHeader({
           <button
             type="button"
             aria-label="More options"
-            className="h-9 px-2.5 border border-rule bg-surface text-ink-muted hover:text-ink hover:bg-hover text-body-sm font-medium rounded-lg inline-flex items-center justify-center transition-colors cursor-pointer"
+            className="h-9 px-2.5 border border-rule bg-surface text-ink-muted hover:text-ink hover:bg-hover text-body-sm font-medium rounded-card inline-flex items-center justify-center transition-colors cursor-pointer"
           >
             <MoreHorizontal className="h-4 w-4 text-ink-muted" aria-hidden="true" />
           </button>

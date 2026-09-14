@@ -17,6 +17,11 @@ const LINKS = [
 // The only navigation. A single underline slides between links as sections
 // change, and a hairline along the top edge shows position in the page. The
 // uplink readout is real: it follows the browser's connectivity state.
+// Which ground each section sits on, so the nav can match it without blending.
+const GROUND: Record<string, "ink" | "paper"> = {
+  signal: "ink", place: "paper", pipeline: "ink", gate: "ink", reasoning: "paper", proof: "paper", contract: "ink", workstation: "ink",
+};
+
 export function Nav({ active }: { active: string }) {
   const trace = useTrace();
   const list = useRef<HTMLElement>(null);
@@ -65,7 +70,7 @@ export function Nav({ active }: { active: string }) {
     <>
       {/* Outside the header so the blend mode does not recolour the bar. */}
       <div ref={progress} className="nav-progress" aria-hidden="true" />
-    <header className="nav">
+    <header className="nav" data-ground={GROUND[active] ?? "ink"}>
       <a href="#signal" className="nav-mark" onMouseEnter={blip} aria-label="MediGem, back to top">
         MediGem
       </a>
