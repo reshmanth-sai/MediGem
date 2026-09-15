@@ -12,6 +12,23 @@ test("product page loads and opens the workstation", async ({ page }) => {
   await expect(page.getByRole("note")).toContainText(/example queue/i);
 });
 
+test("the workstation tour walks from the queue to the replay picker", async ({ page, isMobile }) => {
+  test.skip(isMobile, "the tour is desktop-width only, by design");
+  await page.goto("/workstation?tour=1");
+  const dialog = page.getByRole("dialog", { name: /product tour/i });
+  await expect(dialog).toContainText("The queue");
+  await page.getByRole("button", { name: /^next$/i }).click();
+  await expect(dialog).toContainText("A case the gate caught");
+  await page.getByRole("button", { name: /^next$/i }).click();
+  await expect(dialog).toContainText("Where a live run starts");
+  await page.getByRole("button", { name: /^next$/i }).click();
+  await expect(page).toHaveURL(/\/new-case\?tour=4$/);
+  await expect(dialog).toContainText("Try it");
+  await page.getByRole("button", { name: /got it/i }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page).toHaveURL(/\/new-case$/);
+});
+
 test("the landing gate evaluates what the visitor types", async ({ page }) => {
   await page.goto("/");
   const field = page.getByRole("textbox", { name: "Try the gate", exact: true });

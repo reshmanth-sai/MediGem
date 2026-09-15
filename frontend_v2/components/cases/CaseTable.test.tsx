@@ -36,4 +36,16 @@ describe("CaseTable", () => {
     expect(onSelect).toHaveBeenCalledWith(cases[2]);
     expect(rows[1]).toHaveAttribute("aria-current", "true");
   });
+
+  it("marks only the first EMERGENCY row for the workstation tour", () => {
+    render(<CaseTable cases={cases} total={cases.length} columns={cols} caption="Queue" />);
+    const marked = document.querySelectorAll('[data-tour="tour-emergency-row"]');
+    const firstEmergencyId = cases.find((c) => c.riskLevel === "EMERGENCY")?.caseId;
+    expect(firstEmergencyId).toBeDefined();
+    // One in the desktop table, one in the phone card list would both match
+    // if this weren't scoped per-render-block; the mobile list never gets
+    // the attribute, so exactly one element carries it.
+    expect(marked).toHaveLength(1);
+    expect(marked[0]).toHaveTextContent(cases.find((c) => c.caseId === firstEmergencyId)!.patientName);
+  });
 });

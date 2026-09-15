@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { DemoDataRibbon } from "./DemoDataRibbon";
 import { CommandPalette, CommandPaletteProvider } from "@/components/search/CommandPalette";
+import { ProductTour } from "@/components/tour/ProductTour";
 import { CasesProvider } from "@/providers/CasesProvider";
 import { useSession } from "@/providers/SessionProvider";
 import { SignInScreen } from "@/components/auth/SignInScreen";
@@ -72,6 +73,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <CommandPalette />
+        <Suspense fallback={null}>
+          <ProductTour />
+        </Suspense>
       </div>
       </Gate>
       </CasesProvider>

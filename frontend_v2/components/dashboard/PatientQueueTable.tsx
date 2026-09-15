@@ -16,7 +16,7 @@ export function PatientQueueTable() {
   const f = useCaseFilter(cases);
 
   return (
-    <section className="space-y-4 pt-2 border-t border-rule" aria-label="Patient queue">
+    <section className="space-y-4 pt-2 border-t border-rule" aria-label="Patient queue" data-tour="tour-queue">
       <SectionHeader
         title="Patient queue"
         badge={

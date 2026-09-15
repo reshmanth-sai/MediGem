@@ -85,7 +85,7 @@ uvicorn backend.api.app:app --port 8000        # docs at http://localhost:8000/d
 cd frontend_v2 && cp .env.example .env.local && npm install && npm run dev
 ```
 
-Open http://localhost:3000 (product page) and http://localhost:3000/workstation. With the API up the ribbon reads **Live queue**; a new intake runs the pipeline and lands on a stored case. Without the API the workstation shows bundled examples, says so, and an intake replays a recorded run.
+Open http://localhost:3000 (product page) and http://localhost:3000/workstation. With the API up the ribbon reads **Live queue**; a new intake runs the pipeline and lands on a stored case. Without the API the workstation shows bundled examples, says so, and an intake replays a recorded run. A first visit to `/workstation` in that mode opens a four-step tour (`?tour=1` any time after) pointing at real elements only: the gate-ordered queue, the example the gate intercepted, where a live run would start, and the replay picker that leads to a genuine reasoning card and sign-off.
 
 <details>
 <summary>API</summary>
@@ -121,10 +121,10 @@ Optional hardening for a public host: `MEDIGEM_API_KEY` (checked as `X-API-Key` 
 # backend: 87 tests (pipeline, gate, safety guard, API, case store, auth, gate parity fixtures)
 MEDIGEM_DB_PATH=:memory: python -m unittest discover -s tests -p "test_*.py"
 
-# frontend: 321 unit tests (including the in-browser gate against the Python engine's answers), type-check, lint, design gate, build
+# frontend: 348 unit tests (including the in-browser gate against the Python engine's answers), type-check, lint, design gate, build
 cd frontend_v2 && npm test && npm run type-check && npm run lint && npm run gate && npm run build:verify
 
-# end to end: 23 Playwright checks on desktop and phone against a production build in replay mode,
+# end to end: 24 Playwright checks on desktop and phone against a production build in replay mode,
 # including axe WCAG 2 A/AA on six routes (the first run caught four contrast failures and a
 # disclosure control that had no button role)
 npm run e2e

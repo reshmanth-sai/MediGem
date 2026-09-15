@@ -43,3 +43,8 @@ up so the scope is clear.
   hero and telemetry fit a phone.
 - Sidebar, page headers, tables and filters rebuilt on one design system with
   a design gate in CI.
+- Live emergency gate on the product page (a TypeScript port held to the
+  Python engine by recorded fixtures) and a coverage matrix of known gaps on
+  `/developer`; the intake replay now runs at the recorded pace instead of
+  resolving instantly; a four-step, dismissible, deep-linkable first-visit
+  tour of the workstation.

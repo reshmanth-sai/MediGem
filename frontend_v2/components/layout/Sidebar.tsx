@@ -204,6 +204,7 @@ export function Sidebar() {
         <Link
           href={"/new-case" as Route}
           aria-label={collapsed ? "New patient intake" : undefined}
+          data-tour="tour-new-intake"
           className={cn(
             "flex items-center gap-2 h-11 rounded-control bg-action text-on-action text-body-sm font-semibold hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
             collapsed ? "justify-center" : "px-3"

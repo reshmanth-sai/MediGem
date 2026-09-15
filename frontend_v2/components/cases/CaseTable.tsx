@@ -145,9 +145,15 @@ export function CaseTable({ cases, total, columns: cols, caption, selectedCaseId
             </tr>
           </THead>
           <TBody>
-            {cases.map((c) => {
-              const selected = selectable ? selectedCaseId === c.caseId : undefined;
-              return (
+            {(() => {
+              let markedEmergency = false;
+              return cases.map((c) => {
+                const selected = selectable ? selectedCaseId === c.caseId : undefined;
+                // The workstation tour points at the first intercepted case in
+                // the queue; this is the only place that decides which one.
+                const isFirstEmergency = !markedEmergency && c.riskLevel === "EMERGENCY";
+                if (isFirstEmergency) markedEmergency = true;
+                return (
                 <TR
                   key={c.caseId}
                   selected={selected}
@@ -155,6 +161,7 @@ export function CaseTable({ cases, total, columns: cols, caption, selectedCaseId
                   onClick={onSelect ? () => onSelect(c) : undefined}
                   onKeyDown={(e) => rowKey(e, c)}
                   aria-current={selected ? "true" : undefined}
+                  data-tour={isFirstEmergency ? "tour-emergency-row" : undefined}
                   className={cn(selectable && "cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus")}
                 >
                   {cols.map((col) => (
@@ -164,8 +171,9 @@ export function CaseTable({ cases, total, columns: cols, caption, selectedCaseId
                   ))}
                   {renderAction && <TD className="text-right whitespace-nowrap">{renderAction(c)}</TD>}
                 </TR>
-              );
-            })}
+                );
+              });
+            })()}
           </TBody>
         </Table>
       </div>

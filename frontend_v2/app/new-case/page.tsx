@@ -332,6 +332,7 @@ export default function NewCasePage() {
               size="sm"
               onClick={loadDemoCase}
               leftIcon={<PlayCircle className="h-4 w-4" aria-hidden="true" />}
+              data-tour="tour-replay-demo"
             >
               Load demo case
             </Button>
