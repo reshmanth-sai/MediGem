@@ -22,7 +22,6 @@ import { CarePlanPanel } from "@/components/patient/CarePlanPanel";
 import { useToastContext } from "@/providers/ToastProvider";
 import { mapStoredCase } from "@/lib/mapAnalysis";
 import { useCaseList } from "@/providers/CasesProvider";
-import { SESSION } from "@/lib/session";
 
 const ACTION_LABELS: Record<string, string> = {
   created: "Case created from intake",
@@ -97,7 +96,7 @@ export default function CaseResultsPage() {
   };
 
   const handleReview = async (decision: "approved" | "modified" | "rejected", note: string) => {
-    applyUpdate(await reviewCase(caseId, decision, SESSION.clinician.name, note || undefined));
+    applyUpdate(await reviewCase(caseId, decision, note || undefined));
     addToast({ type: "success", title: decision === "approved" ? "Signed off" : decision === "modified" ? "Signed off with changes" : "Assessment rejected" });
   };
   const handleEditPatient = async (patch: PatientPatch) => {

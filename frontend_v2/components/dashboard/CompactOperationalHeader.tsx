@@ -4,13 +4,17 @@ import React from "react";
 import { Users, AlertTriangle, Clock, ArrowUpRight } from "lucide-react";
 import { MetricStat } from "@/components/ui/MetricStat";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { SESSION, greetingFor } from "@/lib/session";
+import { SESSION, greetingFor, activeClinician } from "@/lib/session";
+import { useSession } from "@/providers/SessionProvider";
 import { caseCounters } from "@/lib/caseStats";
 import { useCaseList } from "@/providers/CasesProvider";
 import { capture } from "@/components/landing/data";
 
 export function CompactOperationalHeader() {
   const list = useCaseList();
+  // Re-renders on sign-in/out; activeClinician() alone would not.
+  useSession();
+  const clinician = activeClinician();
   const counters = caseCounters(list.cases);
   // Measured by evaluation/capture_landing_data.py, the same figure the
   // product page quotes. Replaced by /health once the pipeline API answers.
@@ -19,8 +23,8 @@ export function CompactOperationalHeader() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title={`${greetingFor()}, ${SESSION.clinician.shortName}`}
-        subtitle={`${SESSION.facility.name} · ${SESSION.clinician.role}. Assessment runs on this machine; no uplink is used.`}
+        title={`${greetingFor()}, ${clinician.shortName}`}
+        subtitle={`${SESSION.facility.name} · ${clinician.role}. Assessment runs on this machine; no uplink is used.`}
         meta={[capture.meta.model, `emergency gate ${gateMs.toFixed(2)} ms median`, "offline ready"]}
       />
       <section aria-label="Queue counters" className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 divide-y divide-rule sm:divide-y-0">

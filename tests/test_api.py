@@ -26,6 +26,21 @@ class ApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.client = TestClient(app)
+        # Isolated so an account created by another test module elsewhere in
+        # the suite (they share the module-level singleton) cannot lock these
+        # pre-auth-assumption tests out with a 401, and so /analyze calls here
+        # cannot exhaust the rate limit other test files also share.
+        from backend.store.users import UserStore
+
+        cls._user_store_patch = patch.object(api, "user_store", UserStore(":memory:"))
+        cls._user_store_patch.start()
+        cls._limiter_patch = patch.object(api, "analyze_limiter", api.SlidingWindow(10_000))
+        cls._limiter_patch.start()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls._user_store_patch.stop()
+        cls._limiter_patch.stop()
 
     def test_rules_lists_every_enabled_rule(self) -> None:
         r = self.client.get("/rules")

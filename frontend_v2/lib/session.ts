@@ -1,14 +1,16 @@
 /*
- * The one place the signed-in clinician, the facility and the data source are
- * described. Every greeting, avatar, header readout and case attribution reads
- * from here so the workstation cannot disagree with itself.
+ * Facility identity, and the clinician currently acting in this browser.
  *
- * There is no authentication yet. Until there is, the session is the demo
- * persona the bundled cases were written for (see lib/casesData.ts activeUser),
- * and `dataSource` is "demo" so the shell can say so on screen.
+ * There is one facility (no multi-site concept yet), so it stays a constant.
+ * The clinician is different: once accounts exist, it is whoever is signed
+ * in, set by SessionProvider as soon as /auth/me resolves. Code that runs
+ * outside a component (lib/mapAnalysis.ts, an event handler) calls
+ * activeClinician() for a synchronous snapshot rather than the hook; a
+ * component that needs to re-render on sign-in/out should use useSession()
+ * from providers/SessionProvider instead.
  */
 
-export interface ClinicianSession {
+export interface ClinicianIdentity {
   name: string;
   /** Name as used in a greeting. */
   shortName: string;
@@ -22,24 +24,39 @@ export interface Facility {
   type: string;
 }
 
-export type DataSource = "demo" | "live";
-
 export const SESSION = {
-  clinician: {
+  facility: {
+    name: "Rampur Sub-Center",
+    type: "Primary sub-centre",
+  } satisfies Facility,
+  // The persona shown before a real session resolves, and in replay/example
+  // mode where there is no API to sign in against.
+  demoClinician: {
     name: "Dr. Vikram Patel",
     shortName: "Dr. Vikram",
     initials: "VP",
     role: "Community Health Officer",
     roleShort: "CHO",
-  } satisfies ClinicianSession,
-  facility: {
-    name: "Rampur Sub-Center",
-    type: "Primary sub-centre",
-  } satisfies Facility,
-  // Flip to "live" once analysis results come from the pipeline API rather
-  // than the bundled presets.
-  dataSource: (process.env.NEXT_PUBLIC_API_BASE_URL ? "live" : "demo") as DataSource,
+  } satisfies ClinicianIdentity,
 } as const;
+
+let active: ClinicianIdentity | null = null;
+
+/** Called by SessionProvider whenever the signed-in user changes. */
+export function setActiveClinician(identity: ClinicianIdentity | null): void {
+  active = identity;
+}
+
+/** The clinician acting right now: the real session if one exists, else the demo persona. */
+export function activeClinician(): ClinicianIdentity {
+  return active ?? SESSION.demoClinician;
+}
+
+export function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const letters = parts.length >= 2 ? [parts[0][0], parts[parts.length - 1][0]] : [parts[0]?.[0] ?? "?"];
+  return letters.join("").toUpperCase();
+}
 
 /** "Good morning" before noon, "Good afternoon" before 17:00, then "Good evening". */
 export function greetingFor(date: Date = new Date()): string {

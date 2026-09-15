@@ -18,13 +18,15 @@ export async function getCase(id: string, signal?: AbortSignal): Promise<StoredC
 
 export type ReviewDecision = "approved" | "modified" | "rejected";
 
-export async function reviewCase(id: string, decision: ReviewDecision, reviewer: string, note?: string): Promise<StoredCase> {
+export async function reviewCase(id: string, decision: ReviewDecision, note?: string): Promise<StoredCase> {
   return parse(
     StoredCase,
     await apiRequest<unknown>(`/cases/${encodeURIComponent(id)}/review`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ decision, reviewer, note }),
+      // The reviewer is whoever the session cookie says is signed in; the
+      // API rejects a request body that tries to name someone else.
+      body: JSON.stringify({ decision, note }),
       timeoutMs: 8_000,
     })
   );

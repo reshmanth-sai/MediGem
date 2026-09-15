@@ -19,7 +19,7 @@
 | Lab report, ECG, prescription, or wound photo | Image-quality scores, OCR where there is a text layer, and one structured `ClinicalReasoningOutput`: observations · assessment (risk level, qualitative confidence, red flags) · recommendations · patient summary · limitations |
 | A finished assessment | A stored case the clinician signs off (approve / modify / reject with a note), corrects, plans, annotates and attaches documents to, with every change in an append-only history; a referral note; a queue that orders by the gate first, then severity |
 
-It does not diagnose, it does not prescribe, and it will not return a dose: a dose or a definitive diagnosis in the model's output fails the safety guard and marks the run degraded.
+It does not diagnose, it does not prescribe, and it will not return a dose: a dose or a definitive diagnosis in the model's output fails the safety guard and marks the run degraded. Local accounts (ANM / CHO / MO / admin) gate who can sign off and who can delete a case; the first account created on a machine is always admin.
 
 ![Clinical workstation](docs/screenshots/workstation.webp)
 
@@ -92,6 +92,10 @@ Open http://localhost:3000 (product page) and http://localhost:3000/workstation.
 
 | Route | Purpose |
 |---|---|
+| `GET /auth/me` | the signed-in user, and whether first-run setup is still pending |
+| `POST /auth/setup` | create the first account (always admin); only works while none exists |
+| `POST /auth/login`, `POST /auth/logout` | cookie session, scrypt-hashed password |
+| `GET /users`, `POST /users`, `POST /users/{id}/deactivate` | admin-only account management |
 | `GET /health` | model, Ollama reachability, gate rule count and latency, case count |
 | `GET /rules` | the emergency rules |
 | `POST /gate/evaluate` | run the gate on a symptom list |
@@ -105,9 +109,9 @@ Open http://localhost:3000 (product page) and http://localhost:3000/workstation.
 | `GET /cases/{id}/events` | the append-only history: every change with actor and time |
 | `DELETE /cases/{id}` | remove a case, its notes, documents and files |
 
-Every mutation writes an event; the workstation's History tab reads it. The acting clinician is sent as `X-Actor` until accounts exist.
+Every mutation writes an event; the workstation's History tab reads it, with the real signed-in user as the actor. Roles rank ANM, then CHO, then MO, then admin: `/cases/{id}/review` needs CHO or above, `DELETE /cases/{id}` needs MO or above, user management needs admin. Before the first account exists the API is open (there would be no other way in); the moment one is created, every route but `/auth/*` requires a session.
 
-Optional hardening for a public host: `MEDIGEM_API_KEY` (checked as `X-API-Key` on every POST), `MEDIGEM_ANALYZE_PER_MINUTE` (default 6 per client), `MEDIGEM_CORS_ORIGINS`. Store location: `MEDIGEM_DB_PATH` (default `data/medigem.db`; `:memory:` for tests). Uploaded images are held for one run and deleted.
+Optional hardening for a public host: `MEDIGEM_API_KEY` (checked as `X-API-Key` on every POST), `MEDIGEM_ANALYZE_PER_MINUTE` (default 6 per client), `MEDIGEM_CORS_ORIGINS`. If the site and the API are on different hosts over HTTPS, set `MEDIGEM_COOKIE_SAMESITE=none` so the session cookie survives cross-site (this implies `Secure`, so it needs real TLS, not just a plain HTTP tunnel). Storage: `MEDIGEM_DB_PATH` for the database (default `data/medigem.db`; `:memory:` for tests) and `MEDIGEM_DOCS_DIR` for files attached to a case after intake. Uploaded intake images are held for one run and deleted; attached documents are kept.
 </details>
 
 <details>
@@ -125,8 +129,9 @@ cd frontend_v2 && npm test && npm run type-check && npm run lint && npm run gate
 # disclosure control that had no button role)
 npm run e2e
 
-# with the API and dev server running: one flow that edits a patient, sets a plan, adds a note,
-# attaches a file, checks the history, signs off, exports and deletes a stored case
+# with the API and dev server running: signs up the first account, signs out, signs back in,
+# creates a lower-role account and confirms it cannot sign off or delete, then edits a patient,
+# sets a plan, adds a note, attaches a file, checks the history, signs off, exports and deletes
 MEDIGEM_LIVE=1 npm run e2e:live
 ```
 
@@ -144,13 +149,15 @@ backend/
   input/        image quality, OCR, PDF text extraction
   reasoning/    prompt composition, output schema, validator, safety guard
   pipeline/     orchestration strategies per modality
-  store/        SQLite case store
+  store/        SQLite case store, accounts and sessions (cases.py, users.py)
   services/     orchestrator (validate → gate → route → pipeline)
 frontend_v2/
   app/          Next.js routes: product page at /, workstation under /workstation …
-  components/   landing (GSAP, canvas ECG, WebGL document plane) · cases · layout · results
-  lib/          api client, schemas (Zod mirrors of the Python models), mappers, replay
-  providers/    CasesProvider (live store or bundled examples), theme, accessibility
+  components/   landing (GSAP, canvas ECG, WebGL document plane) · auth · cases · layout · results
+  lib/          api client, schemas (Zod mirrors of the Python models), mappers, replay, session
+  providers/    CasesProvider, SessionProvider (cookie auth), theme, accessibility
+  e2e/          Playwright against replay mode (no API), in CI
+  e2e-live/     Playwright against a running API: case controls, accounts and roles
 evaluation/     capture_landing_data.py — the script every published figure comes from
 tests/          backend suite
 docs/           architecture, safety, limitations
@@ -163,6 +170,7 @@ docs/           architecture, safety, limitations
 - **Why a rule gate and not "just prompt it to be careful".** The failure mode of an LLM on an acute case is a plausible, wrong answer. Rules are inspectable and testable (matching, synonyms, priority resolution, benign input, latency are all under test) and the product page shows the real match latency.
 - **Why the workstation refuses to fake a result.** An earlier version computed a risk score in the browser with a heuristic and animated "AI stages" with timers. It once produced `EMERGENCY` with the action "routine ECG within 48 hours". It was removed; without the API, the intake replays a *recorded* run and labels it as such.
 - **Why SQLite, no ORM.** One process, one clinic, one file. `sqlite3` from the standard library, a single table, and a `:memory:` mode that makes the test suite hermetic.
+- **Why the API is open until the first account exists, then never again.** A brand-new install has no user to log in as; locking every route from the start would mean nobody could ever get in. So `setup_required` is true exactly until the first account is created, during which the API answers unauthenticated requests as that yet-to-exist admin, and false forever after. No route re-opens once an account exists, including `/analyze` — a live test asserts that directly.
 - **Why the safety guard needed fixing.** Its dosage regex read the haemoglobin value `13.8 g/dL` as the dose "8 g" and marked every lab-report run DEGRADED. Found by re-running the capture at 20 runs per modality; fixed with a negative lookahead for concentrations and a test file of lab values that must pass and doses that must not.
 - **Why the fonts are bundled.** The first build loaded Switzer from Fontshare on every route — an offline product whose UI needed an uplink. `next/font/local` now.
 
@@ -171,12 +179,12 @@ docs/           architecture, safety, limitations
 ## Limitations
 
 - **Not clinically validated.** No labelled dataset, no clinician agreement study, no outcome data. The measured figures are latency and schema validity only. This is decision *support* for a clinician who decides; it is not a diagnostic device and is not certified as one.
-- **No accounts.** The signed-in clinician is a fixed demo persona; sign-offs are recorded under that name.
+- **Accounts are minimal.** Username/password over a cookie session, four roles, no password-reset flow in the UI, no login-attempt lockout, one facility. See [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) for the full list.
 - **One machine.** Single-process API, plain SQLite file, no backup or encryption at rest, no installer. "Offline" means a laptop serving itself over the clinic's own network.
 - **Small model, small gate.** `gemma3:4b` with no clinical fine-tuning; 11 rules with English synonyms. Observations occasionally come back empty; OCR is Tesseract with no preprocessing.
 - **Hardware.** 9 s is an Apple M5 figure. Expect 60–120 s per assessment on a CPU-only laptop.
 
-What I would do next, in order: local accounts and an append-only event log; a labelled evaluation set with a clinician; a single-process install (standalone Next build served by the API, `docker compose`); Hindi patient summaries. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+What I would do next, in order: `docker compose up` so the API and Ollama start with one command; a labelled evaluation set with a clinician; a single-process install (standalone Next build served by the API); Hindi patient summaries. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ---
 

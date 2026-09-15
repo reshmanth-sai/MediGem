@@ -14,12 +14,6 @@ export const API_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_API_TIMEOUT || 120_
 // server-side rate limit is the real control.
 export const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "";
 
-// Who is acting, until accounts exist. The API records it on every event.
-let actor = "";
-export function setApiActor(name: string): void {
-  actor = name;
-}
-
 export type ApiErrorKind = "unconfigured" | "network" | "timeout" | "http" | "parse";
 
 export class ApiError extends Error {
@@ -77,7 +71,11 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     res = await fetch(`${API_BASE_URL}${path}`, {
       method: options.method ?? "GET",
       body: options.body,
-      headers: { ...(API_KEY ? { "X-API-Key": API_KEY } : {}), ...(actor ? { "X-Actor": actor } : {}), ...(options.headers ?? {}) },
+      headers: { ...(API_KEY ? { "X-API-Key": API_KEY } : {}), ...(options.headers ?? {}) },
+      // Sessions are an HttpOnly cookie the API sets; this is what makes it
+      // ride along on every request, including cross-origin (site on 3000,
+      // API on 8000) since the API echoes back an exact-origin CORS header.
+      credentials: "include",
       signal: controller.signal,
     });
   } catch (e) {

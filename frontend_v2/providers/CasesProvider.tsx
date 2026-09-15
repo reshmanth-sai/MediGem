@@ -1,8 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { isApiConfigured, setApiActor } from "@/lib/api-client";
-import { SESSION } from "@/lib/session";
+import { isApiConfigured } from "@/lib/api-client";
 import { listCases } from "@/services/cases.service";
 import { mapStoredCase } from "@/lib/mapAnalysis";
 import { allCases as exampleCases } from "@/lib/caseStats";
@@ -61,12 +60,6 @@ export function CasesProvider({ children, pollMs = 30_000 }: { children: React.R
       if (!ac.signal.aborted) setLoading(false);
     }
   }, [configured]);
-
-  useEffect(() => {
-    // Until accounts exist the acting clinician is the session persona; the
-    // API records it on every event it writes.
-    setApiActor(SESSION.clinician.name);
-  }, []);
 
   useEffect(() => {
     if (!configured) return;

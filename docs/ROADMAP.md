@@ -7,11 +7,11 @@ up so the scope is clear.
 
 ## Planned
 
-1. **Accounts.** Local users (bcrypt, roles CHO / ANM / MO / admin), session
-   cookie, actor taken from the session instead of a header. Makes the event
-   log and sign-off attributable to a verified person.
-2. **`docker compose up`.** API + Ollama in one command, so an engineer can run
+1. **`docker compose up`.** API + Ollama in one command, so an engineer can run
    the live queue without three terminals.
+2. **Account lifecycle.** Password reset from the UI (an admin can already
+   reset one via the API), lockout after repeated failed logins, an audit log
+   of failed attempts. The accounts themselves are done; this is hardening.
 
 ## Not planned, and why
 

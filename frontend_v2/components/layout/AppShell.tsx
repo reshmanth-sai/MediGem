@@ -6,11 +6,41 @@ import { Header } from "./Header";
 import { DemoDataRibbon } from "./DemoDataRibbon";
 import { CommandPalette, CommandPaletteProvider } from "@/components/search/CommandPalette";
 import { CasesProvider } from "@/providers/CasesProvider";
+import { useSession } from "@/providers/SessionProvider";
+import { SignInScreen } from "@/components/auth/SignInScreen";
+import { EcgMark } from "./Sidebar";
+
+/*
+ * The workstation behind a sign-in wall, but only when there is somewhere to
+ * sign into: with no pipeline API configured (replay/example mode) there is
+ * no account system to gate against, so the shell renders straight through.
+ * A brief "still checking" state avoids flashing the workstation before a
+ * pending /auth/me redirects to the login screen.
+ */
+function Gate({ children }: { children: React.ReactNode }) {
+  const session = useSession();
+
+  if (!session.ready) {
+    return (
+      <div className="min-h-screen bg-ground flex items-center justify-center" role="status" aria-live="polite">
+        <EcgMark className="text-risk-high h-8 w-14 motion-safe:animate-pulse" />
+        <span className="sr-only">Loading</span>
+      </div>
+    );
+  }
+
+  if (session.status === "setup" || session.status === "signed-out") {
+    return <SignInScreen />;
+  }
+
+  return <>{children}</>;
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <CommandPaletteProvider>
       <CasesProvider>
+      <Gate>
       <div className="min-h-screen bg-ground text-ink flex">
         {/*
           WCAG 2.4.1 bypass block. Without it, every route walks a keyboard user
@@ -43,6 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <CommandPalette />
       </div>
+      </Gate>
       </CasesProvider>
     </CommandPaletteProvider>
   );

@@ -4,9 +4,10 @@ import React, { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { PanelLeftClose, PanelLeftOpen, PlusCircle } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, PlusCircle, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SESSION } from "@/lib/session";
+import { SESSION, activeClinician } from "@/lib/session";
+import { useSession } from "@/providers/SessionProvider";
 import { useApiHealth } from "@/hooks/useApiHealth";
 import { NAVIGATION, isNavActive, type NavigationItem } from "./navigation";
 
@@ -111,10 +112,12 @@ export function NavGroups({ collapsed = false, onNavigate }: { collapsed?: boole
 }
 
 export function ClinicianCard({ compact = false }: { compact?: boolean }) {
-  const c = SESSION.clinician;
+  const session = useSession();
+  const c = activeClinician();
   const api = useApiHealth();
   const dot = api.state === "up" ? "bg-risk-low" : api.state === "down" ? "bg-risk-emergency" : "bg-ink-subtle";
   const apiText = api.state === "up" ? "Pipeline API up" : api.state === "down" ? "Pipeline API not reachable" : api.state === "checking" ? "Checking pipeline API" : "Replay mode, no API";
+  const signedIn = session.status === "signed-in";
   return (
     <div className={cn("flex items-center gap-3", compact ? "justify-center" : "px-1")} title={compact ? `${c.name}, ${c.role} · ${apiText}` : undefined}>
       <div className="relative shrink-0">
@@ -127,9 +130,20 @@ export function ClinicianCard({ compact = false }: { compact?: boolean }) {
         <div className="min-w-0 flex-1">
           <p className="text-body-sm font-semibold text-ink truncate">{c.name}</p>
           <p className="text-body-sm text-ink-muted truncate">
-            {c.roleShort} · {SESSION.facility.name}
+            {c.roleShort} · {signedIn ? "Signed in" : SESSION.facility.name}
           </p>
         </div>
+      )}
+      {signedIn && !compact && (
+        <button
+          type="button"
+          onClick={() => session.logout()}
+          aria-label="Sign out"
+          title="Sign out"
+          className="h-8 w-8 shrink-0 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        >
+          <LogOut className="h-4 w-4" aria-hidden="true" />
+        </button>
       )}
       <span className="sr-only">{apiText}</span>
     </div>

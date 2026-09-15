@@ -21,12 +21,17 @@ Read this before drawing any conclusion from the product page's figures.
 
 ## Data
 
-- **No accounts.** The signed-in clinician is a fixed demo persona. Sign-offs
-  are recorded under that name.
-- **The event log is per case, not per user.** Every change to a stored case
-  is recorded with an actor and time, but the actor is a header the
-  workstation sends (the demo persona), not a verified identity. Deletes are
-  hard deletes of the case; the deletion event itself is kept.
+- **Accounts exist but are minimal.** Local username/password (scrypt-hashed),
+  four roles (ANM, CHO, MO, admin), cookie sessions. There is no password
+  reset flow in the UI (an admin can reset one via the API), no lockout after
+  repeated failed logins, no audit of failed attempts, and only one facility
+  (no multi-site accounts). The very first account created on a machine is
+  always admin, by design, so there is a way in.
+- **The event log is per case.** Every change to a stored case is recorded
+  with the real signed-in actor and time once accounts exist (before that,
+  while no account has been created yet, the API is open and actor is
+  whatever the client claims). Deletes are hard deletes of the case; the
+  deletion event itself is kept.
 - **Plain SQLite** on one disk. No encryption at rest, no backups, no retention
   policy. Intake uploads are deleted after the run, so the document the model
   assessed cannot be re-viewed; files attached to a case afterwards are kept on

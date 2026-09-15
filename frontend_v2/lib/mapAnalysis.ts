@@ -1,7 +1,7 @@
 import type { AnalysisResponse, StoredCase } from "@/lib/schemas/analysis";
 import type { ClinicalCaseData, ClinicalDocument, VitalSign } from "@/lib/casesData";
 import { documentUrl } from "@/services/cases.service";
-import { SESSION } from "@/lib/session";
+import { SESSION, activeClinician } from "@/lib/session";
 
 export interface IntakeSnapshot {
   caseId: string;
@@ -54,8 +54,8 @@ export function mapAnalysisToCase(res: AnalysisResponse, intake: IntakeSnapshot)
     age: intake.age,
     gender: intake.gender,
     arrivalTime: "Arrived just now",
-    assignedWorker: `${SESSION.clinician.name} (${SESSION.clinician.roleShort})`,
-    activeUser: `${SESSION.clinician.name} (${SESSION.clinician.roleShort})`,
+    assignedWorker: `${activeClinician().name} (${activeClinician().roleShort})`,
+    activeUser: `${activeClinician().name} (${activeClinician().roleShort})`,
     village: intake.village,
     riskLevel,
     urgencyScore: risk?.urgency_score ?? 0,

@@ -68,6 +68,17 @@ class CaseRoutesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.client = TestClient(api.app)
+        from backend.store.users import UserStore
+
+        cls._user_store_patch = patch.object(api, "user_store", UserStore(":memory:"))
+        cls._user_store_patch.start()
+        cls._limiter_patch = patch.object(api, "analyze_limiter", api.SlidingWindow(10_000))
+        cls._limiter_patch.start()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls._user_store_patch.stop()
+        cls._limiter_patch.stop()
 
     def test_analyze_persists_and_the_case_round_trips(self) -> None:
         with patch.object(api, "case_store", CaseStore(":memory:")) as store:
@@ -145,6 +156,17 @@ class CaseEditRoutesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.client = TestClient(api.app)
+        from backend.store.users import UserStore
+
+        cls._user_store_patch = patch.object(api, "user_store", UserStore(":memory:"))
+        cls._user_store_patch.start()
+        cls._limiter_patch = patch.object(api, "analyze_limiter", api.SlidingWindow(10_000))
+        cls._limiter_patch.start()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls._user_store_patch.stop()
+        cls._limiter_patch.stop()
 
     def test_routes_round_trip_with_actor_header(self) -> None:
         os.environ["MEDIGEM_DOCS_DIR"] = os.path.join(os.environ.get("TMPDIR", "/tmp"), "medigem-test-docs")
