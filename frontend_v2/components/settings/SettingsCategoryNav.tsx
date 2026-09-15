@@ -40,7 +40,7 @@ export function SettingsCategoryNav({ activeTab, setActiveTab }: SettingsCategor
                 "w-full text-left p-2.5 rounded-control transition-all flex items-start space-x-3 border",
                 isActive
                   ? "bg-action-subtle border-action"
-                  : "bg-surface border-transparent opacity-80 hover:opacity-100 hover:border-rule-strong"
+                  : "bg-surface border-transparent text-ink-muted hover:text-ink hover:border-rule-strong"
               )}
             >
               <div

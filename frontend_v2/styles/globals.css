@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 :root {
-  /* --font-sans, --font-serif and --font-mono are set on <html> by app/fonts.ts. */
+  /* --font-sans, --font-serif and --font-mono are set on <html> by app/fonts.ts.
+     Light text colours are chosen for >= 4.5:1 on white, the sunken surface,
+     and their own 12% tint (the risk pills); see e2e axe checks. */
   --ground: #FFFFFF;
   --surface: #FFFFFF;
   --surface-raised: #F8FAFC;
@@ -15,34 +17,34 @@
   --rule-strong: #94A3B8;
   --ink-disabled: #CBD5E1;
   --ink-subtle: #94A3B8;
-  --ink-muted: #64748B;
+  --ink-muted: #586274;
   --ink: #0F172A;
   --periwinkle: #60A5FA;
   --lavender: #EEF4FF;
   --powder-blue: #E0F2FE;
   --sage: #DCFCE7;
   --peach: #FFEDD5;
-  --action: #2563EB;
-  --action-hover: #1D4ED8;
-  --action-active: #1E40AF;
+  --action: #1D4ED8;
+  --action-hover: #1E40AF;
+  --action-active: #1E3A8A;
   --action-subtle: #EFF6FF;
   --on-action: #FFFFFF;
-  --clinical-emergency: #DC2626;
-  --clinical-moderate: #D97706;
-  --clinical-success: #16A34A;
-  --risk-emergency: #DC2626;
+  --clinical-emergency: #B91C1C;
+  --clinical-moderate: #92500A;
+  --clinical-success: #0F7A3A;
+  --risk-emergency: #B91C1C;
   --risk-emergency-subtle: #FEF2F2;
   --risk-emergency-border: #FECACA;
-  --risk-high: #D97706;
+  --risk-high: #92500A;
   --risk-high-subtle: #FFFBEB;
   --risk-high-border: #FDE68A;
-  --risk-moderate: #D97706;
+  --risk-moderate: #92500A;
   --risk-moderate-subtle: #FFFBEB;
   --risk-moderate-border: #FDE68A;
-  --risk-low: #16A34A;
+  --risk-low: #0F7A3A;
   --risk-low-subtle: #F0FDF4;
   --risk-low-border: #BBF7D0;
-  --focus: #2563EB;
+  --focus: #1D4ED8;
 }
 
 .theme-night {

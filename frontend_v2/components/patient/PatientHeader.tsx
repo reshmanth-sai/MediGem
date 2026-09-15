@@ -126,7 +126,6 @@ export function PatientHeader({
               type="button"
               id={`tab-${tab.id}`}
               aria-selected={isActive}
-              aria-controls={`panel-${tab.id}`}
               onClick={() => onTabChange(tab.id)}
               className={`-mb-px pb-3 text-body-sm font-medium transition-colors border-b-2 cursor-pointer ${
                 isActive

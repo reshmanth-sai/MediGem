@@ -84,6 +84,7 @@ export default function NewCasePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   // Without an API, the intake replays one recorded run; this is which.
   const [replayId, setReplayId] = useState<ReplayId | null>(null);
+  const [replayMenuOpen, setReplayMenuOpen] = useState(false);
   const [summaryVisible, setSummaryVisible] = useState(false);
   const [failedAdvances, setFailedAdvances] = useState(0);
   const summaryRef = useRef<HTMLDivElement>(null);
@@ -470,31 +471,38 @@ export default function NewCasePage() {
                       Run clinical assessment
                     </Button>
                   ) : (
-                    <details className="relative">
-                      <summary
-                        className="list-none [&::-webkit-details-marker]:hidden cursor-pointer inline-flex items-center gap-2 h-11 px-4 rounded-control bg-action text-on-action text-body-sm font-semibold hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-                        aria-label="Replay a recorded run"
+                    <div className="relative">
+                      <Button
+                        type="button"
+                        onClick={() => setReplayMenuOpen((v) => !v)}
+                        aria-expanded={replayMenuOpen}
+                        aria-controls="replay-menu"
+                        leftIcon={<PlayCircle className="h-4 w-4" aria-hidden="true" />}
                       >
-                        <PlayCircle className="h-4 w-4" aria-hidden="true" />
                         Replay a recorded run
-                      </summary>
-                      <div className="absolute right-0 z-20 mt-2 w-[min(28rem,90vw)] rounded-control border border-rule bg-surface p-2 space-y-1">
-                        <p className="px-2 py-1 text-body-sm text-ink-muted">
-                          No pipeline API in this build. Replay a run measured on {CAPTURED_AT}; the assessment shown is of the recorded sample, not of this patient.
-                        </p>
-                        {REPLAY_OPTIONS.map((o) => (
-                          <button
-                            key={o.id}
-                            type="button"
-                            onClick={() => startReplay(o.id)}
-                            className="w-full text-left px-2 py-2 rounded-control hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-                          >
-                            <span className="block text-body-sm font-semibold text-ink">{o.label}</span>
-                            <span className="block text-body-sm text-ink-muted font-mono">{o.detail}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </details>
+                      </Button>
+                      {replayMenuOpen && (
+                        <div id="replay-menu" role="group" aria-label="Recorded runs" className="absolute right-0 z-20 mt-2 w-[min(28rem,90vw)] rounded-control border border-rule bg-surface p-2 space-y-1">
+                          <p className="px-2 py-1 text-body-sm text-ink-muted">
+                            No pipeline API in this build. Replay a run measured on {CAPTURED_AT}; the assessment shown is of the recorded sample, not of this patient.
+                          </p>
+                          {REPLAY_OPTIONS.map((o) => (
+                            <button
+                              key={o.id}
+                              type="button"
+                              onClick={() => {
+                                setReplayMenuOpen(false);
+                                startReplay(o.id);
+                              }}
+                              className="w-full text-left px-2 py-2 rounded-control hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                            >
+                              <span className="block text-body-sm font-semibold text-ink">{o.label}</span>
+                              <span className="block text-body-sm text-ink-muted font-mono">{o.detail}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   )
                 )}
               </div>

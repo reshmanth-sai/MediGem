@@ -30,3 +30,9 @@ npm-debug.log*
 # verification builds (NEXT_DIST_DIR)
 .next-verify/
 .next-*/
+
+# playwright
+playwright-report/
+test-results/
+
+.next-e2e/
