@@ -6,12 +6,33 @@ from typing import Dict, List, Set, Tuple
 from backend.emergency.models import EmergencyRule
 
 
+# A handful of contractions that show up in typed symptom text. Expanded
+# before punctuation is stripped, so "can't breathe" reaches the same string
+# as "cannot breathe" instead of losing the apostrophe and becoming one
+# unmatched word "cant".
+_CONTRACTIONS = {
+    "can't": "cannot",
+    "won't": "will not",
+    "don't": "do not",
+    "doesn't": "does not",
+    "isn't": "is not",
+    "wasn't": "was not",
+    "couldn't": "could not",
+    "shouldn't": "should not",
+}
+
+
 def normalize_text(text: str) -> str:
     """Normalize text by converting to lower case, trimming, and stripping punctuation."""
     if not text:
         return ""
     text = text.lower().strip()
-    # Remove non-alphanumeric except spaces
+    for contraction, expansion in _CONTRACTIONS.items():
+        text = text.replace(contraction, expansion)
+    # A hyphen joins two words ("third-degree", "passed-out"); treat it as a
+    # space rather than deleting it, so the words stay separately matchable.
+    text = re.sub(r"[-‐-―]", " ", text)
+    # Remove remaining non-alphanumeric except spaces
     text = re.sub(r"[^\w\s]", "", text)
     # Collapse multiple spaces
     text = re.sub(r"\s+", " ", text)

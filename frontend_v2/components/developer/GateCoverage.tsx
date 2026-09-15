@@ -85,7 +85,7 @@ export function GateCoverage() {
       </ul>
 
       <BodySm className="text-ink-muted mt-3">
-        Misses come from exact-substring matching: no stemming (&ldquo;swollen throat&rdquo; is not &ldquo;throat swelling&rdquo;), apostrophes and hyphens deleted rather than spaced, and no Hindi synonyms at all. Over-fires come from the same matching having no idea of negation or severity; they fail toward referral.
+        The remaining misses are all romanised Hindi: no Hindi synonym table exists yet. Over-fires come from substring matching having no idea of negation or severity (&ldquo;no chest pain&rdquo; still trips the cardiac rule, bare &ldquo;fever&rdquo; still trips sepsis); they fail toward referral, and fixing them needs real language handling, not a matcher tweak.
       </BodySm>
     </Section>
   );

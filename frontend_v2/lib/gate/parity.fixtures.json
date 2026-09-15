@@ -249,17 +249,19 @@
         "  passed-out  "
       ],
       "expected": {
-        "emergency_detected": false,
-        "safe_for_ai_processing": true,
-        "matched_rules": [],
-        "matched_symptoms": [
-          "  passed-out  "
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
         ],
-        "emergency_category": null,
-        "priority": "LOW",
-        "rule_match_score": 0.0,
-        "recommended_action": "MONITOR_PATIENT",
-        "should_refer_immediately": false,
+        "matched_symptoms": [
+          "loss of consciousness"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
         "should_call_ambulance": false
       }
     },
@@ -492,17 +494,19 @@
         "third-degree burn on both arms"
       ],
       "expected": {
-        "emergency_detected": false,
-        "safe_for_ai_processing": true,
-        "matched_rules": [],
-        "matched_symptoms": [
-          "third-degree burn on both arms"
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-BURNS-01"
         ],
-        "emergency_category": null,
-        "priority": "LOW",
-        "rule_match_score": 0.0,
-        "recommended_action": "MONITOR_PATIENT",
-        "should_refer_immediately": false,
+        "matched_symptoms": [
+          "severe burns"
+        ],
+        "emergency_category": "BURNS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
         "should_call_ambulance": false
       }
     },
@@ -612,6 +616,27 @@
     {
       "input": [
         "chest pressure"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "pressure in my chest"
       ],
       "expected": {
         "emergency_detected": true,
@@ -1040,6 +1065,27 @@
     },
     {
       "input": [
+        "face drooping"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
         "arm weakness"
       ],
       "expected": {
@@ -1167,6 +1213,27 @@
     {
       "input": [
         "heavy bleeding"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TRAUMA-01"
+        ],
+        "matched_symptoms": [
+          "severe bleeding"
+        ],
+        "emergency_category": "TRAUMA",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "bleeding a lot"
       ],
       "expected": {
         "emergency_detected": true,
@@ -1420,6 +1487,27 @@
     },
     {
       "input": [
+        "high fever and confused"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "high fever with confusion"
+        ],
+        "emergency_category": "SEPSIS",
+        "priority": "HIGH",
+        "rule_match_score": 1.0,
+        "recommended_action": "NEAREST_HOSPITAL",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
         "high temp and confused"
       ],
       "expected": {
@@ -1526,6 +1614,27 @@
     {
       "input": [
         "pesticide swallowed"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TOXIC-01"
+        ],
+        "matched_symptoms": [
+          "poisoning"
+        ],
+        "emergency_category": "POISONING",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "drank pesticide"
       ],
       "expected": {
         "emergency_detected": true,
@@ -1672,6 +1781,27 @@
     },
     {
       "input": [
+        "bitten by a snake"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SNAKE-01"
+        ],
+        "matched_symptoms": [
+          "snake bite"
+        ],
+        "emergency_category": "SNAKE_BITE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
         "cobra bite"
       ],
       "expected": {
@@ -1757,6 +1887,27 @@
     {
       "input": [
         "fire burn"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-BURNS-01"
+        ],
+        "matched_symptoms": [
+          "severe burns"
+        ],
+        "emergency_category": "BURNS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "burnt by fire"
       ],
       "expected": {
         "emergency_detected": true,
@@ -1903,6 +2054,27 @@
     },
     {
       "input": [
+        "swollen throat"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-ANAPHYLAXIS-01"
+        ],
+        "matched_symptoms": [
+          "anaphylaxis"
+        ],
+        "emergency_category": "ANAPHYLAXIS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
         "severe allergic reaction"
       ],
       "expected": {
@@ -1967,6 +2139,27 @@
     {
       "input": [
         "vaginal bleeding during pregnancy"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "pregnant and bleeding"
       ],
       "expected": {
         "emergency_detected": true,
@@ -2118,7 +2311,7 @@
       "phrase": "pressure in my chest",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-CARDIAC-01",
@@ -2160,7 +2353,7 @@
       "phrase": "face drooping on one side",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-STROKE-01",
@@ -2195,7 +2388,7 @@
       "phrase": "can't breathe",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-RESP-01",
@@ -2223,7 +2416,7 @@
       "phrase": "bleeding a lot",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-TRAUMA-01",
@@ -2265,7 +2458,7 @@
       "phrase": "passed-out",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-NEURO-01",
@@ -2293,7 +2486,7 @@
       "phrase": "high fever and confused",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-SEPSIS-01",
@@ -2328,7 +2521,7 @@
       "phrase": "drank pesticide",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-TOXIC-01",
@@ -2349,7 +2542,7 @@
       "phrase": "bitten by a snake",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-SNAKE-01",
@@ -2377,14 +2570,14 @@
       "phrase": "third-degree burn",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-BURNS-01",
       "phrase": "burnt by fire",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-BURNS-01",
@@ -2412,7 +2605,7 @@
       "phrase": "swollen throat",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-ANAPHYLAXIS-01",
@@ -2433,7 +2626,7 @@
       "phrase": "pregnant and bleeding",
       "language": "en",
       "should_fire": true,
-      "fired": false
+      "fired": true
     },
     {
       "rule_id": "R-OB-01",

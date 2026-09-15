@@ -18,14 +18,19 @@ Read this before drawing any conclusion from the product page's figures.
   free-text symptom extraction is a substring list.
 - **Gate matching is substring, both ways.** A symptom matches a rule term if
   either contains the other, so it has no idea of negation ("no chest pain"
-  trips the cardiac rule), a one-letter input like "a" trips all eleven rules,
-  and hyphens are stripped rather than spaced ("passed-out" misses the "passed
-  out" synonym). The first two fail toward referral; the third does not. These
-  cases are pinned in `frontend_v2/lib/gate/parity.fixtures.json`, so fixing
-  the matcher shows up as a reviewed fixture diff rather than a silent change.
-  The coverage matrix on `/developer` lists 49 phrasings against the 11 rules;
-  21 do not behave as a clinician would expect (12 English misses, all 7
-  romanised Hindi phrasings, 2 over-fires).
+  trips the cardiac rule) and a one-letter input like "a" trips all eleven
+  rules. Both fail toward referral, not away from it, and neither is fixed:
+  fixing negation needs real language handling, not a matcher tweak. Hyphens
+  and common contractions ("passed-out", "can't breathe") are normalized
+  before matching, and phrasings that shared no substring with any rule term
+  ("bitten by a snake", "swollen throat") were added to the synonym table.
+  These cases are pinned in `frontend_v2/lib/gate/parity.fixtures.json`, so
+  changing the matcher or the rules shows up as a reviewed fixture diff
+  rather than a silent change.
+  The coverage matrix on `/developer` lists 49 phrasings against the 11
+  rules; 40 now behave as a clinician would expect. The 9 that don't: all 7
+  romanised Hindi phrasings (no Hindi synonym table exists yet) and the 2
+  substring-driven over-fires above.
 - **OCR.** Tesseract with no preprocessing; 77.5 % mean confidence on the two
   sample documents that carry a text layer. Handwriting is not read.
 

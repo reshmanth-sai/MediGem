@@ -40,14 +40,27 @@ export const GATE_SYNONYMS: Record<string, string[]> = rulesDoc.synonyms;
 
 const PRIORITY_NAMES = { 1: "LOW", 2: "MEDIUM", 3: "HIGH", 4: "CRITICAL" } as const;
 
-/** Python: lower().strip(), re.sub(r"[^\w\s]", ""), re.sub(r"\s+", " "). */
+// Mirrors backend/emergency/evaluator.py's _CONTRACTIONS.
+const CONTRACTIONS: Record<string, string> = {
+  "can't": "cannot",
+  "won't": "will not",
+  "don't": "do not",
+  "doesn't": "does not",
+  "isn't": "is not",
+  "wasn't": "was not",
+  "couldn't": "could not",
+  "shouldn't": "should not",
+};
+
+/** Python: expand contractions, hyphens to spaces, strip punctuation, collapse spaces. */
 export function normalizeText(text: string): string {
   if (!text) return "";
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\p{L}\p{N}_\s]/gu, "")
-    .replace(/\s+/gu, " ");
+  let t = text.toLowerCase().trim();
+  for (const [contraction, expansion] of Object.entries(CONTRACTIONS)) {
+    t = t.split(contraction).join(expansion);
+  }
+  t = t.replace(/[-‐-―]/gu, " ");
+  return t.replace(/[^\p{L}\p{N}_\s]/gu, "").replace(/\s+/gu, " ");
 }
 
 export function expandSymptoms(input: string[], synonyms: Record<string, string[]> = GATE_SYNONYMS): Set<string> {

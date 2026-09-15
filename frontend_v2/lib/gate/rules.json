@@ -1,17 +1,17 @@
 {
   "synonyms": {
-    "chest pain": ["chest tightness", "chest pressure", "thoracic pain", "angina", "squeezing chest pain"],
+    "chest pain": ["chest tightness", "chest pressure", "pressure in my chest", "thoracic pain", "angina", "squeezing chest pain"],
     "shortness of breath": ["difficulty breathing", "dyspnea", "gasping", "breathless", "cannot breathe", "trouble breathing"],
     "loss of consciousness": ["passed out", "fainted", "unresponsive", "blackout", "unconscious", "collapsed"],
-    "stroke symptoms": ["facial drooping", "arm weakness", "slurred speech", "numbness one side", "stroke", "paralysis"],
-    "severe bleeding": ["uncontrolled bleeding", "heavy bleeding", "gushing blood", "arterial bleeding", "profuse bleeding"],
+    "stroke symptoms": ["facial drooping", "face drooping", "arm weakness", "slurred speech", "numbness one side", "stroke", "paralysis"],
+    "severe bleeding": ["uncontrolled bleeding", "heavy bleeding", "bleeding a lot", "gushing blood", "arterial bleeding", "profuse bleeding"],
     "seizure": ["fitting", "convulsions", "epileptic seizure", "shaking uncontrollably", "seizures"],
-    "high fever with confusion": ["fever and delirium", "high temp and confused", "fever with altered mental status", "sepsis symptoms"],
-    "poisoning": ["chemical ingestion", "pesticide swallowed", "swallowed poison", "toxic exposure", "overdose"],
-    "snake bite": ["venomous bite", "snake attack", "cobra bite", "viper bite", "fang marks with swelling"],
-    "severe burns": ["fire burn", "airway burn", "facial burn", "third degree burn", "extensive skin burn"],
-    "anaphylaxis": ["throat swelling", "severe allergic reaction", "allergic shock", "hives and gasping"],
-    "pregnancy emergency": ["vaginal bleeding during pregnancy", "severe abdominal pain pregnant", "eclampsia fitting", "labour complications"]
+    "high fever with confusion": ["fever and delirium", "high fever and confused", "high temp and confused", "fever with altered mental status", "sepsis symptoms"],
+    "poisoning": ["chemical ingestion", "pesticide swallowed", "drank pesticide", "swallowed poison", "toxic exposure", "overdose"],
+    "snake bite": ["venomous bite", "snake attack", "bitten by a snake", "cobra bite", "viper bite", "fang marks with swelling"],
+    "severe burns": ["fire burn", "burnt by fire", "airway burn", "facial burn", "third degree burn", "extensive skin burn"],
+    "anaphylaxis": ["throat swelling", "swollen throat", "severe allergic reaction", "allergic shock", "hives and gasping"],
+    "pregnancy emergency": ["vaginal bleeding during pregnancy", "pregnant and bleeding", "severe abdominal pain pregnant", "eclampsia fitting", "labour complications"]
   },
   "rules": [
     {
