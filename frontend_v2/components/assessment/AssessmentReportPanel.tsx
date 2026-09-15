@@ -175,51 +175,18 @@ export function AssessmentReportPanel({
             <ArrowRight className="h-4 w-4" aria-hidden="true" /> Write referral note
           </button>
         )}
-        <div className={onReview ? "hidden" : "grid grid-cols-1 sm:grid-cols-2 gap-2.5"}>
-          {/* Approve referral */}
-          <button
-            type="button"
-            onClick={onOpenReferralModal}
-            className="h-10 px-3.5 bg-action hover:bg-action-hover text-on-action font-medium text-body-sm rounded-card flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            <span>Approve referral</span>
-          </button>
-
-          {/* Modify assessment */}
-          <button
-            type="button"
-            onClick={onModifyAssessment}
-            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <Edit3 className="h-4 w-4 text-ink-muted" aria-hidden="true" />
-            <span>Modify assessment</span>
-          </button>
-
-          {/* Reject assessment */}
-          <button
-            type="button"
-            onClick={onRejectAssessment}
-            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <XCircle className="h-4 w-4 text-ink-muted" aria-hidden="true" />
-            <span>Reject assessment</span>
-          </button>
-
-          {/* Add clinician note */}
-          <button
-            type="button"
-            onClick={() => {
-              if (onAddNote) onAddNote();
-              else setShowNoteInput((v) => !v);
-            }}
-            className="h-10 px-3.5 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <FileEdit className="h-4 w-4 text-ink-muted" aria-hidden="true" />
-            <span>Add clinician note</span>
-          </button>
-        </div>
-
+        {!onReview && (
+          <div className="space-y-2">
+            <button type="button" onClick={onOpenReferralModal} className="h-10 w-full px-3 bg-action hover:bg-action-hover text-on-action font-medium text-body-sm rounded-card flex items-center justify-center gap-2">
+              <ArrowRight className="h-4 w-4" aria-hidden="true" /> Write referral note
+            </button>
+            <p className="text-body-sm text-ink-muted">
+              {caseData.pipeline?.replay
+                ? "Sign-off is recorded on cases stored by the pipeline API; a replayed run is not stored."
+                : "Sign-off is recorded on cases stored by the pipeline API. This is a bundled example."}
+            </p>
+          </div>
+        )}
         {showNoteInput && (
           <div className="pt-2 space-y-2">
             <textarea

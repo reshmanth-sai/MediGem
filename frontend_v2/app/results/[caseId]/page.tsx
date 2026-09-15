@@ -176,31 +176,43 @@ export default function CaseResultsPage() {
 
             {activeTab === "history" && (
               <div className="space-y-4">
-                <SectionHeader title="Patient Longitudinal History" />
-                <div className="border-y border-rule py-4 space-y-4">
-                  <div className="flex items-start gap-3">
-                    <History className="h-5 w-5 text-ink-muted mt-0.5" aria-hidden="true" />
-                    <div className="space-y-1">
-                      <p className="text-body-sm font-semibold text-ink">
-                        Prior Sub-Center Visit: {caseData.lastVisit || "Sep 7, 2025"}
-                      </p>
-                      <p className="text-body-sm text-ink-muted">
-                        Recorded by {caseData.assignedWorker}. Baseline blood pressure checked; routine outpatient counsel given.
-                      </p>
+                <SectionHeader title="Case history" />
+                <ol className="border-y border-rule divide-y divide-rule">
+                  <li className="py-3 flex items-start gap-3">
+                    <Clock className="h-5 w-5 text-action mt-0.5 shrink-0" aria-hidden="true" />
+                    <div className="space-y-0.5">
+                      <p className="text-body-sm font-semibold text-ink">Intake {caseData.arrivalTime.toLowerCase()}</p>
+                      <p className="text-body-sm text-ink-muted">Presenting complaint: {caseData.chiefComplaint}</p>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3 pt-3 border-t border-rule">
-                    <Clock className="h-5 w-5 text-action mt-0.5" aria-hidden="true" />
-                    <div className="space-y-1">
-                      <p className="text-body-sm font-semibold text-ink">
-                        Current Visit: Today ({caseData.arrivalTime})
-                      </p>
-                      <p className="text-body-sm text-ink-muted">
-                        Presenting complaint: {caseData.chiefComplaint}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  </li>
+                  {caseData.pipeline && (
+                    <li className="py-3 flex items-start gap-3">
+                      <History className="h-5 w-5 text-ink-muted mt-0.5 shrink-0" aria-hidden="true" />
+                      <div className="space-y-0.5">
+                        <p className="text-body-sm font-semibold text-ink">
+                          Assessment {caseData.pipeline.status.toLowerCase().replace(/_/g, " ")}
+                          {caseData.pipeline.durationMs != null ? ` in ${(caseData.pipeline.durationMs / 1000).toFixed(1)} s` : ""}
+                        </p>
+                        <p className="text-body-sm text-ink-muted font-mono">{caseData.pipeline.requestId}{caseData.pipeline.replay ? " · replay" : ""}</p>
+                      </div>
+                    </li>
+                  )}
+                  {caseData.review && (
+                    <li className="py-3 flex items-start gap-3">
+                      <History className="h-5 w-5 text-risk-low mt-0.5 shrink-0" aria-hidden="true" />
+                      <div className="space-y-0.5">
+                        <p className="text-body-sm font-semibold text-ink">
+                          {caseData.review.decision === "approved" ? "Signed off" : caseData.review.decision === "modified" ? "Signed off with changes" : "Rejected"} by {caseData.review.reviewer}
+                        </p>
+                        <p className="text-body-sm text-ink-muted font-mono">{caseData.review.at.replace("T", " ").slice(0, 16)} UTC</p>
+                        {caseData.review.note && <p className="text-body-sm text-ink">{caseData.review.note}</p>}
+                      </div>
+                    </li>
+                  )}
+                </ol>
+                <p className="text-body-sm text-ink-muted">
+                  {caseData.lastVisit ? `Last recorded visit: ${caseData.lastVisit}.` : "No prior visits are recorded for this patient."} A full event log is on the roadmap.
+                </p>
               </div>
             )}
           </section>

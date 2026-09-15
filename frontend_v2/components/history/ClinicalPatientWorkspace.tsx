@@ -15,7 +15,6 @@ import {
   Triangle,
   Shield,
   Octagon,
-  FileText,
   ExternalLink,
   FileUp,
   AlertTriangle,
@@ -232,30 +231,21 @@ export function ClinicalPatientWorkspace({
 
       {/* Sticky Actions Footer (Mockup: 3 buttons on one row) */}
       <div className="p-3 border-t border-rule bg-surface shrink-0">
-        <div className="grid grid-cols-12 gap-2">
-          <button
-            type="button"
-            className="col-span-5 bg-action hover:bg-action-hover text-on-action px-3 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            <span className="truncate">Update Care Plan</span>
-          </button>
-          
+        <div className="grid grid-cols-2 gap-2">
           <Link
             href={`/results/${patient.caseId}`}
-            className="col-span-4 border border-rule bg-surface hover:bg-surface-raised text-ink px-2.5 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="bg-action hover:bg-action-hover text-on-action px-3 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
-            <ExternalLink className="h-3.5 w-3.5 text-ink-muted shrink-0" />
-            <span className="truncate">Open Full Case</span>
+            <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span className="truncate">Open full case</span>
           </Link>
-
           <button
             type="button"
             onClick={onOpenReferralModal}
-            className="col-span-3 border border-rule bg-surface hover:bg-surface-raised text-ink px-2 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="border border-rule bg-surface hover:bg-surface-raised text-ink px-2 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
-            <FileUp className="h-3.5 w-3.5 text-ink-muted shrink-0" />
-            <span className="truncate">Referral Memo</span>
+            <FileUp className="h-3.5 w-3.5 text-ink-muted shrink-0" aria-hidden="true" />
+            <span className="truncate">Referral note</span>
           </button>
         </div>
       </div>

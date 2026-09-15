@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Clock, MapPin, MoreHorizontal, Edit3 } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin } from "lucide-react";
 import { ClinicalCaseData } from "@/lib/casesData";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,6 @@ export interface PatientHeaderProps {
   caseData: ClinicalCaseData;
   activeTab: PatientTabId;
   onTabChange: (tab: PatientTabId) => void;
-  onEditPatient?: () => void;
 }
 
 const TABS: Array<{ id: PatientTabId; label: string }> = [
@@ -26,7 +25,6 @@ export function PatientHeader({
   caseData,
   activeTab,
   onTabChange,
-  onEditPatient,
 }: PatientHeaderProps) {
   return (
     <header className="space-y-4">
@@ -110,25 +108,6 @@ export function PatientHeader({
               </>
             )}
           </div>
-        </div>
-
-        {/* Right Actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={onEditPatient}
-            className="h-9 px-3.5 border border-rule bg-surface text-ink hover:bg-hover text-body-sm font-medium rounded-card inline-flex items-center gap-2 transition-colors cursor-pointer"
-          >
-            <Edit3 className="h-4 w-4 text-ink-muted" aria-hidden="true" />
-            <span>Edit patient</span>
-          </button>
-          <button
-            type="button"
-            aria-label="More options"
-            className="h-9 px-2.5 border border-rule bg-surface text-ink-muted hover:text-ink hover:bg-hover text-body-sm font-medium rounded-card inline-flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <MoreHorizontal className="h-4 w-4 text-ink-muted" aria-hidden="true" />
-          </button>
         </div>
       </div>
 
