@@ -226,7 +226,7 @@ export default function NewCasePage() {
   // (abort, retry); this builds the input from the draft and maps the answer
   // into the case the results route renders. No result is produced locally.
   const runAnalysis = useCallback(
-    async (signal: AbortSignal): Promise<ClinicalCaseData> => {
+    async (signal: AbortSignal, onStage?: (index: number) => void): Promise<ClinicalCaseData> => {
       const vitals: ClinicalCaseData["vitals"] = [
         { label: "HR", value: displayVital(patient.hrBpm, "bpm"), status: (patient.hrBpm ?? 0) > 100 ? "alert" : "normal" },
         {
@@ -264,7 +264,7 @@ export default function NewCasePage() {
         vitals,
         documents: uploads.map((u) => u.file.name),
       };
-      if (replayId) return replayRun(replayId, intake, signal);
+      if (replayId) return replayRun(replayId, intake, signal, onStage);
 
       const res = await analyze({
         patientId: patient.patientId || undefined,

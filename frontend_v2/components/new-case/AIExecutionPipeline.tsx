@@ -17,7 +17,11 @@ import type { ClinicalCaseData } from "@/lib/casesData";
  */
 
 export interface AIExecutionPipelineProps {
-  run: (signal: AbortSignal) => Promise<ClinicalCaseData>;
+  // onStage fires as each stage starts. A real API call never calls it, so
+  // the run stays on stage 0 (Emergency gate) throughout, same as today; a
+  // replay calls it at each of its own recorded stage boundaries so the
+  // overlay tracks which stage is actually running instead of one opaque wait.
+  run: (signal: AbortSignal, onStage?: (index: number) => void) => Promise<ClinicalCaseData>;
   onComplete: (result: ClinicalCaseData) => void;
   onCancel: () => void;
 }
@@ -34,6 +38,7 @@ type Phase = { kind: "running" } | { kind: "done"; result: ClinicalCaseData } | 
 export function AIExecutionPipeline({ run, onComplete, onCancel }: AIExecutionPipelineProps) {
   const [phase, setPhase] = useState<Phase>({ kind: "running" });
   const [elapsed, setElapsed] = useState(0);
+  const [stage, setStage] = useState(0);
   const [attempt, setAttempt] = useState(0);
   const controller = useRef<AbortController | null>(null);
   const onCompleteRef = useRef(onComplete);
@@ -46,10 +51,13 @@ export function AIExecutionPipeline({ run, onComplete, onCancel }: AIExecutionPi
     controller.current = ac;
     setPhase({ kind: "running" });
     setElapsed(0);
+    setStage(0);
     const started = performance.now();
     const tick = setInterval(() => setElapsed((performance.now() - started) / 1000), 250);
 
-    run(ac.signal).then(
+    run(ac.signal, (i) => {
+      if (!ac.signal.aborted) setStage(i);
+    }).then(
       (result) => {
         if (ac.signal.aborted) return;
         setPhase({ kind: "done", result });
@@ -77,7 +85,7 @@ export function AIExecutionPipeline({ run, onComplete, onCancel }: AIExecutionPi
   const degraded = phase.kind === "done" && phase.result.status === "DEGRADED";
 
   const stageState = (idx: number): "done" | "current" | "pending" | "blocked" => {
-    if (phase.kind === "running") return idx === 0 ? "current" : "pending";
+    if (phase.kind === "running") return idx < stage ? "done" : idx === stage ? "current" : "pending";
     if (phase.kind === "error") return "pending";
     if (intercepted) return idx === 0 ? "done" : "blocked";
     return "done";
@@ -96,7 +104,7 @@ export function AIExecutionPipeline({ run, onComplete, onCancel }: AIExecutionPi
             </H3>
             <BodySm className="text-ink-muted font-mono tabular">
               {phase.kind === "running"
-                ? `${elapsed.toFixed(0)} s elapsed`
+                ? `${elapsed.toFixed(0)} s elapsed · ${STAGES[stage].name}`
                 : replay
                 ? `Replay of ${replay.label}, measured ${replay.capturedAt} · recorded ${recordedS}`
                 : recordedS

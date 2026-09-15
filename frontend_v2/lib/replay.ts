@@ -108,12 +108,53 @@ function wait(ms: number, signal: AbortSignal): Promise<void> {
   });
 }
 
+export interface ReplayStage {
+  /** Index into AIExecutionPipeline's STAGES: gate, input processing, reasoning, validation. */
+  index: number;
+  ms: number;
+}
+
+// Output validation has no separate measurement in the capture (see
+// PipelineInspector: "not measured separately"), so it gets a small,
+// honestly-labeled stand-in rather than a real figure, taken out of the
+// reasoning bucket so the total still equals the recorded pipeline duration.
+const VALIDATION_STAND_IN_MS = 40;
+
 /**
- * Replays a recorded run for the current intake. A short pause stands in for
- * the recorded duration; the case carries the real duration and the source.
+ * The recorded run broken into the four pipeline stages, at their real
+ * measured pace. The gate case stops after stage 0, matching the real gate:
+ * a match ends the request before anything else runs.
  */
-export async function replayRun(id: ReplayId, intake: IntakeSnapshot, signal: AbortSignal): Promise<ClinicalCaseData> {
-  await wait(id === "gate" ? 300 : 1200, signal);
+export function replayStages(id: ReplayId): ReplayStage[] {
+  if (id === "gate") {
+    const g = capture.gate;
+    return [{ index: 0, ms: g.orchestrator_block.duration_ms ?? g.latency_ms.match_median }];
+  }
+  const m = capture.modalities[id];
+  const gateMs = capture.gate.latency_ms.benign_median;
+  const inputMs = m.input.input_processing_ms;
+  const reasoningMs = Math.max(0, m.pipeline_ms.median - gateMs - inputMs - VALIDATION_STAND_IN_MS);
+  return [
+    { index: 0, ms: gateMs },
+    { index: 1, ms: inputMs },
+    { index: 2, ms: reasoningMs },
+    { index: 3, ms: VALIDATION_STAND_IN_MS },
+  ];
+}
+
+/**
+ * Replays a recorded run for the current intake, stage by stage, each stage
+ * waiting its own real recorded duration: the gate clears in under a
+ * millisecond, input processing takes its measured time, and the model
+ * stage sits for as long as the model actually took. `onStage` fires as each
+ * stage starts, so the caller can show which one is running instead of one
+ * opaque wait. The case that comes back carries the real total and the source.
+ */
+export async function replayRun(id: ReplayId, intake: IntakeSnapshot, signal: AbortSignal, onStage?: (index: number) => void): Promise<ClinicalCaseData> {
+  for (const stage of replayStages(id)) {
+    onStage?.(stage.index);
+    await wait(stage.ms, signal);
+  }
   const option = REPLAY_OPTIONS.find((o) => o.id === id)!;
   const c = mapAnalysisToCase(replayResponse(id), intake);
   const sourceFile = id === "gate" ? "evaluation/capture_landing_data.py (gate case)" : capture.modalities[id].file;
