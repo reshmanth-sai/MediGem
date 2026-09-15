@@ -134,3 +134,9 @@ ijfw/
 
 # local case store
 data/
+
+# evaluation/report_generator.py's own output: regenerate rather than commit,
+# so a stale run never sits in the repo contradicting the real capture.json.
+evaluation/evaluation_report.md
+evaluation/evaluation_summary.json
+evaluation/benchmark_results.csv
