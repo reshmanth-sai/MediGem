@@ -1,0 +1,2101 @@
+{
+  "source": "backend/emergency/rules.json",
+  "cases": [
+    {
+      "input": [],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "",
+        "   "
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "chest tightness",
+        "breathlessness"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01",
+          "R-RESP-01"
+        ],
+        "matched_symptoms": [
+          "chest pain",
+          "shortness of breath"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "slurred speech",
+        "arm weakness"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "mild headache"
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "mild headache"
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "Mild fatigue",
+        "slight dry skin"
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "Mild fatigue",
+          "slight dry skin"
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "fever and delirium",
+        "chest tightness"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01",
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "chest pain",
+          "high fever with confusion"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "cobra bite on right ankle",
+        "rapid swelling"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SNAKE-01"
+        ],
+        "matched_symptoms": [
+          "snake bite"
+        ],
+        "emergency_category": "SNAKE_BITE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "seene mein dard"
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "seene mein dard"
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "saans nahi aa rahi"
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "saans nahi aa rahi"
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "सीने में दर्द"
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "सीने में दर्द"
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "CHEST   PAIN!!!"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "  passed-out  "
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "  passed-out  "
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "pain"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain",
+          "pregnancy emergency"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "a"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01",
+          "R-STROKE-01",
+          "R-RESP-01",
+          "R-TRAUMA-01",
+          "R-NEURO-01",
+          "R-TOXIC-01",
+          "R-SNAKE-01",
+          "R-BURNS-01",
+          "R-ANAPHYLAXIS-01",
+          "R-OB-01",
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "anaphylaxis",
+          "chest pain",
+          "high fever with confusion",
+          "loss of consciousness",
+          "poisoning",
+          "pregnancy emergency",
+          "seizure",
+          "severe bleeding",
+          "severe burns",
+          "shortness of breath",
+          "snake bite",
+          "stroke symptoms"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "bleeding"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TRAUMA-01",
+          "R-OB-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency",
+          "severe bleeding"
+        ],
+        "emergency_category": "TRAUMA",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "cough for two weeks",
+        "night sweats"
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "cough for two weeks",
+          "night sweats"
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "pregnant",
+        "vaginal bleeding during pregnancy"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "hives and gasping"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-RESP-01",
+          "R-ANAPHYLAXIS-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "anaphylaxis",
+          "shortness of breath"
+        ],
+        "emergency_category": "RESPIRATORY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "fever"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "high fever with confusion"
+        ],
+        "emergency_category": "SEPSIS",
+        "priority": "HIGH",
+        "rule_match_score": 1.0,
+        "recommended_action": "NEAREST_HOSPITAL",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "high fever with confusion",
+        "seizure"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01",
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "high fever with confusion",
+          "seizure"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "overdose",
+        "unresponsive"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TOXIC-01",
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness",
+          "poisoning"
+        ],
+        "emergency_category": "POISONING",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "third-degree burn on both arms"
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "third-degree burn on both arms"
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "headache, dizziness"
+      ],
+      "expected": {
+        "emergency_detected": false,
+        "safe_for_ai_processing": true,
+        "matched_rules": [],
+        "matched_symptoms": [
+          "headache, dizziness"
+        ],
+        "emergency_category": null,
+        "priority": "LOW",
+        "rule_match_score": 0.0,
+        "recommended_action": "MONITOR_PATIENT",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "stroke"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "no chest pain"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "chest pain"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "chest tightness"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "chest pressure"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "thoracic pain"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "angina"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "squeezing chest pain"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "chest pain"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "shortness of breath"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-RESP-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "shortness of breath"
+        ],
+        "emergency_category": "RESPIRATORY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "difficulty breathing"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-RESP-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "shortness of breath"
+        ],
+        "emergency_category": "RESPIRATORY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "dyspnea"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-RESP-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "shortness of breath"
+        ],
+        "emergency_category": "RESPIRATORY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "gasping"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-RESP-01",
+          "R-ANAPHYLAXIS-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "anaphylaxis",
+          "shortness of breath"
+        ],
+        "emergency_category": "RESPIRATORY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "breathless"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-RESP-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "shortness of breath"
+        ],
+        "emergency_category": "RESPIRATORY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "cannot breathe"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-RESP-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "shortness of breath"
+        ],
+        "emergency_category": "RESPIRATORY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "trouble breathing"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-RESP-01",
+          "R-CARDIAC-01"
+        ],
+        "matched_symptoms": [
+          "shortness of breath"
+        ],
+        "emergency_category": "RESPIRATORY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "loss of consciousness"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "passed out"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "fainted"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "unresponsive"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "blackout"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "unconscious"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "collapsed"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "stroke symptoms"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "facial drooping"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "arm weakness"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "slurred speech"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "numbness one side"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "paralysis"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-STROKE-01"
+        ],
+        "matched_symptoms": [
+          "stroke symptoms"
+        ],
+        "emergency_category": "STROKE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "severe bleeding"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TRAUMA-01"
+        ],
+        "matched_symptoms": [
+          "severe bleeding"
+        ],
+        "emergency_category": "TRAUMA",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "uncontrolled bleeding"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TRAUMA-01"
+        ],
+        "matched_symptoms": [
+          "severe bleeding"
+        ],
+        "emergency_category": "TRAUMA",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "heavy bleeding"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TRAUMA-01"
+        ],
+        "matched_symptoms": [
+          "severe bleeding"
+        ],
+        "emergency_category": "TRAUMA",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "gushing blood"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TRAUMA-01"
+        ],
+        "matched_symptoms": [
+          "severe bleeding"
+        ],
+        "emergency_category": "TRAUMA",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "arterial bleeding"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TRAUMA-01"
+        ],
+        "matched_symptoms": [
+          "severe bleeding"
+        ],
+        "emergency_category": "TRAUMA",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "profuse bleeding"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TRAUMA-01"
+        ],
+        "matched_symptoms": [
+          "severe bleeding"
+        ],
+        "emergency_category": "TRAUMA",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "EMERGENCY_STABILIZATION",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "seizure"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "seizure"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "fitting"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01",
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency",
+          "seizure"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "convulsions"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "seizure"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "epileptic seizure"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "seizure"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "shaking uncontrollably"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "seizure"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "seizures"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "seizure"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 0.5,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "high fever with confusion"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "high fever with confusion"
+        ],
+        "emergency_category": "SEPSIS",
+        "priority": "HIGH",
+        "rule_match_score": 1.0,
+        "recommended_action": "NEAREST_HOSPITAL",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "fever and delirium"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "high fever with confusion"
+        ],
+        "emergency_category": "SEPSIS",
+        "priority": "HIGH",
+        "rule_match_score": 1.0,
+        "recommended_action": "NEAREST_HOSPITAL",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "high temp and confused"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "high fever with confusion"
+        ],
+        "emergency_category": "SEPSIS",
+        "priority": "HIGH",
+        "rule_match_score": 1.0,
+        "recommended_action": "NEAREST_HOSPITAL",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "fever with altered mental status"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "high fever with confusion"
+        ],
+        "emergency_category": "SEPSIS",
+        "priority": "HIGH",
+        "rule_match_score": 1.0,
+        "recommended_action": "NEAREST_HOSPITAL",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "sepsis symptoms"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SEPSIS-01"
+        ],
+        "matched_symptoms": [
+          "high fever with confusion"
+        ],
+        "emergency_category": "SEPSIS",
+        "priority": "HIGH",
+        "rule_match_score": 1.0,
+        "recommended_action": "NEAREST_HOSPITAL",
+        "should_refer_immediately": false,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "poisoning"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TOXIC-01"
+        ],
+        "matched_symptoms": [
+          "poisoning"
+        ],
+        "emergency_category": "POISONING",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "chemical ingestion"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TOXIC-01"
+        ],
+        "matched_symptoms": [
+          "poisoning"
+        ],
+        "emergency_category": "POISONING",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "pesticide swallowed"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TOXIC-01"
+        ],
+        "matched_symptoms": [
+          "poisoning"
+        ],
+        "emergency_category": "POISONING",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "swallowed poison"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TOXIC-01"
+        ],
+        "matched_symptoms": [
+          "poisoning"
+        ],
+        "emergency_category": "POISONING",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "toxic exposure"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TOXIC-01"
+        ],
+        "matched_symptoms": [
+          "poisoning"
+        ],
+        "emergency_category": "POISONING",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "overdose"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-TOXIC-01"
+        ],
+        "matched_symptoms": [
+          "poisoning"
+        ],
+        "emergency_category": "POISONING",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "snake bite"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SNAKE-01"
+        ],
+        "matched_symptoms": [
+          "snake bite"
+        ],
+        "emergency_category": "SNAKE_BITE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "venomous bite"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SNAKE-01"
+        ],
+        "matched_symptoms": [
+          "snake bite"
+        ],
+        "emergency_category": "SNAKE_BITE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "snake attack"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SNAKE-01"
+        ],
+        "matched_symptoms": [
+          "snake bite"
+        ],
+        "emergency_category": "SNAKE_BITE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "cobra bite"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SNAKE-01"
+        ],
+        "matched_symptoms": [
+          "snake bite"
+        ],
+        "emergency_category": "SNAKE_BITE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "viper bite"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SNAKE-01"
+        ],
+        "matched_symptoms": [
+          "snake bite"
+        ],
+        "emergency_category": "SNAKE_BITE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "fang marks with swelling"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-SNAKE-01"
+        ],
+        "matched_symptoms": [
+          "snake bite"
+        ],
+        "emergency_category": "SNAKE_BITE",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "severe burns"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-BURNS-01"
+        ],
+        "matched_symptoms": [
+          "severe burns"
+        ],
+        "emergency_category": "BURNS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "fire burn"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-BURNS-01"
+        ],
+        "matched_symptoms": [
+          "severe burns"
+        ],
+        "emergency_category": "BURNS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "airway burn"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-BURNS-01"
+        ],
+        "matched_symptoms": [
+          "severe burns"
+        ],
+        "emergency_category": "BURNS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "facial burn"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-BURNS-01"
+        ],
+        "matched_symptoms": [
+          "severe burns"
+        ],
+        "emergency_category": "BURNS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "third degree burn"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-BURNS-01"
+        ],
+        "matched_symptoms": [
+          "severe burns"
+        ],
+        "emergency_category": "BURNS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "extensive skin burn"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-BURNS-01"
+        ],
+        "matched_symptoms": [
+          "severe burns"
+        ],
+        "emergency_category": "BURNS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "anaphylaxis"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-ANAPHYLAXIS-01"
+        ],
+        "matched_symptoms": [
+          "anaphylaxis"
+        ],
+        "emergency_category": "ANAPHYLAXIS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "throat swelling"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-ANAPHYLAXIS-01"
+        ],
+        "matched_symptoms": [
+          "anaphylaxis"
+        ],
+        "emergency_category": "ANAPHYLAXIS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "severe allergic reaction"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-ANAPHYLAXIS-01"
+        ],
+        "matched_symptoms": [
+          "anaphylaxis"
+        ],
+        "emergency_category": "ANAPHYLAXIS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "allergic shock"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-ANAPHYLAXIS-01"
+        ],
+        "matched_symptoms": [
+          "anaphylaxis"
+        ],
+        "emergency_category": "ANAPHYLAXIS",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "pregnancy emergency"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "vaginal bleeding during pregnancy"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "severe abdominal pain pregnant"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "eclampsia fitting"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01",
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency",
+          "seizure"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "labour complications"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-OB-01"
+        ],
+        "matched_symptoms": [
+          "pregnancy emergency"
+        ],
+        "emergency_category": "PREGNANCY_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    },
+    {
+      "input": [
+        "chest pain",
+        "shortness of breath"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-CARDIAC-01",
+          "R-RESP-01"
+        ],
+        "matched_symptoms": [
+          "chest pain",
+          "shortness of breath"
+        ],
+        "emergency_category": "CARDIAC",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "CALL_AMBULANCE",
+        "should_refer_immediately": true,
+        "should_call_ambulance": true
+      }
+    },
+    {
+      "input": [
+        "loss of consciousness",
+        "seizure"
+      ],
+      "expected": {
+        "emergency_detected": true,
+        "safe_for_ai_processing": false,
+        "matched_rules": [
+          "R-NEURO-01"
+        ],
+        "matched_symptoms": [
+          "loss of consciousness",
+          "seizure"
+        ],
+        "emergency_category": "GENERAL_EMERGENCY",
+        "priority": "CRITICAL",
+        "rule_match_score": 1.0,
+        "recommended_action": "IMMEDIATE_REFERRAL",
+        "should_refer_immediately": true,
+        "should_call_ambulance": false
+      }
+    }
+  ]
+}

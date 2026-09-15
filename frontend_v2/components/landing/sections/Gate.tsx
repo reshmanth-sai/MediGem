@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { copy } from "../copy";
 import { prefersReducedMotion } from "@/lib/motion";
 import { capture } from "../data";
 import { TraceStrip } from "../Trace";
+import { evaluateGate, parseSymptoms } from "@/lib/gate/evaluate";
 
 const g = capture.gate;
 
@@ -13,33 +14,36 @@ function fmt(n: number, d = 2) {
   return n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
 }
 
-// The interlock. A hard cut to black, the eleven rules as a ledger, and the
-// path INPUT > RULE GATE > BLOCK > LLM driven by scroll with no easing at all.
+// One evaluation is below timer resolution in most browsers, so time a
+// batch and report the mean. Measured after mount, never during render, so
+// the server markup and the first client render agree.
+function meanEvalMs(symptoms: string[]) {
+  const runs = 200;
+  const start = performance.now();
+  for (let i = 0; i < runs; i++) evaluateGate(symptoms);
+  return (performance.now() - start) / runs;
+}
+
+// The interlock. A hard cut to black, the eleven rules as a ledger, and a
+// live input: the real rules evaluated in the browser on every keystroke,
+// walking INPUT > RULE GATE > BLOCK > LLM.
 export function Gate({ reduced }: { reduced: boolean }) {
   const ref = useRef<HTMLElement>(null);
+  const [text, setText] = useState<string>(copy.gate.presets[0].text);
+  const symptoms = useMemo(() => parseSymptoms(text), [text]);
+  const result = useMemo(() => evaluateGate(symptoms), [symptoms]);
+  const [perEvalMs, setPerEvalMs] = useState<number | null>(null);
+  useEffect(() => setPerEvalMs(meanEvalMs(symptoms)), [symptoms]);
+  const hit = result.emergency_detected;
+  const preset = copy.gate.presets.find((p) => p.text === text);
   const [open, setOpen] = useState<string | null>(g.match_case.matched_rules[0] ?? null);
+  useEffect(() => {
+    if (result.matched_rules[0]) setOpen(result.matched_rules[0]);
+  }, [result]);
 
   useEffect(() => {
     if (reduced || prefersReducedMotion() || !ref.current) return;
     const ctx = gsap.context(() => {
-      const steps = gsap.utils.toArray<HTMLElement>(".gate-path li");
-      steps.forEach((el, i) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0.6 },
-          {
-            opacity: 1,
-            duration: 0.01,
-            ease: "none",
-            scrollTrigger: { trigger: ref.current, start: `${20 + i * 12}% 60%`, toggleActions: "play none none reverse" },
-          }
-        );
-      });
-      gsap.fromTo(
-        ".gate-blocked",
-        { visibility: "hidden" },
-        { visibility: "visible", duration: 0.01, scrollTrigger: { trigger: ref.current, start: "60% 60%", toggleActions: "play none none reverse" } }
-      );
       gsap.from(".gate-ledger li", {
         opacity: 0,
         duration: 0.01,
@@ -74,13 +78,13 @@ export function Gate({ reduced }: { reduced: boolean }) {
             <li key={r.id}>
               <button
                 type="button"
-                className={open === r.id ? "gate-rule is-open" : "gate-rule"}
+                className={`gate-rule${open === r.id ? " is-open" : ""}${result.matched_rules.includes(r.id) ? " is-hit" : ""}`}
                 aria-expanded={open === r.id}
                 onMouseEnter={() => setOpen(r.id)}
                 onFocus={() => setOpen(r.id)}
                 onClick={() => setOpen(r.id)}
               >
-                <span>{r.id}</span>
+                <span>{r.id}{result.matched_rules.includes(r.id) && <span className="gate-rule-hit"> · matched</span>}</span>
                 <span className="gate-rule-cat">{r.category}</span>
               </button>
             </li>
@@ -103,39 +107,62 @@ export function Gate({ reduced }: { reduced: boolean }) {
 
       <div className="gate-demo">
         <div className="gate-demo-path">
-          <div className="t-label">A real input, evaluated by the gate</div>
-          <div className="t-mono gate-input">symptoms = [{g.match_case.symptoms.map((s) => `"${s}"`).join(", ")}]</div>
+          <label htmlFor="gate-try" className="t-label">{copy.gate.tryLabel}</label>
+          <input
+            id="gate-try"
+            className="t-mono gate-field"
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            spellCheck={false}
+            autoComplete="off"
+            aria-describedby="gate-try-hint"
+          />
+          <p id="gate-try-hint" className="t-mono stage-note">{copy.gate.tryHint}</p>
+          <ul className="gate-presets" aria-label="Example inputs">
+            {copy.gate.presets.map((p) => (
+              <li key={p.text}>
+                <button type="button" className="t-mono gate-preset" aria-pressed={text === p.text} onClick={() => setText(p.text)}>
+                  {p.text}
+                </button>
+              </li>
+            ))}
+          </ul>
           <ol className="gate-path t-mono">
-            <li>Input</li>
-            <li>Rule gate · {g.match_case.matched_rules.join(", ")} · match in {fmt(g.orchestrator_block.duration_ms ?? g.latency_ms.match_median)} ms</li>
-            <li>{g.match_case.priority} · {g.match_case.recommended_action}</li>
+            <li>Input · {symptoms.length} {symptoms.length === 1 ? "symptom" : "symptoms"}</li>
+            <li>Rule gate · {hit ? result.matched_rules.join(", ") : "no rule matched"}{perEvalMs != null && ` · ${fmt(perEvalMs, 3)} ms in this browser`}</li>
+            <li>{result.priority} · {result.recommended_action}</li>
             <li className="gate-llm">
               LLM
-              <span className="gate-blocked" style={reduced ? { visibility: "visible" } : undefined}>{copy.gate.blocked}</span>
+              <span className={hit ? "gate-blocked" : "gate-passed"}>{hit ? copy.gate.blocked : copy.gate.passed}</span>
             </li>
           </ol>
-          <div className="t-mono stage-note">status {g.orchestrator_block.status} · safe_for_ai_processing {String(g.match_case.safe_for_ai_processing)}</div>
+          {preset && <p className="t-body gate-note">{preset.note}</p>}
         </div>
-        <div className="gate-state" aria-label="Gate state for this input">
+        <div className="gate-state" aria-label="Gate state for this input" aria-live="polite">
           <div className="gate-state-row">
             <span className="t-label">Trigger</span>
-            <span className="t-mono">{g.match_case.symptoms.map((x, i) => <span key={x}>&ldquo;{x}&rdquo; &rarr; {g.match_case.matched_symptoms[i] ?? ""}<br /></span>)}</span>
+            <span className="t-mono">
+              {hit
+                ? result.triggered[0].matched.map((m) => <span key={m}>{m}<br /></span>)
+                : "none"}
+            </span>
           </div>
           <div className="gate-state-row">
             <span className="t-label">Rule</span>
-            <span className="t-mono-lg">{g.match_case.matched_rules[0]}</span>
+            <span className="t-mono-lg">{hit ? result.matched_rules[0] : "None"}</span>
           </div>
           <div className="gate-state-row">
             <span className="t-label">Status</span>
-            <span className="t-mono-lg gate-state-blocked">Blocked</span>
+            <span className={hit ? "t-mono-lg gate-state-blocked" : "t-mono-lg"}>{hit ? "Blocked" : "Clear"}</span>
           </div>
           <div className="gate-state-row">
             <span className="t-label">LLM inference</span>
-            <span className="t-mono-lg">Not allowed</span>
+            <span className="t-mono-lg">{result.safe_for_ai_processing ? "Allowed" : "Not allowed"}</span>
           </div>
           <div className="gate-state-row">
             <span className="t-label">Action</span>
-            <span className="t-mono-lg">{g.match_case.recommended_action.replace(/_/g, " ")}</span>
+            <span className="t-mono-lg">{result.recommended_action.replace(/_/g, " ")}</span>
           </div>
         </div>
       </div>

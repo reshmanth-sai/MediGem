@@ -1,0 +1,139 @@
+{
+  "synonyms": {
+    "chest pain": ["chest tightness", "chest pressure", "thoracic pain", "angina", "squeezing chest pain"],
+    "shortness of breath": ["difficulty breathing", "dyspnea", "gasping", "breathless", "cannot breathe", "trouble breathing"],
+    "loss of consciousness": ["passed out", "fainted", "unresponsive", "blackout", "unconscious", "collapsed"],
+    "stroke symptoms": ["facial drooping", "arm weakness", "slurred speech", "numbness one side", "stroke", "paralysis"],
+    "severe bleeding": ["uncontrolled bleeding", "heavy bleeding", "gushing blood", "arterial bleeding", "profuse bleeding"],
+    "seizure": ["fitting", "convulsions", "epileptic seizure", "shaking uncontrollably", "seizures"],
+    "high fever with confusion": ["fever and delirium", "high temp and confused", "fever with altered mental status", "sepsis symptoms"],
+    "poisoning": ["chemical ingestion", "pesticide swallowed", "swallowed poison", "toxic exposure", "overdose"],
+    "snake bite": ["venomous bite", "snake attack", "cobra bite", "viper bite", "fang marks with swelling"],
+    "severe burns": ["fire burn", "airway burn", "facial burn", "third degree burn", "extensive skin burn"],
+    "anaphylaxis": ["throat swelling", "severe allergic reaction", "allergic shock", "hives and gasping"],
+    "pregnancy emergency": ["vaginal bleeding during pregnancy", "severe abdominal pain pregnant", "eclampsia fitting", "labour complications"]
+  },
+  "rules": [
+    {
+      "rule_id": "R-CARDIAC-01",
+      "rule_name": "Acute Cardiac Event",
+      "description": "Triggers on acute chest pain, angina, or chest tightness with breathlessness.",
+      "symptoms_required": ["chest pain", "shortness of breath"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "CALL_AMBULANCE",
+      "emergency_category": "CARDIAC",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-STROKE-01",
+      "rule_name": "Acute Cerebrovascular Event (Stroke)",
+      "description": "Triggers on sudden neurological deficits, slurred speech, or facial drooping.",
+      "symptoms_required": ["stroke symptoms"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "CALL_AMBULANCE",
+      "emergency_category": "STROKE",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-RESP-01",
+      "rule_name": "Severe Respiratory Distress",
+      "description": "Triggers on acute dyspnea, cyanosis, or gasping for air.",
+      "symptoms_required": ["shortness of breath"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "EMERGENCY_STABILIZATION",
+      "emergency_category": "RESPIRATORY",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-TRAUMA-01",
+      "rule_name": "Severe Uncontrolled Trauma / Hemorrhage",
+      "description": "Triggers on major trauma or active severe hemorrhage.",
+      "symptoms_required": ["severe bleeding"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "EMERGENCY_STABILIZATION",
+      "emergency_category": "TRAUMA",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-NEURO-01",
+      "rule_name": "Unconsciousness / Active Seizure",
+      "description": "Triggers on unresponsiveness, fainting, or prolonged convulsive seizure.",
+      "symptoms_required": ["loss of consciousness", "seizure"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "IMMEDIATE_REFERRAL",
+      "emergency_category": "GENERAL_EMERGENCY",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-SEPSIS-01",
+      "rule_name": "High Fever with Altered Mental Status (Sepsis)",
+      "description": "Triggers on severe high fever accompanied by confusion or delirium.",
+      "symptoms_required": ["high fever with confusion"],
+      "min_match_count": 1,
+      "priority": 3,
+      "recommended_action": "NEAREST_HOSPITAL",
+      "emergency_category": "SEPSIS",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-TOXIC-01",
+      "rule_name": "Acute Poisoning / Chemical Ingestion",
+      "description": "Triggers on suspected toxic substance, pesticide, or chemical ingestion.",
+      "symptoms_required": ["poisoning"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "IMMEDIATE_REFERRAL",
+      "emergency_category": "POISONING",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-SNAKE-01",
+      "rule_name": "Venomous Snake Bite",
+      "description": "Triggers on suspected or confirmed venomous snake envenomation.",
+      "symptoms_required": ["snake bite"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "CALL_AMBULANCE",
+      "emergency_category": "SNAKE_BITE",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-BURNS-01",
+      "rule_name": "Major Thermal / Airway Burn",
+      "description": "Triggers on severe thermal injury or facial/airway involvement.",
+      "symptoms_required": ["severe burns"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "IMMEDIATE_REFERRAL",
+      "emergency_category": "BURNS",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-ANAPHYLAXIS-01",
+      "rule_name": "Severe Anaphylaxis / Airway Compromise",
+      "description": "Triggers on severe acute systemic allergic reaction.",
+      "symptoms_required": ["anaphylaxis"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "CALL_AMBULANCE",
+      "emergency_category": "ANAPHYLAXIS",
+      "enabled": true
+    },
+    {
+      "rule_id": "R-OB-01",
+      "rule_name": "Obstetric / Pregnancy Emergency",
+      "description": "Triggers on vaginal hemorrhage or acute severe pain/complications in pregnancy.",
+      "symptoms_required": ["pregnancy emergency"],
+      "min_match_count": 1,
+      "priority": 4,
+      "recommended_action": "IMMEDIATE_REFERRAL",
+      "emergency_category": "PREGNANCY_EMERGENCY",
+      "enabled": true
+    }
+  ]
+}

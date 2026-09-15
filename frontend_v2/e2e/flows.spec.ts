@@ -12,6 +12,22 @@ test("product page loads and opens the workstation", async ({ page }) => {
   await expect(page.getByRole("note")).toContainText(/example queue/i);
 });
 
+test("the landing gate evaluates what the visitor types", async ({ page }) => {
+  await page.goto("/");
+  const field = page.getByRole("textbox", { name: "Try the gate", exact: true });
+  const state = page.getByLabel("Gate state for this input");
+  await expect(state).toContainText("R-CARDIAC-01");
+  await expect(state).toContainText("Not allowed");
+
+  await field.fill("mild headache, dizziness");
+  await expect(state).toContainText("Clear");
+  await expect(state).toContainText("Allowed");
+
+  await page.getByRole("button", { name: "slurred speech, arm weakness" }).click();
+  await expect(field).toHaveValue("slurred speech, arm weakness");
+  await expect(state).toContainText("R-STROKE-01");
+});
+
 test("intake replays a recorded run and lands on a result", async ({ page }) => {
   await page.goto("/new-case");
   await page.getByRole("button", { name: /load demo case/i }).click();

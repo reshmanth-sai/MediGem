@@ -16,6 +16,13 @@ Read this before drawing any conclusion from the product page's figures.
 - **Small gate.** 11 rules across 11 categories with one English synonym
   table. Symptoms in Hindi or transliterated Hindi do not match. The assistant's
   free-text symptom extraction is a substring list.
+- **Gate matching is substring, both ways.** A symptom matches a rule term if
+  either contains the other, so it has no idea of negation ("no chest pain"
+  trips the cardiac rule), a one-letter input like "a" trips all eleven rules,
+  and hyphens are stripped rather than spaced ("passed-out" misses the "passed
+  out" synonym). The first two fail toward referral; the third does not. These
+  cases are pinned in `frontend_v2/lib/gate/parity.fixtures.json`, so fixing
+  the matcher shows up as a reviewed fixture diff rather than a silent change.
 - **OCR.** Tesseract with no preprocessing; 77.5 % mean confidence on the two
   sample documents that carry a text layer. Handwriting is not read.
 
