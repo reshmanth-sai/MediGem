@@ -72,10 +72,26 @@ Apple M5, `gemma3:4b` via Ollama, 2026-09-14. Raw capture: [`frontend_v2/compone
 
 ## Run it
 
-Prerequisites: Python 3.10+, Node 20+, [Tesseract](https://tesseract-ocr.github.io/tessdoc/Installation.html), [Ollama](https://ollama.com) with `ollama pull gemma3:4b`.
+**API + Ollama, one command:**
 
 ```bash
 git clone https://github.com/reshmanth-sai/MediGem.git && cd MediGem
+docker compose up
+```
+
+Pulls `gemma3:4b` on first run (a few GB; the API waits for the pull to finish
+before it starts, so `docker compose up` just takes as long as that download
+does the first time) and serves the API at `http://localhost:8000`. Override
+the model or add an API key with a `.env` file next to `docker-compose.yml`
+(`MODEL_NAME=...`, `MEDIGEM_API_KEY=...`); see the comment at the top of
+[`docker-compose.yml`](docker-compose.yml). The frontend isn't part of this —
+run it separately (below) for hot reload.
+
+**Without Docker**, or to work on the frontend:
+
+Prerequisites: Python 3.10+, Node 20+, [Tesseract](https://tesseract-ocr.github.io/tessdoc/Installation.html), [Ollama](https://ollama.com) with `ollama pull gemma3:4b`.
+
+```bash
 python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 
 # Terminal 1: the pipeline API (FastAPI over the orchestrator)
@@ -161,6 +177,7 @@ frontend_v2/
 evaluation/     capture_landing_data.py — the script every published figure comes from
 tests/          backend suite
 docs/           architecture, safety, limitations
+Dockerfile, docker-compose.yml   API + Ollama, one command — see Run it above
 ```
 
 ---

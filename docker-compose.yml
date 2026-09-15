@@ -1,0 +1,66 @@
+# API + Ollama in one command:
+#
+#   docker compose up
+#
+# The API waits for the model to finish pulling before it starts, so the
+# first request never race a model that isn't there yet; that just makes
+# the first `docker compose up` take as long as the pull does (a few GB).
+# The frontend is not part of this -- run it separately with
+# `cd frontend_v2 && npm run dev` for hot reload, pointed at
+# NEXT_PUBLIC_API_BASE_URL=http://localhost:8000. See README.md "Run it".
+#
+# Override the model or add an API key with a .env file next to this one:
+#   MODEL_NAME=gemma3:4b
+#   MEDIGEM_API_KEY=
+#   MEDIGEM_CORS_ORIGINS=
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # One-shot: pulls the model, then exits 0. `api` depends on that exit
+  # rather than on `ollama` alone, so the model is guaranteed present
+  # before the API takes its first request.
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: ["ollama", "pull", "${MODEL_NAME:-gemma3:4b}"]
+
+  api:
+    build: .
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - MODEL_NAME=${MODEL_NAME:-gemma3:4b}
+      - MEDIGEM_DB_PATH=/app/data/medigem.db
+      - MEDIGEM_API_KEY=${MEDIGEM_API_KEY:-}
+      - MEDIGEM_CORS_ORIGINS=${MEDIGEM_CORS_ORIGINS:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - medigem_data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8000/health', timeout=3)\" || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  ollama_data:
+  medigem_data:

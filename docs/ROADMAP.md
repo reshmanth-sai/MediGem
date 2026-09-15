@@ -7,9 +7,7 @@ up so the scope is clear.
 
 ## Planned
 
-1. **`docker compose up`.** API + Ollama in one command, so an engineer can run
-   the live queue without three terminals.
-2. **Account lifecycle.** Password reset from the UI (an admin can already
+1. **Account lifecycle.** Password reset from the UI (an admin can already
    reset one via the API), lockout after repeated failed logins, an audit log
    of failed attempts. The accounts themselves are done; this is hardening.
 
@@ -48,3 +46,8 @@ up so the scope is clear.
   `/developer`; the intake replay now runs at the recorded pace instead of
   resolving instantly; a four-step, dismissible, deep-linkable first-visit
   tour of the workstation.
+- `docker compose up`: API + Ollama, one command. The API waits for the model
+  pull to finish (`depends_on: condition: service_completed_successfully`)
+  before it starts, so the first request never races a model that isn't
+  there yet. Verified live: the full stack built, pulled a model, and served
+  a real `/analyze` request end to end.
