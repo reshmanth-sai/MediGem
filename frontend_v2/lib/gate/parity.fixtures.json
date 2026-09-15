@@ -2097,5 +2097,350 @@
         "should_call_ambulance": false
       }
     }
+  ],
+  "coverage": [
+    {
+      "rule_id": "R-CARDIAC-01",
+      "phrase": "chest pain",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-CARDIAC-01",
+      "phrase": "chest tightness",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-CARDIAC-01",
+      "phrase": "pressure in my chest",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-CARDIAC-01",
+      "phrase": "seene mein dard",
+      "language": "hi-Latn",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-CARDIAC-01",
+      "phrase": "chest x-ray normal",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-CARDIAC-01",
+      "phrase": "no chest pain",
+      "language": "en",
+      "should_fire": false,
+      "fired": true
+    },
+    {
+      "rule_id": "R-STROKE-01",
+      "phrase": "slurred speech",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-STROKE-01",
+      "phrase": "facial drooping",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-STROKE-01",
+      "phrase": "face drooping on one side",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-STROKE-01",
+      "phrase": "lakwa",
+      "language": "hi-Latn",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-STROKE-01",
+      "phrase": "speech therapy follow-up",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-RESP-01",
+      "phrase": "difficulty breathing",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-RESP-01",
+      "phrase": "cannot breathe",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-RESP-01",
+      "phrase": "can't breathe",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-RESP-01",
+      "phrase": "saans lene mein takleef",
+      "language": "hi-Latn",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-RESP-01",
+      "phrase": "breathing normally",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-TRAUMA-01",
+      "phrase": "heavy bleeding",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-TRAUMA-01",
+      "phrase": "bleeding a lot",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-TRAUMA-01",
+      "phrase": "khoon beh raha hai",
+      "language": "hi-Latn",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-TRAUMA-01",
+      "phrase": "bleeding stopped",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-TRAUMA-01",
+      "phrase": "bleeding gums",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-NEURO-01",
+      "phrase": "seizure",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-NEURO-01",
+      "phrase": "fainted",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-NEURO-01",
+      "phrase": "passed-out",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-NEURO-01",
+      "phrase": "behosh",
+      "language": "hi-Latn",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-NEURO-01",
+      "phrase": "feels faint",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-SEPSIS-01",
+      "phrase": "fever and delirium",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-SEPSIS-01",
+      "phrase": "high fever and confused",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-SEPSIS-01",
+      "phrase": "tez bukhar aur behoshi",
+      "language": "hi-Latn",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-SEPSIS-01",
+      "phrase": "fever",
+      "language": "en",
+      "should_fire": false,
+      "fired": true
+    },
+    {
+      "rule_id": "R-TOXIC-01",
+      "phrase": "overdose",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-TOXIC-01",
+      "phrase": "swallowed poison",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-TOXIC-01",
+      "phrase": "drank pesticide",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-TOXIC-01",
+      "phrase": "took paracetamol as prescribed",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-SNAKE-01",
+      "phrase": "cobra bite",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-SNAKE-01",
+      "phrase": "bitten by a snake",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-SNAKE-01",
+      "phrase": "saanp ne kaata",
+      "language": "hi-Latn",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-SNAKE-01",
+      "phrase": "dog bite",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-BURNS-01",
+      "phrase": "third degree burn",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-BURNS-01",
+      "phrase": "third-degree burn",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-BURNS-01",
+      "phrase": "burnt by fire",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-BURNS-01",
+      "phrase": "sunburn",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-ANAPHYLAXIS-01",
+      "phrase": "throat swelling",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-ANAPHYLAXIS-01",
+      "phrase": "severe allergic reaction",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-ANAPHYLAXIS-01",
+      "phrase": "swollen throat",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-ANAPHYLAXIS-01",
+      "phrase": "mild rash",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    },
+    {
+      "rule_id": "R-OB-01",
+      "phrase": "vaginal bleeding during pregnancy",
+      "language": "en",
+      "should_fire": true,
+      "fired": true
+    },
+    {
+      "rule_id": "R-OB-01",
+      "phrase": "pregnant and bleeding",
+      "language": "en",
+      "should_fire": true,
+      "fired": false
+    },
+    {
+      "rule_id": "R-OB-01",
+      "phrase": "routine pregnancy checkup",
+      "language": "en",
+      "should_fire": false,
+      "fired": false
+    }
   ]
 }

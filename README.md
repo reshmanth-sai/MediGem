@@ -45,7 +45,7 @@ flowchart LR
 
 Three decisions shape the design:
 
-**Rules before the model.** Acute presentations (cardiac, stroke, sepsis, anaphylaxis, obstetric, snakebite, …) are matched by deterministic rules with a synonym table before any inference. A match ends the request: the model is never consulted for a case where a wrong answer is most expensive. Median 0.35 ms. The product page runs the same rules in the browser, a TypeScript port held to the Python engine by 98 recorded answers, so a visitor can type symptoms and watch the gate decide.
+**Rules before the model.** Acute presentations (cardiac, stroke, sepsis, anaphylaxis, obstetric, snakebite, …) are matched by deterministic rules with a synonym table before any inference. A match ends the request: the model is never consulted for a case where a wrong answer is most expensive. Median 0.35 ms. The product page runs the same rules in the browser, a TypeScript port held to the Python engine by 98 recorded answers, so a visitor can type symptoms and watch the gate decide. The Pipeline Inspector shows a coverage matrix of every rule against phrasings that should and should not fire it, gaps included: 28 of 49 behave as expected today, and none of the romanised Hindi phrasings match.
 
 **One output contract.** The model must return a Pydantic-validated `ClinicalReasoningOutput`. `requires_human_review` defaults to `true`. A separate `SafetyGuard` runs regex checks for prohibited content (doses, "diagnosed with", certainty claims). Anything that fails is reported as DEGRADED, never passed off as an assessment.
 
@@ -121,11 +121,11 @@ Optional hardening for a public host: `MEDIGEM_API_KEY` (checked as `X-API-Key` 
 # backend: 87 tests (pipeline, gate, safety guard, API, case store, auth, gate parity fixtures)
 MEDIGEM_DB_PATH=:memory: python -m unittest discover -s tests -p "test_*.py"
 
-# frontend: 271 unit tests (including the in-browser gate against the Python engine's answers), type-check, lint, design gate, build
+# frontend: 321 unit tests (including the in-browser gate against the Python engine's answers), type-check, lint, design gate, build
 cd frontend_v2 && npm test && npm run type-check && npm run lint && npm run gate && npm run build:verify
 
-# end to end: 21 Playwright checks on desktop and phone against a production build in replay mode,
-# including axe WCAG 2 A/AA on five routes (the first run caught four contrast failures and a
+# end to end: 23 Playwright checks on desktop and phone against a production build in replay mode,
+# including axe WCAG 2 A/AA on six routes (the first run caught four contrast failures and a
 # disclosure control that had no button role)
 npm run e2e
 

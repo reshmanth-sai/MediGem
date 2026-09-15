@@ -4,6 +4,7 @@ import React from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { DashboardTemplate } from "@/components/templates/Templates";
 import { PipelineInspector } from "@/components/developer/PipelineInspector";
+import { GateCoverage } from "@/components/developer/GateCoverage";
 import { PromptExplorer } from "@/components/developer/PromptExplorer";
 import { SystemHealthDashboard } from "@/components/health/SystemHealthDashboard";
 
@@ -14,6 +15,7 @@ export default function DeveloperPage() {
         <div className="space-y-6 max-w-7xl mx-auto pb-8">
           <SystemHealthDashboard />
           <PipelineInspector />
+          <GateCoverage />
           <PromptExplorer />
         </div>
       </DashboardTemplate>

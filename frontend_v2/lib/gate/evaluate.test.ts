@@ -34,6 +34,17 @@ describe("gate port parity with backend/emergency/engine.py", () => {
   });
 });
 
+describe("gate coverage matrix", () => {
+  it.each(fixtures.coverage.map((r) => [`${r.rule_id} / ${r.phrase}`, r] as const))("%s", (_name, r) => {
+    expect(evaluateGate([r.phrase]).matched_rules.includes(r.rule_id)).toBe(r.fired);
+  });
+
+  it("names only rules that exist", () => {
+    const ids = new Set(rules.rules.map((r) => r.rule_id));
+    expect(fixtures.coverage.every((r) => ids.has(r.rule_id))).toBe(true);
+  });
+});
+
 describe("parseSymptoms", () => {
   it("splits on commas and drops empty entries, as the API form field does", () => {
     expect(parseSymptoms(" chest pain, , breathless ")).toEqual(["chest pain", "breathless"]);

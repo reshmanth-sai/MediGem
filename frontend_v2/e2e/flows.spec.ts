@@ -72,7 +72,7 @@ test("navigation works on a phone", async ({ page, isMobile }) => {
   expect(width).toBeLessThanOrEqual(0);
 });
 
-for (const path of ["/", "/workstation", "/new-case", "/results/CASE-8901", "/settings"]) {
+for (const path of ["/", "/workstation", "/new-case", "/results/CASE-8901", "/settings", "/developer"]) {
   test(`no serious accessibility violations on ${path}`, async ({ page }) => {
     await page.goto(path);
     await page.waitForLoadState("networkidle");

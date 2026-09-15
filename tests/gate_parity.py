@@ -54,6 +54,81 @@ HAND_INPUTS: List[List[str]] = [
 ]
 
 
+# The coverage matrix on the developer page: for each rule, phrasings a
+# clinician would expect to fire it (in English, and in romanised Hindi as a
+# CHO would type it) and phrasings that should leave it alone.
+# The expectation is written by hand; whether the rule actually fired comes
+# from the engine. Rows where the two disagree are the gate's known gaps.
+COVERAGE: Dict[str, Dict[str, List[str]]] = {
+    "R-CARDIAC-01": {
+        "fire": ["chest pain", "chest tightness", "pressure in my chest"],
+        "fire_hindi": ["seene mein dard"],
+        "silent": ["chest x-ray normal", "no chest pain"],
+    },
+    "R-STROKE-01": {
+        "fire": ["slurred speech", "facial drooping", "face drooping on one side"],
+        "fire_hindi": ["lakwa"],
+        "silent": ["speech therapy follow-up"],
+    },
+    "R-RESP-01": {
+        "fire": ["difficulty breathing", "cannot breathe", "can't breathe"],
+        "fire_hindi": ["saans lene mein takleef"],
+        "silent": ["breathing normally"],
+    },
+    "R-TRAUMA-01": {
+        "fire": ["heavy bleeding", "bleeding a lot"],
+        "fire_hindi": ["khoon beh raha hai"],
+        "silent": ["bleeding stopped", "bleeding gums"],
+    },
+    "R-NEURO-01": {
+        "fire": ["seizure", "fainted", "passed-out"],
+        "fire_hindi": ["behosh"],
+        "silent": ["feels faint"],
+    },
+    "R-SEPSIS-01": {
+        "fire": ["fever and delirium", "high fever and confused"],
+        "fire_hindi": ["tez bukhar aur behoshi"],
+        "silent": ["fever"],
+    },
+    "R-TOXIC-01": {
+        "fire": ["overdose", "swallowed poison", "drank pesticide"],
+        "silent": ["took paracetamol as prescribed"],
+    },
+    "R-SNAKE-01": {
+        "fire": ["cobra bite", "bitten by a snake"],
+        "fire_hindi": ["saanp ne kaata"],
+        "silent": ["dog bite"],
+    },
+    "R-BURNS-01": {
+        "fire": ["third degree burn", "third-degree burn", "burnt by fire"],
+        "silent": ["sunburn"],
+    },
+    "R-ANAPHYLAXIS-01": {
+        "fire": ["throat swelling", "severe allergic reaction", "swollen throat"],
+        "silent": ["mild rash"],
+    },
+    "R-OB-01": {
+        "fire": ["vaginal bleeding during pregnancy", "pregnant and bleeding"],
+        "silent": ["routine pregnancy checkup"],
+    },
+}
+
+
+def _coverage(engine: EmergencyEngine) -> List[Dict[str, Any]]:
+    rows = []
+    for rule_id, groups in COVERAGE.items():
+        for group in ("fire", "fire_hindi", "silent"):
+            for phrase in groups.get(group, []):
+                rows.append({
+                    "rule_id": rule_id,
+                    "phrase": phrase,
+                    "language": "hi-Latn" if group == "fire_hindi" else "en",
+                    "should_fire": group != "silent",
+                    "fired": rule_id in engine.evaluate([phrase]).matched_rules,
+                })
+    return rows
+
+
 def _generated_inputs(rules_doc: Dict[str, Any]) -> List[List[str]]:
     inputs: List[List[str]] = []
     for canonical, synonyms in rules_doc["synonyms"].items():
@@ -93,7 +168,7 @@ def build_fixtures() -> Dict[str, Any]:
             continue
         seen.add(key)
         cases.append({"input": symptoms, "expected": _answer(engine, symptoms)})
-    return {"source": "backend/emergency/rules.json", "cases": cases}
+    return {"source": "backend/emergency/rules.json", "cases": cases, "coverage": _coverage(engine)}
 
 
 def render(doc: Dict[str, Any]) -> str:

@@ -23,6 +23,9 @@ Read this before drawing any conclusion from the product page's figures.
   out" synonym). The first two fail toward referral; the third does not. These
   cases are pinned in `frontend_v2/lib/gate/parity.fixtures.json`, so fixing
   the matcher shows up as a reviewed fixture diff rather than a silent change.
+  The coverage matrix on `/developer` lists 49 phrasings against the 11 rules;
+  21 do not behave as a clinician would expect (12 English misses, all 7
+  romanised Hindi phrasings, 2 over-fires).
 - **OCR.** Tesseract with no preprocessing; 77.5 % mean confidence on the two
   sample documents that carry a text layer. Handwriting is not read.
 
