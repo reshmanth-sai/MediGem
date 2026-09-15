@@ -110,8 +110,13 @@ Optional hardening for a public host: `MEDIGEM_API_KEY` (checked as `X-API-Key` 
 # backend: 65 tests (pipeline, gate, safety guard, API, case store)
 MEDIGEM_DB_PATH=:memory: python -m unittest discover -s tests -p "test_*.py"
 
-# frontend: 170 tests, type-check, lint, design gate, build
+# frontend: 170 unit tests, type-check, lint, design gate, build
 cd frontend_v2 && npm test && npm run type-check && npm run lint && npm run gate && npm run build:verify
+
+# end to end: 19 Playwright checks on desktop and phone against a production build in replay mode,
+# including axe WCAG 2 A/AA on five routes (the first run caught four contrast failures and a
+# disclosure control that had no button role)
+npm run e2e
 ```
 
 The design gate (`scripts/slop-gate.mjs`) fails the build on hex colours outside the token files, sub-13 px type, shadows, emoji, numeric AI confidence, and a few other things that made the earlier UI look generated. CI runs all of it on every push.
