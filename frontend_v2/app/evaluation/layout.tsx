@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Evaluation",
-  description: "Measured pipeline performance and quality.",
+  title: "Measured performance",
+  description: "Latency, schema validity, and OCR confidence, read from a recorded capture run.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

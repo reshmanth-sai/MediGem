@@ -14,6 +14,13 @@ import { cn } from "@/lib/utils";
  * height (56px, matching the row height token), so the browser's
  * scroll-into-view keeps that much clearance above the focused row and it
  * lands visibly below the header instead.
+ *
+ * WCAG 2.1.1 "Keyboard" / axe's `scrollable-region-focusable`: on a table
+ * wide enough to need horizontal scroll (most of them, on a phone), the
+ * scrolling element itself has to be reachable and operable from the
+ * keyboard, not just the row content inside it. The wrapper below is
+ * `tabIndex={0}` with its own accessible name for exactly that; without it,
+ * a keyboard user with no pointer has no way to scroll the table at all.
  */
 export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
   children: React.ReactNode;
@@ -43,7 +50,12 @@ export function Table({
   ...props
 }: TableProps) {
   return (
-    <div className={cn("overflow-x-auto scroll-pt-14", containerClassName)}>
+    <div
+      className={cn("overflow-x-auto scroll-pt-14", containerClassName)}
+      tabIndex={0}
+      role="group"
+      aria-label={typeof caption === "string" ? caption : "Data table"}
+    >
       <table className={cn("w-full border-collapse", className)} {...props}>
         <caption
           className={cn(

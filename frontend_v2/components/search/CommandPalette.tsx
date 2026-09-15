@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import { Search, Home, PlusCircle, History, Award, Settings, Terminal, BookOpen, type LucideIcon } from "lucide-react";
+import { Search, Home, PlusCircle, History, Settings, Terminal, BookOpen, Gauge, type LucideIcon } from "lucide-react";
 import { ModalDialog } from "@/components/ui/Dialog";
 import { BodySm } from "@/components/ui/Typography";
 
@@ -58,8 +58,7 @@ export function CommandPalette() {
     { title: "New Patient Intake", route: "/new-case", icon: PlusCircle },
     { title: "Patient Queue & Archive", route: "/history", icon: History },
     { title: "Clinical Guidelines & Protocols", route: "/learning", icon: BookOpen },
-    { title: "Clinical Sample Presets", route: "/demo", icon: Award },
-    { title: "System Benchmarks & Quality", route: "/evaluation", icon: Terminal },
+    { title: "Measured performance", route: "/evaluation", icon: Gauge },
     { title: "Pipeline Inspector & Diagnostics", route: "/developer", icon: Terminal },
     { title: "Workstation Settings", route: "/settings", icon: Settings },
   ];

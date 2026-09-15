@@ -3,14 +3,14 @@
 import React from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { DashboardTemplate } from "@/components/templates/Templates";
-import { EvaluationMetricsCharts } from "@/components/evaluation/EvaluationMetricsCharts";
+import { MeasuredPerformance } from "@/components/evaluation/MeasuredPerformance";
 
 export default function EvaluationPage() {
   return (
     <AppShell>
-      <DashboardTemplate title="System Evaluation & Quality Benchmarks" subtitle="Empirical benchmark performance across reasoning accuracy, latency & safety compliance">
+      <DashboardTemplate title="Measured performance" subtitle="Latency, schema validity, and OCR confidence, read from a recorded capture run. Not a target, not a benchmark suite.">
         <div className="max-w-7xl mx-auto pb-8">
-          <EvaluationMetricsCharts />
+          <MeasuredPerformance />
         </div>
       </DashboardTemplate>
     </AppShell>

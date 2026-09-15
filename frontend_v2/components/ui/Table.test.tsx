@@ -33,6 +33,15 @@ describe("Table", () => {
     expect(screen.getByText("Patient queue")).toBeInTheDocument();
   });
 
+  it("the scrolling wrapper is itself keyboard-focusable and named, for a table too wide to fit", () => {
+    // axe's scrollable-region-focusable: the element that actually scrolls
+    // has to be reachable without a pointer, not just the rows inside it.
+    render(<Table caption="Recorded run outcomes"><TBody><TR><TD>x</TD></TR></TBody></Table>);
+    const wrapper = screen.getByRole("group", { name: "Recorded run outcomes" });
+    expect(wrapper).toHaveAttribute("tabindex", "0");
+    expect(wrapper.className).toContain("overflow-x-auto");
+  });
+
   it("keeps the selected background winning over zebra striping on both even and odd rows", () => {
     render(
       <Table caption="Q">

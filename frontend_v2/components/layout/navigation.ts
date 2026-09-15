@@ -8,6 +8,7 @@ import {
   BookOpen,
   Sliders,
   Terminal,
+  Gauge,
   type LucideIcon,
 } from "lucide-react";
 
@@ -45,6 +46,7 @@ export const NAVIGATION: NavigationGroup[] = [
     label: "System",
     items: [
       { label: "Pipeline inspector", href: "/developer", icon: Terminal },
+      { label: "Measured performance", href: "/evaluation", icon: Gauge, short: "Performance" },
       { label: "System controls", href: "/settings", icon: Sliders },
     ],
   },

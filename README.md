@@ -121,11 +121,11 @@ Optional hardening for a public host: `MEDIGEM_API_KEY` (checked as `X-API-Key` 
 # backend: 87 tests (pipeline, gate, safety guard, API, case store, auth, gate parity fixtures)
 MEDIGEM_DB_PATH=:memory: python -m unittest discover -s tests -p "test_*.py"
 
-# frontend: 348 unit tests (including the in-browser gate against the Python engine's answers), type-check, lint, design gate, build
+# frontend: 349 unit tests (including the in-browser gate against the Python engine's answers), type-check, lint, design gate, build
 cd frontend_v2 && npm test && npm run type-check && npm run lint && npm run gate && npm run build:verify
 
-# end to end: 24 Playwright checks on desktop and phone against a production build in replay mode,
-# including axe WCAG 2 A/AA on six routes (the first run caught four contrast failures and a
+# end to end: 27 Playwright checks on desktop and phone against a production build in replay mode,
+# including axe WCAG 2 A/AA on seven routes (the first run caught four contrast failures and a
 # disclosure control that had no button role)
 npm run e2e
 

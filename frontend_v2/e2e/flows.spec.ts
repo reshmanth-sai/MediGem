@@ -45,6 +45,16 @@ test("the landing gate evaluates what the visitor types", async ({ page }) => {
   await expect(state).toContainText("R-STROKE-01");
 });
 
+test("measured performance is reachable from the sidebar and shows recorded figures", async ({ page, isMobile }) => {
+  test.skip(isMobile, "the desktop sidebar is exercised here; phone nav is its own test");
+  await page.goto("/workstation");
+  await page.getByRole("link", { name: /measured performance/i }).click();
+  await expect(page).toHaveURL(/\/evaluation$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(/measured performance/i);
+  await expect(page.getByText("80 / 80")).toBeVisible();
+  await expect(page.getByText(/mean over 2 sample documents/i)).toBeVisible();
+});
+
 test("intake replays a recorded run and lands on a result", async ({ page }) => {
   await page.goto("/new-case");
   await page.getByRole("button", { name: /load demo case/i }).click();
@@ -89,7 +99,7 @@ test("navigation works on a phone", async ({ page, isMobile }) => {
   expect(width).toBeLessThanOrEqual(0);
 });
 
-for (const path of ["/", "/workstation", "/new-case", "/results/CASE-8901", "/settings", "/developer"]) {
+for (const path of ["/", "/workstation", "/new-case", "/results/CASE-8901", "/settings", "/developer", "/evaluation"]) {
   test(`no serious accessibility violations on ${path}`, async ({ page }) => {
     await page.goto(path);
     await page.waitForLoadState("networkidle");
