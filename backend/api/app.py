@@ -24,6 +24,7 @@ import threading
 from collections import deque
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -43,7 +44,12 @@ STARTED_AT = time.time()
 
 # Browser origins allowed to call this API. The Next dev server and a
 # production origin, comma-separated in MEDIGEM_CORS_ORIGINS.
-DEFAULT_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+DEFAULT_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+]
 
 ALLOWED_UPLOAD_TYPES = {"image/png", "image/jpeg", "image/webp", "application/pdf"}
 
@@ -53,6 +59,12 @@ ALLOWED_UPLOAD_TYPES = {"image/png", "image/jpeg", "image/webp", "application/pd
 API_KEY = os.getenv("MEDIGEM_API_KEY", "")
 # Per-client budget for /analyze, which is a ten-second model run.
 ANALYZE_PER_MINUTE = int(os.getenv("MEDIGEM_ANALYZE_PER_MINUTE", "6"))
+
+
+def actor_of(request: Request) -> str:
+    """Who is acting. Until accounts exist this is the X-Actor header the workstation sends."""
+    name = request.headers.get("x-actor", "").strip()
+    return name[:120] if name else "unknown"
 
 
 def require_api_key(request: Request) -> None:
@@ -124,6 +136,26 @@ class ReviewRequest(BaseModel):
     note: Optional[str] = None
 
 
+class PatientPatch(BaseModel):
+    patient_id: Optional[str] = None
+    patient_name: Optional[str] = None
+    age: Optional[int] = Field(None, ge=0, le=120)
+    gender: Optional[str] = None
+    location: Optional[str] = None
+    chief_complaint: Optional[str] = None
+
+
+class PlanIn(BaseModel):
+    next_step: str = Field(..., min_length=1)
+    follow_up: Optional[str] = None
+    urgency: Optional[str] = None
+    note: Optional[str] = None
+
+
+class NoteIn(BaseModel):
+    text: str = Field(..., min_length=1, max_length=4000)
+
+
 class CaseOut(BaseModel):
     id: str
     created_at: str
@@ -138,6 +170,10 @@ class CaseOut(BaseModel):
     reviewer: Optional[str] = None
     review_note: Optional[str] = None
     review_decision: Optional[str] = None
+    plan: Optional[Dict[str, Any]] = None
+    notes: List[Dict[str, Any]] = Field(default_factory=list)
+    documents: List[Dict[str, Any]] = Field(default_factory=list)
+    events: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class AnalyzeOut(AnalysisResponse):
@@ -202,7 +238,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=_origins(),
-        allow_methods=["GET", "POST", "DELETE"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["*"],
     )
 
@@ -249,6 +285,7 @@ def create_app() -> FastAPI:
         temperature_c: Optional[float] = Form(None),
         image_type: Optional[str] = Form(None, description="ECG, REPORT, PRESCRIPTION or WOUND."),
         image: Optional[UploadFile] = File(None),
+        request: Request = None,  # type: ignore[assignment]
     ) -> AnalyzeOut:
         request_id = f"REQ-{uuid.uuid4().hex[:10].upper()}"
 
@@ -321,6 +358,7 @@ def create_app() -> FastAPI:
                         "image_type": image_type,
                     },
                     response=result.model_dump(mode="json"),
+                    actor=actor_of(request),
                 )
                 out.case_id = stored.id
             return out
@@ -357,9 +395,59 @@ def create_app() -> FastAPI:
         return CaseOut(**rec.to_dict())
 
     @app.delete("/cases/{case_id}", status_code=204, dependencies=[Depends(require_api_key)])
-    def delete_case(case_id: str) -> None:
-        if not case_store.delete(case_id):
+    def delete_case(case_id: str, request: Request) -> None:
+        if not case_store.delete(case_id, actor_of(request)):
             raise HTTPException(404, "No such case.")
+
+    @app.patch("/cases/{case_id}/patient", response_model=CaseOut, dependencies=[Depends(require_api_key)])
+    def patch_patient(case_id: str, body: PatientPatch, request: Request) -> CaseOut:
+        patch = {k: v for k, v in body.model_dump().items() if v is not None}
+        rec = case_store.update_patient(case_id, patch, actor_of(request))
+        if rec is None:
+            raise HTTPException(404, "No such case.")
+        return CaseOut(**rec.to_dict())
+
+    @app.put("/cases/{case_id}/plan", response_model=CaseOut, dependencies=[Depends(require_api_key)])
+    def put_plan(case_id: str, body: PlanIn, request: Request) -> CaseOut:
+        rec = case_store.set_plan(case_id, body.model_dump(), actor_of(request))
+        if rec is None:
+            raise HTTPException(404, "No such case.")
+        return CaseOut(**rec.to_dict())
+
+    @app.post("/cases/{case_id}/notes", response_model=CaseOut, status_code=201, dependencies=[Depends(require_api_key)])
+    def post_note(case_id: str, body: NoteIn, request: Request) -> CaseOut:
+        rec = case_store.add_note(case_id, actor_of(request), body.text)
+        if rec is None:
+            raise HTTPException(404, "No such case.")
+        return CaseOut(**rec.to_dict())
+
+    @app.post("/cases/{case_id}/documents", response_model=CaseOut, status_code=201, dependencies=[Depends(require_api_key)])
+    async def post_document(case_id: str, request: Request, file: UploadFile = File(...)) -> CaseOut:
+        if file.content_type not in ALLOWED_UPLOAD_TYPES:
+            raise HTTPException(415, f"Unsupported file type {file.content_type}.")
+        data = await file.read()
+        if len(data) > settings.MAX_FILE_SIZE_MB * 1024 * 1024:
+            raise HTTPException(413, f"File exceeds {settings.MAX_FILE_SIZE_MB} MB.")
+        if not file.filename:
+            raise HTTPException(422, "A file name is required.")
+        doc = case_store.add_document(case_id, name=file.filename, content_type=file.content_type or "application/octet-stream", data=data, added_by=actor_of(request))
+        if doc is None:
+            raise HTTPException(404, "No such case.")
+        return CaseOut(**case_store.get(case_id).to_dict())  # type: ignore[union-attr]
+
+    @app.get("/cases/{case_id}/documents/{doc_id}")
+    def get_document(case_id: str, doc_id: str) -> FileResponse:
+        doc = case_store.get_document(case_id, doc_id)
+        if doc is None or not Path(doc["path"]).exists():
+            raise HTTPException(404, "No such document.")
+        return FileResponse(doc["path"], media_type=doc["content_type"], filename=doc["name"])
+
+    @app.get("/cases/{case_id}/events")
+    def get_events(case_id: str) -> List[Dict[str, Any]]:
+        rec = case_store.get(case_id)
+        if rec is None:
+            raise HTTPException(404, "No such case.")
+        return rec.events
 
     return app
 

@@ -46,11 +46,13 @@ export interface CaseDisposition {
 }
 
 export interface ClinicalDocument {
+  id?: string;
   name: string;
   type: string;
   size: string;
   uploadedTime: string;
   url?: string;
+  addedBy?: string;
 }
 
 export interface KeyObservation {
@@ -122,6 +124,12 @@ export interface ClinicalCaseData {
   pipeline?: PipelineRecord;
   /** Clinician sign-off, when the case came from the store and has one. */
   review?: { decision: "approved" | "modified" | "rejected"; reviewer: string; at: string; note?: string | null };
+  /** Care plan set by a clinician after the assessment. */
+  plan?: { nextStep: string; followUp?: string | null; urgency?: string | null; note?: string | null; updatedBy?: string; updatedAt?: string };
+  /** Notes added by clinicians after intake. */
+  notes?: { id: string; author: string; text: string; at: string }[];
+  /** Append-only history from the store. */
+  events?: { id: number; actor: string; action: string; payload?: Record<string, unknown> | null; at: string }[];
 }
 
 export const PRESET_CASES: Record<string, ClinicalCaseData> = {

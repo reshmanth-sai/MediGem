@@ -17,7 +17,7 @@
 |---|---|
 | Symptoms + vitals typed at intake | An emergency-gate decision in under a millisecond; if it matches, a referral and **no model call** |
 | Lab report, ECG, prescription, or wound photo | Image-quality scores, OCR where there is a text layer, and one structured `ClinicalReasoningOutput`: observations · assessment (risk level, qualitative confidence, red flags) · recommendations · patient summary · limitations |
-| A finished assessment | A stored case the clinician signs off (approve / modify / reject with a note), a referral note, and a queue that orders by the gate first, then severity |
+| A finished assessment | A stored case the clinician signs off (approve / modify / reject with a note), corrects, plans, annotates and attaches documents to, with every change in an append-only history; a referral note; a queue that orders by the gate first, then severity |
 
 It does not diagnose, it does not prescribe, and it will not return a dose: a dose or a definitive diagnosis in the model's output fails the safety guard and marks the run degraded.
 
@@ -98,7 +98,14 @@ Open http://localhost:3000 (product page) and http://localhost:3000/workstation.
 | `POST /analyze` | multipart: demographics, symptoms, vitals, one image + `image_type`; stores the case, returns the response with `case_id` |
 | `GET /cases`, `GET /cases/{id}` | the store |
 | `POST /cases/{id}/review` | clinician sign-off: `approved` / `modified` / `rejected` + note |
-| `DELETE /cases/{id}` | remove a case |
+| `PATCH /cases/{id}/patient` | correct demographics (symptoms, vitals and the assessment stay as recorded) |
+| `PUT /cases/{id}/plan` | the clinician's care plan: next step, urgency, follow-up, note |
+| `POST /cases/{id}/notes` | append a clinician note |
+| `POST /cases/{id}/documents`, `GET …/documents/{doc}` | attach a file to a case and open it later |
+| `GET /cases/{id}/events` | the append-only history: every change with actor and time |
+| `DELETE /cases/{id}` | remove a case, its notes, documents and files |
+
+Every mutation writes an event; the workstation's History tab reads it. The acting clinician is sent as `X-Actor` until accounts exist.
 
 Optional hardening for a public host: `MEDIGEM_API_KEY` (checked as `X-API-Key` on every POST), `MEDIGEM_ANALYZE_PER_MINUTE` (default 6 per client), `MEDIGEM_CORS_ORIGINS`. Store location: `MEDIGEM_DB_PATH` (default `data/medigem.db`; `:memory:` for tests). Uploaded images are held for one run and deleted.
 </details>
@@ -117,6 +124,10 @@ cd frontend_v2 && npm test && npm run type-check && npm run lint && npm run gate
 # including axe WCAG 2 A/AA on five routes (the first run caught four contrast failures and a
 # disclosure control that had no button role)
 npm run e2e
+
+# with the API and dev server running: one flow that edits a patient, sets a plan, adds a note,
+# attaches a file, checks the history, signs off, exports and deletes a stored case
+MEDIGEM_LIVE=1 npm run e2e:live
 ```
 
 The design gate (`scripts/slop-gate.mjs`) fails the build on hex colours outside the token files, sub-13 px type, shadows, emoji, numeric AI confidence, and a few other things that made the earlier UI look generated. CI runs all of it on every push.

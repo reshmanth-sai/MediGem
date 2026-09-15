@@ -99,3 +99,69 @@ class CaseRoutesTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CaseEditsTests(unittest.TestCase):
+    """Patient edits, care plan, notes, documents and the event log behind them."""
+
+    def setUp(self) -> None:
+        os.environ["MEDIGEM_DOCS_DIR"] = os.path.join(os.environ.get("TMPDIR", "/tmp"), "medigem-test-docs")
+        self.store = CaseStore(":memory:")
+        self.case = self.store.create({"patient_name": "A", "symptoms": ["cough"]}, {"status": "COMPLETED"}, actor="Dr. T")
+
+    def test_every_mutation_is_an_event(self) -> None:
+        cid = self.case.id
+        self.store.update_patient(cid, {"patient_name": "B", "symptoms": ["ignored"]}, "Dr. T")
+        self.store.set_plan(cid, {"next_step": "Recheck", "follow_up": "3 days", "urgency": "Routine"}, "Dr. T")
+        self.store.add_note(cid, "Dr. T", "Counselled.")
+        self.store.add_document(cid, name="c.png", content_type="image/png", data=b"\x89PNG", added_by="Dr. T")
+        self.store.review(cid, "approved", "Dr. T")
+        rec = self.store.get(cid)
+        self.assertEqual([e["action"] for e in rec.events], ["created", "patient_updated", "plan_updated", "note_added", "document_added", "reviewed"])
+        self.assertEqual(rec.patient["patient_name"], "B")
+        self.assertEqual(rec.patient["symptoms"], ["cough"], "symptoms are what was assessed and must not change")
+        self.assertEqual(rec.plan["updated_by"], "Dr. T")
+        self.assertEqual(len(rec.notes), 1)
+        self.assertEqual(rec.documents[0]["size_bytes"], 4)
+
+    def test_unchanged_patient_patch_writes_no_event(self) -> None:
+        self.store.update_patient(self.case.id, {"patient_name": "A"}, "Dr. T")
+        self.assertEqual([e["action"] for e in self.store.get(self.case.id).events], ["created"])
+
+    def test_empty_note_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            self.store.add_note(self.case.id, "Dr. T", "   ")
+
+    def test_delete_removes_children_and_files(self) -> None:
+        doc = self.store.add_document(self.case.id, name="c.png", content_type="image/png", data=b"x", added_by="Dr. T")
+        path = self.store.get_document(self.case.id, doc["id"])["path"]
+        self.assertTrue(os.path.exists(path))
+        self.assertTrue(self.store.delete(self.case.id, "Dr. T"))
+        self.assertFalse(os.path.exists(path))
+        self.assertIsNone(self.store.get(self.case.id))
+
+
+class CaseEditRoutesTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.client = TestClient(api.app)
+
+    def test_routes_round_trip_with_actor_header(self) -> None:
+        os.environ["MEDIGEM_DOCS_DIR"] = os.path.join(os.environ.get("TMPDIR", "/tmp"), "medigem-test-docs")
+        with patch.object(api, "case_store", CaseStore(":memory:")):
+            with patch("backend.pipeline.medical_pipeline.ai_manager.generate"):
+                cid = self.client.post("/analyze", data={"age": 40, "gender": "Male", "symptoms": '["chest tightness","breathlessness"]'}, headers={"X-Actor": "Dr. T"}).json()["case_id"]
+            h = {"X-Actor": "Dr. T"}
+            self.assertEqual(self.client.patch(f"/cases/{cid}/patient", json={"patient_name": "Z", "age": 41}, headers=h).json()["patient"]["patient_name"], "Z")
+            self.assertEqual(self.client.patch(f"/cases/{cid}/patient", json={"age": 500}, headers=h).status_code, 422)
+            self.assertEqual(self.client.put(f"/cases/{cid}/plan", json={"next_step": "Recheck"}, headers=h).json()["plan"]["next_step"], "Recheck")
+            self.assertEqual(self.client.post(f"/cases/{cid}/notes", json={"text": "ok"}, headers=h).status_code, 201)
+            r = self.client.post(f"/cases/{cid}/documents", files={"file": ("a.png", b"\x89PNG", "image/png")}, headers=h)
+            self.assertEqual(r.status_code, 201)
+            did = r.json()["documents"][0]["id"]
+            self.assertEqual(self.client.get(f"/cases/{cid}/documents/{did}").status_code, 200)
+            self.assertEqual(self.client.post(f"/cases/{cid}/documents", files={"file": ("x.exe", b"MZ", "application/octet-stream")}, headers=h).status_code, 415)
+            actions = [e["action"] for e in self.client.get(f"/cases/{cid}/events").json()]
+            self.assertEqual(actions, ["created", "patient_updated", "plan_updated", "note_added", "document_added"])
+            self.assertTrue(all(e["actor"] == "Dr. T" for e in self.client.get(f"/cases/{cid}/events").json()))
+            self.assertEqual(self.client.post("/cases/NOPE/notes", json={"text": "x"}, headers=h).status_code, 404)

@@ -73,6 +73,18 @@ export const StoredPatient = z.object({
   image_type: z.string().nullable().optional(),
 });
 
+export const CaseNote = z.object({ id: z.string(), author: z.string(), text: z.string(), created_at: z.string() });
+export const CaseDocument = z.object({ id: z.string(), name: z.string(), content_type: z.string(), size_bytes: z.number(), added_by: z.string(), created_at: z.string() });
+export const CaseEvent = z.object({ id: z.number(), actor: z.string(), action: z.string(), payload: z.record(z.unknown()).nullable().optional(), created_at: z.string() });
+export const CarePlan = z.object({
+  next_step: z.string(),
+  follow_up: z.string().nullable().optional(),
+  urgency: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  updated_by: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
 export const StoredCase = z.object({
   id: z.string(),
   created_at: z.string(),
@@ -87,8 +99,13 @@ export const StoredCase = z.object({
   reviewer: z.string().nullable().optional(),
   review_note: z.string().nullable().optional(),
   review_decision: z.enum(["approved", "modified", "rejected"]).nullable().optional(),
+  plan: CarePlan.nullable().optional(),
+  notes: z.array(CaseNote).default([]),
+  documents: z.array(CaseDocument).default([]),
+  events: z.array(CaseEvent).default([]),
 });
 export type StoredCase = z.infer<typeof StoredCase>;
+export type CarePlan = z.infer<typeof CarePlan>;
 
 export const HealthResponse = z.object({
   ok: z.boolean(),

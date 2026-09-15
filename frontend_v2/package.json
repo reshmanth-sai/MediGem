@@ -12,7 +12,8 @@
     "gate": "node scripts/slop-gate.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "e2e:live": "playwright test --config=playwright.live.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

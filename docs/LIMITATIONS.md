@@ -23,11 +23,14 @@ Read this before drawing any conclusion from the product page's figures.
 
 - **No accounts.** The signed-in clinician is a fixed demo persona. Sign-offs
   are recorded under that name.
-- **No audit trail** beyond the single review row on a case. Deletes are hard
-  deletes.
+- **The event log is per case, not per user.** Every change to a stored case
+  is recorded with an actor and time, but the actor is a header the
+  workstation sends (the demo persona), not a verified identity. Deletes are
+  hard deletes of the case; the deletion event itself is kept.
 - **Plain SQLite** on one disk. No encryption at rest, no backups, no retention
-  policy. Uploaded images are deleted after the run, so the document behind a
-  stored assessment cannot be re-viewed.
+  policy. Intake uploads are deleted after the run, so the document the model
+  assessed cannot be re-viewed; files attached to a case afterwards are kept on
+  disk unencrypted.
 - **API key is a shared string** that also ships in the browser bundle when set
   for the site. It deters casual abuse; it is not authentication.
 

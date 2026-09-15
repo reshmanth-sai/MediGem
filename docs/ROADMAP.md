@@ -7,15 +7,10 @@ up so the scope is clear.
 
 ## Planned
 
-1. **Accounts and an event log.** Local users (bcrypt, roles CHO / ANM / MO /
-   admin), session cookie, reviewer taken from the session. An append-only
-   `events` table and a case `state` (open → assessed → reviewed → referred →
-   closed) with a History tab that reads it. Makes sign-off attributable.
-2. **End-to-end tests.** Playwright through intake → overlay → results →
-   sign-off, plus an `axe` pass per route, on the CI verify build.
-3. **Dead controls.** "Edit patient", "Update care plan", and the notes editor
-   are wired to the store or removed.
-4. **`docker compose up`.** API + Ollama in one command, so an engineer can run
+1. **Accounts.** Local users (bcrypt, roles CHO / ANM / MO / admin), session
+   cookie, actor taken from the session instead of a header. Makes the event
+   log and sign-off attributable to a verified person.
+2. **`docker compose up`.** API + Ollama in one command, so an engineer can run
    the live queue without three terminals.
 
 ## Not planned, and why
@@ -41,6 +36,8 @@ up so the scope is clear.
 - SQLite case store; `/analyze` persists; clinician sign-off.
 - Workstation reads the store when it is up, bundled examples otherwise, and
   says which on every screen; replay mode without an API.
+- Case controls that work: edit patient, care plan, clinician notes, attached
+  documents, export, delete, and an append-only event log behind them.
 - Safety-guard regex fixed (lab concentrations were read as doses).
 - Landing page re-measured at 20 runs per modality; fonts bundled; nav,
   hero and telemetry fit a phone.

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ClinicalCaseData, CONFIDENCE_LABELS } from "@/lib/casesData";
 import { cn } from "@/lib/utils";
 import {
+  ClipboardList,
   User,
   MoreVertical,
   Clock,
@@ -231,13 +232,20 @@ export function ClinicalPatientWorkspace({
 
       {/* Sticky Actions Footer (Mockup: 3 buttons on one row) */}
       <div className="p-3 border-t border-rule bg-surface shrink-0">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Link
-            href={`/results/${patient.caseId}`}
+            href={`/results/${patient.caseId}#care-plan`}
             className="bg-action hover:bg-action-hover text-on-action px-3 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
-            <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <span className="truncate">Open full case</span>
+            <ClipboardList className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span className="truncate">{patient.plan ? "Update care plan" : "Set care plan"}</span>
+          </Link>
+          <Link
+            href={`/results/${patient.caseId}`}
+            className="border border-rule bg-surface hover:bg-surface-raised text-ink px-2.5 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5 text-ink-muted shrink-0" aria-hidden="true" />
+            <span className="truncate">Open case</span>
           </Link>
           <button
             type="button"

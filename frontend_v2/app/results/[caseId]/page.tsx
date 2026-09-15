@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { FileQuestion, History, Clock } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PatientHeader, PatientTabId } from "@/components/patient/PatientHeader";
@@ -16,10 +16,34 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { PRESET_CASES, ClinicalCaseData } from "@/lib/casesData";
 import { useCaseDraft } from "@/lib/store/caseDraft";
 import { isApiConfigured } from "@/lib/api-client";
-import { getCase, reviewCase } from "@/services/cases.service";
+import { getCase, reviewCase, updatePatient, setPlan, addNote, addDocument, deleteCase, type PatientPatch, type PlanInput } from "@/services/cases.service";
+import { EditPatientDialog } from "@/components/patient/EditPatientDialog";
+import { CarePlanPanel } from "@/components/patient/CarePlanPanel";
+import { useToastContext } from "@/providers/ToastProvider";
 import { mapStoredCase } from "@/lib/mapAnalysis";
 import { useCaseList } from "@/providers/CasesProvider";
 import { SESSION } from "@/lib/session";
+
+const ACTION_LABELS: Record<string, string> = {
+  created: "Case created from intake",
+  reviewed: "Assessment reviewed",
+  patient_updated: "Patient details updated",
+  plan_updated: "Care plan set",
+  note_added: "Note added",
+  document_added: "Document attached",
+  deleted: "Case deleted",
+};
+
+function describeEvent(action: string, payload?: Record<string, unknown> | null): string {
+  const base = ACTION_LABELS[action] ?? action.replace(/_/g, " ");
+  if (!payload) return base;
+  if (action === "reviewed" && typeof payload.decision === "string") return `${base}: ${payload.decision}`;
+  if (action === "created" && typeof payload.status === "string") return `${base} · ${String(payload.status).toLowerCase().replace(/_/g, " ")}`;
+  if (action === "patient_updated" && payload.fields && typeof payload.fields === "object") return `${base}: ${Object.keys(payload.fields as object).join(", ")}`;
+  if (action === "document_added" && typeof payload.name === "string") return `${base}: ${payload.name}`;
+  if (action === "plan_updated" && typeof payload.next_step === "string") return `${base}: ${payload.next_step}`;
+  return base;
+}
 
 export default function CaseResultsPage() {
   const routerParams = useParams();
@@ -61,11 +85,41 @@ export default function CaseResultsPage() {
   const caseData: ClinicalCaseData | null = preset ?? stored ?? remote ?? null;
   const isLive = Boolean(remote) || (Boolean(stored?.pipeline) && !stored?.pipeline?.replay && caseId.startsWith("CASE-") && caseId !== "CASE-CUSTOM");
   const loading = !isHydrated || remoteState === "loading";
+  const docs = caseData?.clinicalDocuments ?? caseData?.documents?.map((name) => ({ name, type: /\.pdf$/i.test(name) ? "PDF" : "Image", size: "", uploadedTime: caseData.arrivalTime }));
 
-  const handleReview = async (decision: "approved" | "modified" | "rejected", note: string) => {
-    const updated = await reviewCase(caseId, decision, SESSION.clinician.name, note || undefined);
+  const router = useRouter();
+  const { addToast } = useToastContext();
+  const [editOpen, setEditOpen] = useState(false);
+  const notice = (text: string) => addToast({ type: "info", title: text });
+  const applyUpdate = (updated: Parameters<typeof mapStoredCase>[0]) => {
     setRemote(mapStoredCase(updated));
     void list.refresh();
+  };
+
+  const handleReview = async (decision: "approved" | "modified" | "rejected", note: string) => {
+    applyUpdate(await reviewCase(caseId, decision, SESSION.clinician.name, note || undefined));
+    addToast({ type: "success", title: decision === "approved" ? "Signed off" : decision === "modified" ? "Signed off with changes" : "Assessment rejected" });
+  };
+  const handleEditPatient = async (patch: PatientPatch) => {
+    applyUpdate(await updatePatient(caseId, patch));
+    addToast({ type: "success", title: "Patient details updated" });
+  };
+  const handlePlan = async (plan: PlanInput) => {
+    applyUpdate(await setPlan(caseId, plan));
+    addToast({ type: "success", title: "Care plan saved" });
+  };
+  const handleNote = async (text: string) => {
+    applyUpdate(await addNote(caseId, text));
+  };
+  const handleFile = async (file: File) => {
+    applyUpdate(await addDocument(caseId, file));
+    addToast({ type: "success", title: `Attached ${file.name}` });
+  };
+  const handleDelete = async () => {
+    await deleteCase(caseId);
+    await list.refresh();
+    addToast({ type: "info", title: `Deleted ${caseId}` });
+    router.push("/history");
   };
 
   if (!caseData) {
@@ -97,7 +151,11 @@ export default function CaseResultsPage() {
           caseData={caseData}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          onEditPatient={isLive ? () => setEditOpen(true) : undefined}
+          onDelete={isLive ? handleDelete : undefined}
+          onNotice={notice}
         />
+        {isLive && <EditPatientDialog key={caseData.patientName + caseData.age} isOpen={editOpen} onClose={() => setEditOpen(false)} caseData={caseData} onSave={handleEditPatient} />}
 
         {/* Master Clinical Split-Screen Workspace */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-10 items-start">
@@ -114,13 +172,13 @@ export default function CaseResultsPage() {
                   </div>
                 )}
                 <div className="border-t border-rule pt-6">
-                  <ClinicalNotesRecord
-                    initialNotes={caseData.clinicalNotes}
-                    chiefComplaint={caseData.chiefComplaint}
-                  />
+                  <CarePlanPanel caseData={caseData} onSave={isLive ? handlePlan : undefined} />
                 </div>
                 <div className="border-t border-rule pt-6">
-                  <ClinicalDocumentsList documents={caseData.clinicalDocuments ?? caseData.documents?.map((name) => ({ name, type: /\.pdf$/i.test(name) ? "PDF" : "Image", size: "", uploadedTime: caseData.arrivalTime }))} />
+                  <ClinicalNotesRecord initialNotes={caseData.clinicalNotes} chiefComplaint={caseData.chiefComplaint} notes={caseData.notes} onAddNote={isLive ? handleNote : undefined} />
+                </div>
+                <div className="border-t border-rule pt-6">
+                  <ClinicalDocumentsList documents={docs} onAddFile={isLive ? handleFile : undefined} />
                 </div>
               </>
             )}
@@ -160,58 +218,64 @@ export default function CaseResultsPage() {
                 </div>
                 )}
                 <div className="border-t border-rule pt-6">
-                  <ClinicalNotesRecord
-                    initialNotes={caseData.clinicalNotes}
-                    chiefComplaint={caseData.chiefComplaint}
-                  />
+                  <CarePlanPanel caseData={caseData} onSave={isLive ? handlePlan : undefined} />
+                </div>
+                <div className="border-t border-rule pt-6">
+                  <ClinicalNotesRecord initialNotes={caseData.clinicalNotes} chiefComplaint={caseData.chiefComplaint} notes={caseData.notes} onAddNote={isLive ? handleNote : undefined} />
                 </div>
               </>
             )}
 
             {activeTab === "documents" && (
               <div>
-                <ClinicalDocumentsList documents={caseData.clinicalDocuments ?? caseData.documents?.map((name) => ({ name, type: /\.pdf$/i.test(name) ? "PDF" : "Image", size: "", uploadedTime: caseData.arrivalTime }))} />
+                <ClinicalDocumentsList documents={docs} onAddFile={isLive ? handleFile : undefined} />
               </div>
             )}
 
             {activeTab === "history" && (
               <div className="space-y-4">
                 <SectionHeader title="Case history" />
-                <ol className="border-y border-rule divide-y divide-rule">
-                  <li className="py-3 flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-action mt-0.5 shrink-0" aria-hidden="true" />
-                    <div className="space-y-0.5">
-                      <p className="text-body-sm font-semibold text-ink">Intake {caseData.arrivalTime.toLowerCase()}</p>
-                      <p className="text-body-sm text-ink-muted">Presenting complaint: {caseData.chiefComplaint}</p>
-                    </div>
-                  </li>
-                  {caseData.pipeline && (
+                {caseData.events && caseData.events.length > 0 ? (
+                  <ol className="border-y border-rule divide-y divide-rule">
+                    {caseData.events.map((e) => (
+                      <li key={e.id} className="py-3 flex items-start gap-3">
+                        <History className="h-5 w-5 text-ink-muted mt-0.5 shrink-0" aria-hidden="true" />
+                        <div className="space-y-0.5 min-w-0">
+                          <p className="text-body-sm font-semibold text-ink">{describeEvent(e.action, e.payload)}</p>
+                          <p className="text-body-sm text-ink-muted font-mono">{e.actor} · {e.at.replace("T", " ").slice(0, 16)} UTC</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <ol className="border-y border-rule divide-y divide-rule">
                     <li className="py-3 flex items-start gap-3">
-                      <History className="h-5 w-5 text-ink-muted mt-0.5 shrink-0" aria-hidden="true" />
+                      <Clock className="h-5 w-5 text-action mt-0.5 shrink-0" aria-hidden="true" />
                       <div className="space-y-0.5">
-                        <p className="text-body-sm font-semibold text-ink">
-                          Assessment {caseData.pipeline.status.toLowerCase().replace(/_/g, " ")}
-                          {caseData.pipeline.durationMs != null ? ` in ${(caseData.pipeline.durationMs / 1000).toFixed(1)} s` : ""}
-                        </p>
-                        <p className="text-body-sm text-ink-muted font-mono">{caseData.pipeline.requestId}{caseData.pipeline.replay ? " · replay" : ""}</p>
+                        <p className="text-body-sm font-semibold text-ink">Intake {caseData.arrivalTime.toLowerCase()}</p>
+                        <p className="text-body-sm text-ink-muted">Presenting complaint: {caseData.chiefComplaint}</p>
                       </div>
                     </li>
-                  )}
-                  {caseData.review && (
-                    <li className="py-3 flex items-start gap-3">
-                      <History className="h-5 w-5 text-risk-low mt-0.5 shrink-0" aria-hidden="true" />
-                      <div className="space-y-0.5">
-                        <p className="text-body-sm font-semibold text-ink">
-                          {caseData.review.decision === "approved" ? "Signed off" : caseData.review.decision === "modified" ? "Signed off with changes" : "Rejected"} by {caseData.review.reviewer}
-                        </p>
-                        <p className="text-body-sm text-ink-muted font-mono">{caseData.review.at.replace("T", " ").slice(0, 16)} UTC</p>
-                        {caseData.review.note && <p className="text-body-sm text-ink">{caseData.review.note}</p>}
-                      </div>
-                    </li>
-                  )}
-                </ol>
+                    {caseData.pipeline && (
+                      <li className="py-3 flex items-start gap-3">
+                        <History className="h-5 w-5 text-ink-muted mt-0.5 shrink-0" aria-hidden="true" />
+                        <div className="space-y-0.5">
+                          <p className="text-body-sm font-semibold text-ink">
+                            Assessment {caseData.pipeline.status.toLowerCase().replace(/_/g, " ")}
+                            {caseData.pipeline.durationMs != null ? ` in ${(caseData.pipeline.durationMs / 1000).toFixed(1)} s` : ""}
+                          </p>
+                          <p className="text-body-sm text-ink-muted font-mono">{caseData.pipeline.requestId}{caseData.pipeline.replay ? " · replay" : ""}</p>
+                        </div>
+                      </li>
+                    )}
+                  </ol>
+                )}
                 <p className="text-body-sm text-ink-muted">
-                  {caseData.lastVisit ? `Last recorded visit: ${caseData.lastVisit}.` : "No prior visits are recorded for this patient."} A full event log is on the roadmap.
+                  {caseData.events?.length
+                    ? "Every change to a stored case is recorded here and cannot be edited."
+                    : caseData.lastVisit
+                    ? `Last recorded visit: ${caseData.lastVisit}. Stored cases carry a full event log.`
+                    : "Stored cases carry a full event log of every change."}
                 </p>
               </div>
             )}

@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Clock, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Edit3 } from "lucide-react";
+import { CaseMenu } from "./CaseMenu";
 import { ClinicalCaseData } from "@/lib/casesData";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,10 @@ export interface PatientHeaderProps {
   caseData: ClinicalCaseData;
   activeTab: PatientTabId;
   onTabChange: (tab: PatientTabId) => void;
+  /** Present when the case is stored on the API. */
+  onEditPatient?: () => void;
+  onDelete?: () => Promise<void>;
+  onNotice?: (text: string) => void;
 }
 
 const TABS: Array<{ id: PatientTabId; label: string }> = [
@@ -25,6 +30,9 @@ export function PatientHeader({
   caseData,
   activeTab,
   onTabChange,
+  onEditPatient,
+  onDelete,
+  onNotice,
 }: PatientHeaderProps) {
   return (
     <header className="space-y-4">
@@ -108,6 +116,20 @@ export function PatientHeader({
               </>
             )}
           </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={onEditPatient}
+            disabled={!onEditPatient}
+            title={onEditPatient ? undefined : "Available for cases stored on the pipeline API"}
+            className="h-9 px-3.5 border border-rule bg-surface text-ink hover:bg-hover text-body-sm font-medium rounded-card inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          >
+            <Edit3 className="h-4 w-4 text-ink-muted" aria-hidden="true" />
+            <span>Edit patient</span>
+          </button>
+          <CaseMenu caseData={caseData} onDelete={onDelete} onNotice={onNotice} />
         </div>
       </div>
 

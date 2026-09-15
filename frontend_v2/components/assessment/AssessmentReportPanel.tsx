@@ -177,7 +177,12 @@ export function AssessmentReportPanel({
         )}
         {!onReview && (
           <div className="space-y-2">
-            <button type="button" onClick={onOpenReferralModal} className="h-10 w-full px-3 bg-action hover:bg-action-hover text-on-action font-medium text-body-sm rounded-card flex items-center justify-center gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" title="Sign-off is recorded on cases stored by the pipeline API">
+              <button type="button" disabled className="h-10 px-3 bg-action text-on-action font-medium text-body-sm rounded-card opacity-50 cursor-not-allowed">Sign off</button>
+              <button type="button" disabled className="h-10 px-3 bg-surface border border-rule text-ink font-medium text-body-sm rounded-card opacity-50 cursor-not-allowed">Sign off with changes</button>
+              <button type="button" disabled className="h-10 px-3 bg-surface border border-risk-emergency/40 text-risk-emergency font-medium text-body-sm rounded-card opacity-50 cursor-not-allowed">Reject</button>
+            </div>
+            <button type="button" onClick={onOpenReferralModal} className="h-10 w-full px-3 bg-surface border border-rule hover:bg-hover text-ink font-medium text-body-sm rounded-card flex items-center justify-center gap-2">
               <ArrowRight className="h-4 w-4" aria-hidden="true" /> Write referral note
             </button>
             <p className="text-body-sm text-ink-muted">

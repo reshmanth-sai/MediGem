@@ -1,5 +1,6 @@
 import type { AnalysisResponse, StoredCase } from "@/lib/schemas/analysis";
-import type { ClinicalCaseData, VitalSign } from "@/lib/casesData";
+import type { ClinicalCaseData, ClinicalDocument, VitalSign } from "@/lib/casesData";
+import { documentUrl } from "@/services/cases.service";
 import { SESSION } from "@/lib/session";
 
 export interface IntakeSnapshot {
@@ -148,6 +149,23 @@ export function mapStoredCase(c: StoredCase): ClinicalCaseData {
   if (c.reviewed_at && c.review_decision && c.reviewer) {
     mapped.review = { decision: c.review_decision, reviewer: c.reviewer, at: c.reviewed_at, note: c.review_note };
   }
+  if (c.plan) {
+    mapped.plan = { nextStep: c.plan.next_step, followUp: c.plan.follow_up, urgency: c.plan.urgency, note: c.plan.note, updatedBy: c.plan.updated_by, updatedAt: c.plan.updated_at };
+    mapped.disposition = { ...mapped.disposition, nextStep: c.plan.next_step, urgency: c.plan.urgency || mapped.disposition.urgency };
+  }
+  mapped.notes = c.notes.map((n) => ({ id: n.id, author: n.author, text: n.text, at: n.created_at }));
+  mapped.events = c.events.map((e) => ({ id: e.id, actor: e.actor, action: e.action, payload: e.payload ?? null, at: e.created_at }));
+  const intakeDocs: ClinicalDocument[] = p.documents.map((name) => ({ name, type: /\.pdf$/i.test(name) ? "PDF" : "Image", size: "", uploadedTime: mapped.arrivalTime, addedBy: "intake" }));
+  const storedDocs: ClinicalDocument[] = c.documents.map((d) => ({
+    id: d.id,
+    name: d.name,
+    type: d.content_type === "application/pdf" ? "PDF" : "Image",
+    size: d.size_bytes >= 1024 * 1024 ? `${(d.size_bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(d.size_bytes / 1024))} KB`,
+    uploadedTime: relativeTime(d.created_at),
+    url: documentUrl(c.id, d.id),
+    addedBy: d.added_by,
+  }));
+  mapped.clinicalDocuments = [...intakeDocs, ...storedDocs];
   return mapped;
 }
 

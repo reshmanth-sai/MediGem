@@ -17,6 +17,10 @@ vi.mock("@/components/layout/AppShell", () => ({
   AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+vi.mock("@/providers/ToastProvider", () => ({
+  useToastContext: () => ({ toasts: [], addToast: vi.fn(), removeToast: vi.fn() }),
+}));
+
 describe("results route", () => {
   beforeEach(() => {
     useCaseDraft.getState().reset();

@@ -14,6 +14,12 @@ export const API_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_API_TIMEOUT || 120_
 // server-side rate limit is the real control.
 export const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "";
 
+// Who is acting, until accounts exist. The API records it on every event.
+let actor = "";
+export function setApiActor(name: string): void {
+  actor = name;
+}
+
 export type ApiErrorKind = "unconfigured" | "network" | "timeout" | "http" | "parse";
 
 export class ApiError extends Error {
@@ -47,7 +53,7 @@ export class ApiError extends Error {
 }
 
 export interface RequestOptions {
-  method?: "GET" | "POST" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: BodyInit;
   headers?: Record<string, string>;
   timeoutMs?: number;
@@ -71,7 +77,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     res = await fetch(`${API_BASE_URL}${path}`, {
       method: options.method ?? "GET",
       body: options.body,
-      headers: { ...(API_KEY ? { "X-API-Key": API_KEY } : {}), ...(options.headers ?? {}) },
+      headers: { ...(API_KEY ? { "X-API-Key": API_KEY } : {}), ...(actor ? { "X-Actor": actor } : {}), ...(options.headers ?? {}) },
       signal: controller.signal,
     });
   } catch (e) {
