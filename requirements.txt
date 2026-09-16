@@ -20,6 +20,7 @@ httpx==0.28.1
 huggingface_hub==1.25.1
 idna==3.18
 ImageIO==2.37.4
+iniconfig==2.3.0
 Jinja2==3.1.6
 lazy-loader==0.5
 Markdown==3.10.2
@@ -34,10 +35,12 @@ orjson==3.11.9
 packaging==26.2
 pandas==3.0.5
 pillow==12.3.0
+pluggy==1.6.0
 pydantic==2.13.4
 pydantic_core==2.46.4
 pydub==0.25.1
 Pygments==2.20.0
+pytest==9.1.1
 pymupdf==1.28.0
 pytesseract==0.3.13
 python-dateutil==2.9.0.post0
