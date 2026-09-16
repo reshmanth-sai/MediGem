@@ -29,7 +29,7 @@ It does not diagnose, it does not prescribe, and it will not return a dose: a do
 
 ```mermaid
 flowchart LR
-    A[Intake<br/>symptoms · vitals · image] --> B{Emergency gate<br/>11 deterministic rules}
+    A[Intake<br/>symptoms · vitals · image] --> B{Emergency gate<br/>11 rules across 11 categories}
     B -- match --> R[Referral written<br/>status EMERGENCY_INTERCEPTED]
     B -- clear --> C[Input processing<br/>quality scores · OCR]
     C --> D[Prompt composition<br/>per-modality strategy]
@@ -45,7 +45,7 @@ flowchart LR
 
 Three decisions shape the design:
 
-**Rules before the model.** Acute presentations (cardiac, stroke, sepsis, anaphylaxis, obstetric, snakebite, …) are matched by deterministic rules with a synonym table before any inference. A match ends the request: the model is never consulted for a case where a wrong answer is most expensive. Median 0.35 ms. The product page runs the same rules in the browser, a TypeScript port held to the Python engine by 98 recorded answers, so a visitor can type symptoms and watch the gate decide. The Pipeline Inspector shows a coverage matrix of every rule against phrasings that should and should not fire it, gaps included: 40 of 49 behave as expected today; the rest are the 7 romanised Hindi phrasings (no Hindi synonym table yet) and 2 substring-matching over-fires.
+**Rules before the model.** Acute presentations (cardiac, stroke, sepsis, anaphylaxis, obstetric, snakebite, …) are matched by deterministic rules across 11 distinct categories with a synonym table before any inference. A match ends the request: the model is never consulted for a case where a wrong answer is most expensive. Median 0.45 ms (p95 0.51 ms; worst-case max up to 19.5 ms under full logging; target <5.0 ms). The product page runs the same rules in the browser, a TypeScript port held to the Python engine by 98 recorded answers, so a visitor can type symptoms and watch the gate decide. The Pipeline Inspector shows a coverage matrix of every rule against phrasings that should and should not fire it, gaps included: 40 of 49 behave as expected today; the rest are the 7 romanised Hindi phrasings (no Hindi synonym table yet) and 2 substring-matching over-fires.
 
 **One output contract.** The model must return a Pydantic-validated `ClinicalReasoningOutput`. `requires_human_review` defaults to `true`. A separate `SafetyGuard` runs regex checks for prohibited content (doses, "diagnosed with", certainty claims). Anything that fails is reported as DEGRADED, never passed off as an assessment.
 
@@ -57,12 +57,12 @@ Three decisions shape the design:
 
 | Metric | Value | Method |
 |---|---|---|
-| Emergency gate, matching case | **0.352 ms** median, 0.364 ms p95 | 5,000 evaluations |
-| End to end, image → validated assessment | **9.1 s** median, 8.0–13.0 s | 20 runs × 4 modalities |
+| Emergency gate, matching case | **0.445 ms** median, 0.511 ms p95 (max 7.27 ms; up to 19.49 ms under logging) | 5,000 evaluations |
+| End to end, image → validated assessment | **9.1 s** median (9,098 ms; mean 9,239 ms), 7.9–11.4 s | 20 runs × 4 modalities (80 runs) |
 | Schema-valid outputs | **80 / 80**, all `COMPLETED` | every run validated against `ClinicalReasoningOutput` |
 | OCR confidence | 77.5 % | Tesseract mean over the 2 sample documents with a text layer |
 
-Apple M5, `gemma3:4b` via Ollama, 2026-09-14. Raw capture: [`frontend_v2/components/landing/data/capture.json`](frontend_v2/components/landing/data/capture.json), parsed against a Zod schema at build time so the product page cannot drift from the backend's shape.
+Apple M5, `gemma3:4b` via Ollama, 2026-09-16. Raw capture: [`frontend_v2/components/landing/data/capture.json`](frontend_v2/components/landing/data/capture.json), parsed against a Zod schema at build time so the product page cannot drift from the backend's shape.
 
 **What is not measured:** whether the assessments are clinically *right*. These are mechanical figures (latency, validity). A clinical evaluation would need a labelled set reviewed by a clinician; see [Limitations](#limitations).
 
@@ -198,7 +198,7 @@ Dockerfile, docker-compose.yml   API + Ollama, one command — see Run it above
 - **Not clinically validated.** No labelled dataset, no clinician agreement study, no outcome data. The measured figures are latency and schema validity only. This is decision *support* for a clinician who decides; it is not a diagnostic device and is not certified as one.
 - **Accounts are minimal.** Username/password over a cookie session, four roles, no password-reset flow in the UI, no login-attempt lockout, one facility. See [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) for the full list.
 - **One machine.** Single-process API, plain SQLite file, no backup or encryption at rest, no installer. "Offline" means a laptop serving itself over the clinic's own network.
-- **Small model, small gate.** `gemma3:4b` with no clinical fine-tuning; 11 rules with English synonyms. Observations occasionally come back empty; OCR is Tesseract with no preprocessing.
+- **Small model, small gate.** `gemma3:4b` with no clinical fine-tuning; 11 rules across 11 distinct categories with English synonyms. Observations occasionally come back empty; OCR is Tesseract with no preprocessing.
 - **Hardware.** 9 s is an Apple M5 figure. Expect 60–120 s per assessment on a CPU-only laptop.
 
 What I would do next, in order: `docker compose up` so the API and Ollama start with one command; a labelled evaluation set with a clinician; a single-process install (standalone Next build served by the API); Hindi patient summaries. See [`docs/ROADMAP.md`](docs/ROADMAP.md).

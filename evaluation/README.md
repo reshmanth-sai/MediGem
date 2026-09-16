@@ -10,50 +10,54 @@ The `evaluation` package provides an offline, non-mutating framework to validate
 
 ```
 evaluation/
-├── __init__.py          # Package exports
-├── evaluator.py         # EvaluationRunner orchestrating execution
-├── benchmark.py         # Benchmarking suite & multi-run consistency driver
-├── metrics.py           # Metrics collector (OCR confidence, quality, completeness)
-├── latency.py           # Latency breakdown profiler (Input, OCR, Fusion, Gemma, Validation)
-├── safety_audit.py      # Safety compliance auditor (<2.5ms emergency gate)
-├── consistency.py      # Output consistency evaluator across multi-run executions
-├── fixtures.py          # Dynamic fixture manager (discovers ECG, PDF, Rx, Wound samples)
-├── report_generator.py # Report generator (Markdown, JSON, CSV)
-├── screenshots.py      # Vector SVG/PNG architecture diagram & visual asset generator
-├── diagrams/            # Generated SVG/PNG vector architecture diagrams
-├── screenshots/         # Visual screenshot placecard assets
-└── README.md            # Framework documentation
+├── __init__.py               # Package exports
+├── capture_landing_data.py   # Canonical 80-run multimodal benchmark suite (writes capture.json)
+├── evaluator.py              # 5-fixture integration smoke test runner
+├── benchmark.py              # Multi-run consistency runner over evaluator
+├── metrics.py                # Quality, completeness, and pass rate collector
+├── latency.py                # Latency profiler
+├── safety_audit.py           # Emergency gate compliance auditor (<5.0ms threshold)
+├── consistency.py           # Multi-run output consistency evaluator
+├── fixtures.py               # Fixture manager for tests/fixtures
+├── report_generator.py      # Markdown, JSON, and CSV report generator
+├── screenshots.py           # Vector SVG diagram & screenshot generator
+└── README.md                 # Package documentation
 ```
 
 ---
 
-## 📊 Generated Evaluation Artifacts
+## 📊 Evaluation Tools & Sources of Truth
 
-Running the evaluation framework automatically creates:
-1. `evaluation/evaluation_report.md`: Markdown summary report with executive metrics, emergency safety audit, and benchmark dataset table.
-2. `evaluation/evaluation_summary.json`: Machine-readable JSON summary stamped with metadata (`Timestamp`, `Model: gemma3:4b`, `Prompt Version: v1.0`, `Reasoning Version: v1.0`).
-3. `evaluation/benchmark_results.csv`: Tabular CSV benchmark dataset for export and statistical analysis.
-4. `evaluation/diagrams/system_architecture.svg`: Vector SVG architecture diagram.
-5. `evaluation/screenshots/*.png`: Visual screenshot placecard assets.
+### 1. Canonical Multimodal Benchmark (`evaluation/capture_landing_data.py`)
+This is the single source of truth for all published metrics across the landing page, workstation, and documentation:
+- **Scope**: 80 runs (20 runs × 4 real modalities: CBC lab report, Lead II ECG, handwritten prescription, post-op wound photo) + 5,000 emergency gate evaluations.
+- **Measured Metrics**:
+  - End-to-end latency: **9,098 ms median** (published as **9.1 s**; mean **9,239 ms**), range 7,859–11,381 ms
+  - Schema validity: **80 / 80 (100%)** COMPLETED against `ClinicalReasoningOutput`
+  - Real OCR confidence: **77.5%** mean word confidence via Tesseract on documents with a text layer
+  - Emergency gate latency: **0.445 ms median**, 0.511 ms p95, 7.267 ms max (in capture harness; up to 19.49 ms under console logging)
+- **Artifact**: Writes to `frontend_v2/components/landing/data/capture.json` (parsed by a Zod schema at build time).
 
----
+```bash
+PYTHONPATH=. python evaluation/capture_landing_data.py --runs 20 --gate-iterations 5000
+```
 
-## 🚀 Running Evaluation Suite
-
-Execute full evaluation runner:
+### 2. Integration Smoke Test (`evaluation/evaluator.py`)
+A fast integration test running across 5 synthetic test fixtures (`tests/fixtures/`):
+- **Scope**: 5 test cases testing orchestrator flow, safety rules, and report generation.
+- **Note on Latency & OCR**: Test cases include acute symptoms (e.g. chest tightness) that are intercepted by the deterministic gate in < 1 ms without invoking Gemma. Averaging zero-model gate interceptions with full model runs dilutes the arithmetic mean to ~4.8–5.4 s. Additionally, OCR confidence in this smoke test uses fixed heuristic weights (95% / 100%), yielding an artificial 97.0% average. Do not cite `evaluator.py` averages as true pipeline latency.
 
 ```bash
 python -m evaluation.evaluator
 ```
 
-Or run benchmark suite:
+---
 
-```bash
-python -m evaluation.benchmark
-```
+## 🚀 Running Verification Tests
 
 Run automated unit tests for evaluation framework:
 
 ```bash
 python -m unittest evaluation/tests/test_evaluation.py
 ```
+

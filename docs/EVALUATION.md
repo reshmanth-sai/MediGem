@@ -10,14 +10,14 @@ backend does not produce.
 
 | Metric | Value | Method |
 |---|---|---|
-| Emergency gate, matching case | 0.352 ms median, 0.364 ms p95 | 5,000 evaluations of `["chest tightness", "breathlessness"]` |
-| Emergency gate, benign case | see capture | 5,000 evaluations of a non-matching list |
-| End to end, image → validated assessment | 9,063 ms median, 7,975–12,961 ms | 20 runs per modality, four `sample_data/` inputs |
+| Emergency gate, matching case | 0.445 ms median, 0.511 ms p95 (max 7.27 ms; up to 19.49 ms under logging) | 5,000 evaluations of `["chest tightness", "breathlessness"]` |
+| Emergency gate, benign case | 0.329 ms median (max 7.04 ms; up to 15.88 ms under logging) | 5,000 evaluations of a non-matching list |
+| End to end, image → validated assessment | 9,098 ms median (mean 9,239 ms), 7,859–11,381 ms | 20 runs per modality, four `sample_data/` inputs (80 runs total) |
 | Schema-valid outputs | 80 / 80, all `COMPLETED` | each run validated against `ClinicalReasoningOutput` and the safety guard |
 | OCR confidence | 77.5 % | Tesseract mean word confidence on the two documents with a text layer |
 | Input processing | per modality in capture | quality scores, OCR, image metadata timing |
 
-Apple M5, macOS, `gemma3:4b` via Ollama, 2026-09-14.
+Apple M5, macOS, `gemma3:4b` via Ollama, 2026-09-16.
 
 ## What is not measured
 
@@ -34,7 +34,7 @@ ollama pull gemma3:4b
 PYTHONPATH=. python evaluation/capture_landing_data.py --runs 20 --gate-iterations 5000
 ```
 
-Runs take about 15 minutes on an M-series laptop. The script overwrites the
+Runs take about 12–15 minutes on an M-series laptop. The script overwrites the
 capture JSON; the frontend test `components/landing/data/capture.test.ts`
 fails if the new file does not match the schema.
 
@@ -46,3 +46,26 @@ the "8 g" inside "13.8 g/dL" (haemoglobin) and treated a lab value as a
 prescribed dose. The pattern now excludes decimals and concentrations
 (`backend/reasoning/safety.py`, tests in `tests/test_safety_guard_units.py`),
 and the capture was re-run: 80 / 80 COMPLETED.
+
+## Discrepancy Resolution: 9.1 s Median vs. 5,470.93 ms Average
+
+An earlier prototype benchmark table in the repository (Phase 12, July 2026) cited:
+- `5,470.93 ms average total pipeline latency`
+- `97.0% average OCR confidence`
+- `0.33 ms emergency gate max latency`
+
+These figures came from the legacy 5-fixture integration test `evaluation/evaluator.py`, not from a full benchmark:
+1. **Gate dilution**: In `evaluator.py`, test fixtures included acute symptoms that tripped the deterministic emergency gate (`FIX-ECG-01` with chest tightness; and under updated synonyms, `FIX-REPORT-01` and `FIX-TXT-01`). When the gate fires, LLM inference is completely bypassed, completing the request in **< 1 ms** instead of ~12,000 ms. Averaging full model runs (~11–13 s) with zero-model gate interceptions (~0.001 s) over just 5 samples diluted the arithmetic mean to **~5,470 ms** (re-tested at 4,789.5 ms).
+2. **Synthetic OCR score**: The 97.0% OCR confidence was a hardcoded rule in `evaluator.py` (`ocr_conf = 1.0 if fix.input_type in ("TEXT", "PDF") else 0.95`), yielding `(0.95 + 1.0 + 0.95 + 0.95 + 1.0) / 5 = 0.97` (97%).
+3. **True multimodal performance**: The **9.1 s median** (9,098 ms; mean 9,239 ms) is the true, current, and reproducible metric for end-to-end multimodal inference. In `capture_landing_data.py`, all 4 inputs contain benign symptoms that pass to the model without interception, measuring real wall-clock latency across 80 full runs (median 9.1 s, range 7.9–11.4 s) and real Tesseract OCR word confidence (77.5%).
+
+## Gate Latency Reconciliation: 0.352 ms Historical vs. ~0.45–0.48 ms Current
+
+Historical captures recorded a match-path median of `0.352 ms` and a benign-path median of `0.276 ms`.
+Fresh benchmarks measure the match-path median at `0.445–0.499 ms` and benign-path median at `0.329–0.368 ms`.
+
+- **Root cause**: Commit `bc2ac88` ("fix(gate): normalize hyphens and contractions, extend synonym table") introduced contraction expansion (`can't` -> `cannot`, 8 replacements per call), hyphen regex normalization (`re.sub(r"[-‐-―]", " ", text)`), and 9 additional colloquial synonyms in `rules.json`.
+- Because `expand_symptoms_with_synonyms` iterates across all synonyms and calls `normalize_text` in a loop, this added string processing overhead shifted the median gate evaluation latency upward by ~0.10 ms across both matching and benign evaluation paths.
+- The measurement correctly measures the match path (evaluating `["chest tightness", "breathlessness"]` triggering `R-CARDIAC-01`). Both matching and benign metrics are preserved as distinct fields in `capture.json`.
+
+

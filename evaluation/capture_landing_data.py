@@ -324,6 +324,16 @@ def main() -> None:
         json.dumps({"meta": meta, "summary": summary, "gate": gate, "modalities": modalities}, indent=2)
     )
     print(json.dumps({"meta": meta, "summary": summary}, indent=2))
+    print(f"\n--- VERBATIM 80-RUN BENCHMARK SUMMARY ---")
+    print(f"Total Runs: {len(all_durations)}")
+    print(f"Median: {statistics.median(all_durations):.2f} ms")
+    print(f"Mean:   {statistics.mean(all_durations):.2f} ms")
+    print(f"Min:    {min(all_durations):.2f} ms")
+    print(f"Max:    {max(all_durations):.2f} ms")
+    print(f"Date:   {meta['captured_at']}")
+    print(f"Platform: {meta['hardware']['platform']} ({meta['hardware']['chip']})")
+    print(f"Model:  {meta['model']}")
+
 
 
 if __name__ == "__main__":

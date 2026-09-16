@@ -26,7 +26,7 @@ Two processes and a file.
 ## Request path
 
 1. **Validate** the `AnalysisRequest` (demographics, symptoms, vitals, optional image with modality).
-2. **Emergency gate** (`backend/emergency`): symptoms are normalised through a synonym table and matched against `rules.json`. A match returns `EMERGENCY_INTERCEPTED` with a `RiskAssessment` and a referral; the model is never called. Median 0.35 ms.
+2. **Emergency gate** (`backend/emergency`): symptoms are normalised through a synonym table and matched against `rules.json`. A match returns `EMERGENCY_INTERCEPTED` with a `RiskAssessment` and a referral; the model is never called. Median 0.45 ms.
 3. **Route** to a per-modality strategy (lab report, ECG, prescription, wound, general).
 4. **Pipeline** (`backend/pipeline/medical_pipeline.py`):
    - input processing: OpenCV quality scores, Tesseract OCR or PyMuPDF text layer, image metadata;

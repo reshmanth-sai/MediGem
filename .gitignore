@@ -133,7 +133,7 @@ ijfw/
 .superpowers/
 
 # local case store
-data/
+/data/
 
 # evaluation/report_generator.py's own output: regenerate rather than commit,
 # so a stale run never sits in the repo contradicting the real capture.json.
