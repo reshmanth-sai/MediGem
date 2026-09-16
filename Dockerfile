@@ -22,6 +22,13 @@ RUN pip install --no-cache-dir -r requirements-api.txt
 
 COPY backend ./backend
 
+# Create a non-privileged user and ensure write access to runtime directories
+RUN mkdir -p /app/data /app/tmp && \
+    useradd -m -u 1001 -s /bin/bash appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
+
 # MEDIGEM_DB_PATH defaults to data/medigem.db under this directory; the
 # compose file mounts a volume there so cases and accounts survive a
 # container restart. CaseStore/UserStore create the directory themselves.

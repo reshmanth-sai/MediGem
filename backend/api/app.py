@@ -19,6 +19,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import anyio
 import hmac
 import threading
 from collections import deque
@@ -60,6 +61,8 @@ ALLOWED_UPLOAD_TYPES = {"image/png", "image/jpeg", "image/webp", "application/pd
 API_KEY = os.getenv("MEDIGEM_API_KEY", "")
 # Per-client budget for /analyze, which is a ten-second model run.
 ANALYZE_PER_MINUTE = int(os.getenv("MEDIGEM_ANALYZE_PER_MINUTE", "6"))
+LOGIN_PER_MINUTE = int(os.getenv("MEDIGEM_LOGIN_PER_MINUTE", "20"))
+TRUST_PROXY = os.getenv("MEDIGEM_TRUST_PROXY", "").lower() in ("1", "true", "yes")
 
 
 # Sessions ride in an HttpOnly cookie. Same-site by default (the workstation
@@ -132,18 +135,38 @@ class SlidingWindow:
 
 
 analyze_limiter = SlidingWindow(ANALYZE_PER_MINUTE)
+login_limiter = SlidingWindow(LOGIN_PER_MINUTE)
 
 
 def client_key(request: Request) -> str:
-    fwd = request.headers.get("x-forwarded-for", "")
-    if fwd:
-        return fwd.split(",")[0].strip()
+    if TRUST_PROXY:
+        fwd = request.headers.get("x-forwarded-for", "")
+        if fwd:
+            return fwd.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
 
 
 def rate_limit_analyze(request: Request) -> None:
     if not analyze_limiter.allow(client_key(request)):
         raise HTTPException(429, f"Rate limit: {ANALYZE_PER_MINUTE} analyses per minute per client.")
+
+
+def rate_limit_login(request: Request) -> None:
+    if not login_limiter.allow(client_key(request)):
+        raise HTTPException(429, "Too many login attempts. Please wait a minute before retrying.")
+
+
+async def read_upload_bounded(upload: UploadFile, max_bytes: int) -> bytes:
+    """Read an uploaded file up to max_bytes in chunks without loading unbounded data into memory."""
+    chunks: List[bytes] = []
+    total = 0
+    chunk_size = 64 * 1024
+    while chunk := await upload.read(chunk_size):
+        total += len(chunk)
+        if total > max_bytes:
+            raise HTTPException(413, f"Upload exceeds {max_bytes // (1024 * 1024)} MB.")
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 class GateRequest(BaseModel):
@@ -387,9 +410,8 @@ def create_app() -> FastAPI:
                 itype = ImageType(image_type.upper())
             except ValueError:
                 raise HTTPException(422, f"image_type must be one of {[t.value for t in ImageType]}.")
-            data = await image.read()
-            if len(data) > settings.MAX_FILE_SIZE_MB * 1024 * 1024:
-                raise HTTPException(413, f"Upload exceeds {settings.MAX_FILE_SIZE_MB} MB.")
+            max_bytes = settings.MAX_FILE_SIZE_MB * 1024 * 1024
+            data = await read_upload_bounded(image, max_bytes)
             suffix = Path(image.filename).suffix.lower() or ".bin"
             settings.TMP_DIR.mkdir(parents=True, exist_ok=True)
             saved_path = settings.TMP_DIR / f"{request_id}{suffix}"
@@ -405,7 +427,7 @@ def create_app() -> FastAPI:
         )
 
         try:
-            result = orchestrator.process_analysis_request(req)
+            result = await anyio.to_thread.run_sync(orchestrator.process_analysis_request, req)
             out = AnalyzeOut(**result.model_dump())
             if persist:
                 stored = case_store.create(
@@ -456,7 +478,7 @@ def create_app() -> FastAPI:
         _set_cookie(response, token)
         return UserOut(**user.to_dict())
 
-    @app.post("/auth/login", response_model=UserOut)
+    @app.post("/auth/login", response_model=UserOut, dependencies=[Depends(rate_limit_login)])
     def login(body: LoginIn, response: Response) -> UserOut:
         token = user_store.login(body.username, body.password)
         if token is None:
@@ -543,9 +565,8 @@ def create_app() -> FastAPI:
     async def post_document(case_id: str, request: Request, file: UploadFile = File(...)) -> CaseOut:
         if file.content_type not in ALLOWED_UPLOAD_TYPES:
             raise HTTPException(415, f"Unsupported file type {file.content_type}.")
-        data = await file.read()
-        if len(data) > settings.MAX_FILE_SIZE_MB * 1024 * 1024:
-            raise HTTPException(413, f"File exceeds {settings.MAX_FILE_SIZE_MB} MB.")
+        max_bytes = settings.MAX_FILE_SIZE_MB * 1024 * 1024
+        data = await read_upload_bounded(file, max_bytes)
         if not file.filename:
             raise HTTPException(422, "A file name is required.")
         doc = case_store.add_document(case_id, name=file.filename, content_type=file.content_type or "application/octet-stream", data=data, added_by=actor_of(request))
@@ -556,9 +577,16 @@ def create_app() -> FastAPI:
     @app.get("/cases/{case_id}/documents/{doc_id}", dependencies=[Depends(require_user)])
     def get_document(case_id: str, doc_id: str) -> FileResponse:
         doc = case_store.get_document(case_id, doc_id)
-        if doc is None or not Path(doc["path"]).exists():
+        if doc is None:
             raise HTTPException(404, "No such document.")
-        return FileResponse(doc["path"], media_type=doc["content_type"], filename=doc["name"])
+        target_path = Path(doc["path"]).resolve()
+        try:
+            target_path.relative_to(case_store.documents_dir.resolve())
+        except ValueError:
+            raise HTTPException(403, "Access to document path outside documents directory is forbidden.")
+        if not target_path.exists():
+            raise HTTPException(404, "No such document.")
+        return FileResponse(str(target_path), media_type=doc["content_type"], filename=doc["name"])
 
     @app.get("/cases/{case_id}/events", dependencies=[Depends(require_user)])
     def get_events(case_id: str) -> List[Dict[str, Any]]:

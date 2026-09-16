@@ -129,6 +129,30 @@ class ApiTests(unittest.TestCase):
         self.assertGreater(body["gate_latency_ms"], 0)
         self.assertIn(body["ollama_connected"], (True, False))
 
+    def test_login_is_rate_limited_per_client(self) -> None:
+        with patch.object(api, "login_limiter", api.SlidingWindow(2)):
+            body = {"username": "nonexistent", "password": "wrongpassword"}
+            self.assertEqual(self.client.post("/auth/login", json=body).status_code, 401)
+            self.assertEqual(self.client.post("/auth/login", json=body).status_code, 401)
+            r = self.client.post("/auth/login", json=body)
+            self.assertEqual(r.status_code, 429)
+
+    def test_client_key_ignores_untrusted_forwarded_for_by_default(self) -> None:
+        from fastapi import Request
+        scope = {"type": "http", "client": ("192.168.1.100", 1234), "headers": [(b"x-forwarded-for", b"203.0.113.195")]}
+        req = Request(scope)
+        # By default TRUST_PROXY is False, so client IP is 192.168.1.100
+        with patch.object(api, "TRUST_PROXY", False):
+            self.assertEqual(api.client_key(req), "192.168.1.100")
+        with patch.object(api, "TRUST_PROXY", True):
+            self.assertEqual(api.client_key(req), "203.0.113.195")
+
+    def test_get_document_blocks_path_traversal(self) -> None:
+        with patch.object(api.case_store, "get_document", return_value={"path": "/etc/passwd", "content_type": "text/plain", "name": "passwd"}):
+            r = self.client.get("/cases/CASE-1234/documents/DOC-1234")
+            self.assertEqual(r.status_code, 403)
+
 
 if __name__ == "__main__":
     unittest.main()
+
