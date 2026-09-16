@@ -33,12 +33,12 @@ export function Header() {
   }, []);
 
   return (
-    <header className="h-14 md:h-16 border-b border-rule bg-surface sticky top-0 z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
+    <header className="h-14 md:h-16 box-content pad-safe-top pad-safe-left border-b border-rule bg-surface sticky top-0 z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <button
           type="button"
           onClick={() => setNavOpen(true)}
-          className="md:hidden h-10 w-10 -ml-2 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="md:hidden h-11 w-11 -ml-2.5 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           aria-label="Open navigation"
           aria-expanded={navOpen}
         >
@@ -62,7 +62,7 @@ export function Header() {
         <button
           type="button"
           onClick={palette.open}
-          className="sm:hidden h-10 w-10 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover"
+          className="sm:hidden h-11 w-11 inline-flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover"
           aria-label="Search"
         >
           <Search className="h-4 w-4" aria-hidden="true" />
@@ -79,7 +79,7 @@ export function Header() {
           type="button"
           onClick={toggleTheme}
           aria-label={isDark ? "Switch to day theme" : "Switch to night theme"}
-          className="h-9 w-9 inline-flex items-center justify-center text-ink-muted hover:text-ink hover:bg-hover rounded-control transition-colors"
+          className="h-11 w-11 md:h-9 md:w-9 inline-flex items-center justify-center text-ink-muted hover:text-ink hover:bg-hover rounded-control transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
         </button>

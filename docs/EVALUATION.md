@@ -10,8 +10,8 @@ backend does not produce.
 
 | Metric | Value | Method |
 |---|---|---|
-| Emergency gate, matching case | 0.445 ms median, 0.511 ms p95 (max 7.27 ms; up to 19.49 ms under logging) | 5,000 evaluations of `["chest tightness", "breathlessness"]` |
-| Emergency gate, benign case | 0.329 ms median (max 7.04 ms; up to 15.88 ms under logging) | 5,000 evaluations of a non-matching list |
+| Emergency gate, matching case | 0.196 ms median, 0.220 ms p95 (max 0.889 ms harness; <2.8 ms under logging) | 5,000 evaluations of `["chest tightness", "breathlessness"]` |
+| Emergency gate, benign case | 0.107 ms median (max 0.712 ms harness; <2.2 ms under logging) | 5,000 evaluations of a non-matching list |
 | End to end, image → validated assessment | 9,098 ms median (mean 9,239 ms), 7,859–11,381 ms | 20 runs per modality, four `sample_data/` inputs (80 runs total) |
 | Schema-valid outputs | 80 / 80, all `COMPLETED` | each run validated against `ClinicalReasoningOutput` and the safety guard |
 | OCR confidence | 77.5 % | Tesseract mean word confidence on the two documents with a text layer |
@@ -67,5 +67,14 @@ Fresh benchmarks measure the match-path median at `0.445–0.499 ms` and benign-
 - **Root cause**: Commit `bc2ac88` ("fix(gate): normalize hyphens and contractions, extend synonym table") introduced contraction expansion (`can't` -> `cannot`, 8 replacements per call), hyphen regex normalization (`re.sub(r"[-‐-―]", " ", text)`), and 9 additional colloquial synonyms in `rules.json`.
 - Because `expand_symptoms_with_synonyms` iterates across all synonyms and calls `normalize_text` in a loop, this added string processing overhead shifted the median gate evaluation latency upward by ~0.10 ms across both matching and benign evaluation paths.
 - The measurement correctly measures the match path (evaluating `["chest tightness", "breathlessness"]` triggering `R-CARDIAC-01`). Both matching and benign metrics are preserved as distinct fields in `capture.json`.
+
+## Hot Path Logging Optimization (Elimination of Tail Latency)
+
+Prior to the non-blocking logging optimization, synchronous disk I/O from `RotatingFileHandler` writing to `logs/app.log` introduced periodic OS buffer flushes and file rotation locks on the hot path, causing maximum tail latency to spike up to ~19.5 ms under high-frequency evaluation.
+
+By migrating `backend/logging/logger.py` to a non-blocking `QueueHandler` backed by a dedicated background `QueueListener` thread running `RotatingFileHandler` and `RichHandler`:
+- Synchronous disk I/O and terminal formatting are completely removed from the critical evaluation path.
+- 5,000-evaluation gate benchmarks confirm that worst-case maximum latency dropped from ~19.5 ms to **0.889 ms** in the benchmark harness and **< 2.8 ms** under full active console logging.
+- The safety gate now satisfies its `< 5.0 ms` latency target cleanly across median (0.20 ms), p95 (0.22 ms), and true maximum (<2.8 ms) without asterisks.
 
 

@@ -53,7 +53,10 @@ export function ClinicalDocumentsList({ documents = [], onAddFile }: ClinicalDoc
       {documents.length === 0 ? (
         <p className="text-body-sm text-ink-muted">No documents on this case.</p>
       ) : (
-        <div className="overflow-x-auto">
+        // Focusable because it scrolls: the table inside overruns a narrow
+        // phone, and a scroll region a keyboard cannot reach is WCAG 2.1.1
+        // (axe scrollable-region-focusable). The label names the tab stop.
+        <div className="overflow-x-auto" tabIndex={0} role="group" aria-label="Documents, scrollable">
           <table className="w-full text-left text-body-sm">
             <thead>
               <tr className="text-ink-muted border-b border-rule">

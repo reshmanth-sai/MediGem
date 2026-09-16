@@ -35,7 +35,7 @@ This is the single source of truth for all published metrics across the landing 
   - End-to-end latency: **9,098 ms median** (published as **9.1 s**; mean **9,239 ms**), range 7,859–11,381 ms
   - Schema validity: **80 / 80 (100%)** COMPLETED against `ClinicalReasoningOutput`
   - Real OCR confidence: **77.5%** mean word confidence via Tesseract on documents with a text layer
-  - Emergency gate latency: **0.445 ms median**, 0.511 ms p95, 7.267 ms max (in capture harness; up to 19.49 ms under console logging)
+  - Emergency gate latency: **0.196 ms median**, 0.220 ms p95, 0.889 ms max in capture harness (<2.8 ms max under console logging; target <5.0 ms met)
 - **Artifact**: Writes to `frontend_v2/components/landing/data/capture.json` (parsed by a Zod schema at build time).
 
 ```bash

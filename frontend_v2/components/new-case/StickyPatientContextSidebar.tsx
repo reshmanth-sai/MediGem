@@ -103,7 +103,12 @@ export function StickyPatientContextSidebar({
       : `${patientData.systolicBp}/${patientData.diastolicBp}`;
 
   return (
-    <Card className="space-y-4 sticky top-4">
+    // Sticky only where this is actually a sidebar. It sits in `lg:col-span-4`,
+    // so below `lg` it is a card stacked under the form and there is no column
+    // for it to track. Unqualified `sticky top-4` pinned it 4px from the top of
+    // the viewport on a phone, underneath the z-40 app header, with the card's
+    // own `z-index: auto` losing that overlap.
+    <Card className="space-y-4 lg:sticky lg:top-4">
       <div className="flex items-center justify-between gap-2 pb-2 border-b border-rule">
         <h3 className="flex items-center gap-1.5 text-label text-ink">
           <User className="h-4 w-4 text-action" aria-hidden="true" />

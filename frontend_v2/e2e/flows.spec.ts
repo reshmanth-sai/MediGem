@@ -1,6 +1,21 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+/*
+ * The `large-text` project runs the whole suite with Settings > Accessibility >
+ * large text switched on, which is what AccessibilityProvider persists and
+ * reads back. Setting it as an init script means <html> carries the attribute
+ * before first paint, so no route renders once at the default scale and then
+ * reflows -- the layout under test is the one a user with the setting on sees
+ * from the start.
+ */
+test.beforeEach(async ({ page }, testInfo) => {
+  if (testInfo.project.name !== "large-text") return;
+  await page.addInitScript(() => {
+    document.documentElement.setAttribute("data-text-scale", "large");
+  });
+});
+
 // The five things a visitor does, in replay mode. Each must work on a phone.
 
 test("product page loads and opens the workstation", async ({ page }) => {
@@ -68,6 +83,15 @@ test("intake replays a recorded run and lands on a result", async ({ page }) => 
   await expect(card).toBeVisible();
   await expect(card.getByText(/replay\./i)).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/synthetic demo patient/i);
+
+  // CASE-CUSTOM is reachable only by finishing an intake, so the route loop
+  // below never sees it. Its reasoning card carries a much longer status badge
+  // than any preset case, which is exactly what pushed this page 108px wider
+  // than a phone once.
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+  );
+  expect(overflow, `the replay result scrolls sideways by ${overflow}px`).toBeLessThanOrEqual(0);
 });
 
 test("a lab-report replay shows the reasoning card", async ({ page }) => {
@@ -98,6 +122,59 @@ test("navigation works on a phone", async ({ page, isMobile }) => {
   const width = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(width).toBeLessThanOrEqual(0);
 });
+
+/*
+ * Every route, on the phone project only. Two things regress silently on a
+ * phone and are invisible from a desktop run, so they are asserted rather
+ * than eyeballed:
+ *
+ * 1. Horizontal overflow. One un-clipped child is enough to give the whole
+ *    page a sideways scrollbar, and it is easy to reintroduce -- an absolutely
+ *    positioned `sr-only` span escaping a `static` scroll container did exactly
+ *    that to /new-case once.
+ * 2. Form controls under 16px. iOS Safari zooms the page in when one is
+ *    focused and does not zoom back out, which strands the clinician at the
+ *    wrong scale for the rest of the intake. globals.css floors these below
+ *    `md`; this is the test that says so.
+ */
+const MOBILE_ROUTES = [
+  "/",
+  "/workstation",
+  "/new-case",
+  "/history",
+  "/assessments",
+  "/transfers",
+  "/learning",
+  "/evaluation",
+  "/developer",
+  "/settings",
+  "/assistant",
+  "/results/CASE-8901",
+];
+
+for (const path of MOBILE_ROUTES) {
+  test(`phone layout holds on ${path}`, async ({ page, isMobile }) => {
+    test.skip(!isMobile, "phone project only");
+    await page.goto(path);
+    await page.waitForLoadState("networkidle");
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    expect(overflow, `${path} scrolls sideways by ${overflow}px`).toBeLessThanOrEqual(0);
+
+    const tooSmall = await page.evaluate(() =>
+      [...document.querySelectorAll("input, select, textarea")]
+        .filter((el) => {
+          const type = el.getAttribute("type");
+          return type !== "checkbox" && type !== "radio" && type !== "range";
+        })
+        .filter((el) => parseFloat(getComputedStyle(el).fontSize) < 16)
+        .map((el) => el.getAttribute("name") || el.id || el.tagName.toLowerCase())
+    );
+    expect(tooSmall, `${path} has controls iOS will zoom into`).toEqual([]);
+  });
+}
 
 for (const path of ["/", "/workstation", "/new-case", "/results/CASE-8901", "/settings", "/developer", "/evaluation"]) {
   test(`no serious accessibility violations on ${path}`, async ({ page }) => {

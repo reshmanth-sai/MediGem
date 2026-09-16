@@ -74,6 +74,44 @@
 .landing ::selection { background: var(--l-signal); color: var(--l-ink); }
 .landing :focus-visible { outline: 2px solid var(--l-signal); outline-offset: 3px; }
 
+/*
+ * Display type cannot widen the page. These sizes are `clamp()`d against vw,
+ * but their lower bound is in rem, so the large-text accessibility scale
+ * lifts them past what a 320px screen can hold: one long word ("recommendation"
+ * at 42px) became a 347px min-content floor, and because a grid item defaults
+ * to `min-width: auto` that floor inflated the whole track and pushed the
+ * document 47px wider than the viewport. Breaking a long word is a worse
+ * headline than a balanced one and a much better page than a sideways
+ * scrollbar, so it is allowed only when the word genuinely cannot fit.
+ */
+.landing .t-statement,
+.landing .t-hero,
+.landing .t-section {
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+/*
+ * Nothing on this page may set a width floor. Every track and gap here is
+ * rem-based, so the Settings > Accessibility large-text scale inflates the
+ * whole layout at once; at 320px three separate components (the reasoning
+ * heading, the trail row, the gate demo) each pinned their grid track to
+ * min-content and pushed the document wider than the viewport. Patching them
+ * one at a time was whack-a-mole, so the floor is removed page-wide.
+ *
+ * `min-width: auto` only resolves to a content-based size for flex and grid
+ * items -- for ordinary block boxes it already computes to 0 -- so this is
+ * inert everywhere except the layouts that were causing the overflow. SVGs
+ * are excluded because their intrinsic sizing is how they scale at all.
+ */
+.landing *:not(svg):not(svg *) {
+  min-width: 0;
+}
+.landing input,
+.landing textarea,
+.landing select {
+  max-width: 100%;
+}
+
 /* Type roles. Serif is reserved for statements; mono for readouts. */
 .landing .t-statement {
   font-family: var(--l-serif);
@@ -246,6 +284,17 @@
 .landing .nav-open-long { display: none; }
 .landing .nav-open-short { display: inline; }
 @media (max-width: 479px) { .landing .nav-uplink { display: none; } }
+/* The nav is `auto 1fr auto` with a 2rem gap and rem-based gutters, so the
+   large-text scale inflates the gap, the gutter and the wordmark together and
+   the fixed bar outgrows a 320px screen. These overrides are in px on purpose:
+   rem values here would scale with the very setting that causes the overflow,
+   which is what made a first attempt at this rule change nothing. */
+@media (max-width: 379px) {
+  .landing .nav { gap: 8px; padding-inline: 12px; }
+  .landing .nav-right { gap: 8px; }
+  .landing .nav-mark { font-size: 18px; }
+  .landing .nav-open { font-size: 13px; }
+}
 .landing .dot { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; }
 .landing .dot-off { background: transparent; outline: 1px solid currentColor; }
 @media (min-width: 768px) {
@@ -418,6 +467,7 @@
 /* ---------- 05 Reasoning ---------- */
 .landing .trail { display: grid; gap: clamp(2.5rem, 6vh, 4rem); margin-top: clamp(2.5rem, 6vh, 4rem); max-width: 72ch; }
 .landing .trail-head { display: grid; grid-template-columns: 2rem auto 1fr; align-items: center; gap: 1rem; }
+.landing .trail-name { overflow-wrap: break-word; }
 .landing .trail-line { height: 1px; background: var(--l-fg); transform-origin: left; }
 .landing .trail-name { font-family: var(--l-serif); font-size: 1.5rem; letter-spacing: -0.01em; }
 .landing .trail-note { color: var(--l-fg-muted); }
@@ -434,6 +484,13 @@
 
 /* ---------- 06 Proof ---------- */
 .landing .proof .t-body { margin-top: 1.5rem; }
+/* Mono readouts carry unbreakable tokens -- file paths, model ids, request
+   ids -- that have no space to wrap at. `break-word` only splits a token that
+   cannot fit on a line of its own, which at 320px with the large-text scale is
+   the difference between a wrapped path and a page-wide horizontal scrollbar
+   (evaluation/capture_landing_data.py was forcing 41px of it). */
+.landing .t-mono,
+.landing .t-mono-lg { overflow-wrap: break-word; }
 .landing .provenance { margin-top: 2rem; color: var(--l-fg-muted); }
 .landing .ledger { width: 100%; border-collapse: collapse; margin-top: clamp(2rem, 5vh, 3rem); }
 .landing .ledger-row { border-top: 1px solid var(--l-rule); }
@@ -502,7 +559,8 @@
 .landing .telemetry-readouts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.5rem 2rem; margin: 0; }
 @media (min-width: 600px) { .landing .telemetry-readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .landing .telemetry-readouts div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--l-rule); padding-bottom: 0.35rem; }
-.landing .telemetry-readouts dt { color: var(--l-fg-muted); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.6875rem; }
+.landing .telemetry-readouts dt { color: var(--l-fg-muted); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.75rem; }
+@media (min-width: 600px) { .landing .telemetry-readouts dt { font-size: 0.6875rem; } }
 .landing .telemetry-readouts dd { margin: 0; }
 .landing .runs { margin: 0; display: grid; gap: 0.6rem; }
 .landing .runs-bars { display: flex; align-items: flex-end; gap: 3px; height: 4.5rem; border-bottom: 1px solid var(--l-rule); }

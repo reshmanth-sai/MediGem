@@ -91,7 +91,18 @@ export function ModalDialog({ isOpen, onClose, title, children, className }: Mod
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/50 backdrop-blur-sm animate-in fade-in">
+      {/*
+        The overlay scrolls, the panel does not stretch. `fixed inset-0` with
+        `items-center` and no overflow silently truncates any dialog taller
+        than the viewport: the panel centres, its ends fall outside the fixed
+        box, and nothing can scroll to them. The emergency gate result did
+        exactly that at 320px, leaving "Open referral" unreachable and the
+        intake flow impossible to finish on a small phone. Scrolling on the
+        backdrop with `min-h-full` on the inner wrapper keeps short dialogs
+        centred and lets tall ones scroll end to end.
+      */}
+      <div className="flex min-h-full items-center justify-center p-4 pad-safe-bottom pad-safe-top">
       <div
         ref={panelRef}
         role="dialog"
@@ -110,12 +121,13 @@ export function ModalDialog({ isOpen, onClose, title, children, className }: Mod
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="shrink-0 inline-flex h-9 w-9 -mr-1 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-rule hover:text-ink"
+            className="shrink-0 inline-flex h-11 w-11 -mr-2 md:h-9 md:w-9 md:-mr-1 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-rule hover:text-ink"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
         <div>{children}</div>
+      </div>
       </div>
     </div>
   );

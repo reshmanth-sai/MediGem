@@ -77,7 +77,7 @@ export function SegmentedQueueFilters({
             placeholder="Search patients, symptoms, or protocols..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 text-body-sm bg-surface border border-rule rounded-card text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-action focus:border-action transition-colors"
+            className="w-full h-11 pl-9 pr-4 py-1.5 text-body-sm bg-surface border border-rule rounded-card text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-action focus:border-action transition-colors md:h-auto"
             aria-label="Search patient queue"
           />
         </div>
@@ -97,7 +97,7 @@ export function SegmentedQueueFilters({
                 onClick={() => setSelectedStatus(s.id)}
                 aria-pressed={isActive}
                 className={cn(
-                  "px-3 py-1 rounded-control transition-colors font-medium text-body-sm",
+                  "inline-flex min-h-[44px] items-center px-3 py-1 rounded-control transition-colors font-medium text-body-sm md:min-h-0",
                   isActive
                     ? "bg-action/10 text-action border border-action/20 font-semibold"
                     : "text-ink-muted hover:text-ink hover:bg-surface-raised"
@@ -125,7 +125,7 @@ export function SegmentedQueueFilters({
               onClick={() => toggleRisk(rc.id)}
               aria-pressed={isActive}
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-card border text-body-sm font-medium transition-all",
+                "flex min-h-[44px] items-center gap-2 px-3 py-1.5 rounded-card border text-body-sm font-medium transition-all md:min-h-0",
                 isActive
                   ? rc.id === "EMERGENCY"
                     ? "bg-risk-emergency/10 border-risk-emergency text-risk-emergency ring-1 ring-risk-emergency"

@@ -137,7 +137,7 @@ export function PatientHeader({
       <nav
         role="tablist"
         aria-label="Patient workspace tabs"
-        className="flex items-center gap-8 border-b border-rule pt-2"
+        className="flex items-center gap-5 sm:gap-8 border-b border-rule pt-2 overflow-x-auto"
       >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;

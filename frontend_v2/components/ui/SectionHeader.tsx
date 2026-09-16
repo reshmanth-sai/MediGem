@@ -23,12 +23,21 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className={cn("space-y-1.5 pb-2.5 border-b border-rule", className)} {...props}>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
+      {/*
+        The badge used to be `shrink-0`, which is right for a short count chip
+        and wrong for anything longer: the reasoning card passes a request id,
+        status and duration, and at 377px that one chip pushed the whole
+        results page 108px wider than a phone. The row wraps and the badge is
+        allowed to shrink, so long content breaks over lines instead of
+        forcing a horizontal scrollbar. A short badge still sits inline
+        beside the title, unchanged.
+      */}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
+        <div className="flex flex-wrap items-center gap-2.5 min-w-0">
           <h2 className="text-label uppercase tracking-wider font-semibold text-ink-muted">
             {title}
           </h2>
-          {badge && <div className="shrink-0">{badge}</div>}
+          {badge && <div className="min-w-0">{badge}</div>}
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>

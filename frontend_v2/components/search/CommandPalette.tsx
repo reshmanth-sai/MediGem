@@ -104,7 +104,7 @@ export function CommandPalette() {
                 <button
                   type="button"
                   onClick={() => handleNavigate(cmd.route)}
-                  className="w-full flex items-center gap-3 p-2.5 rounded-control text-left hover:bg-action-subtle hover:text-action transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  className="w-full min-h-[44px] md:min-h-0 flex items-center gap-3 p-2.5 rounded-control text-left hover:bg-action-subtle hover:text-action transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
                   <Icon className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
                   <span className="flex-1 min-w-0 truncate text-body-sm font-semibold text-ink">

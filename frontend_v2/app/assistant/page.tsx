@@ -206,7 +206,18 @@ export default function ClinicalAssistantPage() {
 
   return (
     <AppShell>
-      <div className="max-w-[1200px] mx-auto h-[calc(100vh-8.5rem)] flex flex-col space-y-3.5 pb-2">
+      {/*
+        Desktop locks the column to the viewport so the composer sits at the
+        bottom of the screen and only the feed scrolls. That lock cannot hold
+        on a phone: the chrome above this column (header, demo ribbon, page
+        header, suggestions) is taller and variable, so a fixed `100vh - 8.5rem`
+        column overflowed and pushed the composer below the fold -- the chat was
+        unusable without scrolling past it. Below `md` the column flows with the
+        page and the feed carries its own height cap instead. `dvh` rather than
+        `vh` so a tablet with a collapsing browser bar measures the visible
+        viewport, not the tallest one.
+      */}
+      <div className="max-w-[1200px] mx-auto flex flex-col space-y-3.5 pb-2 md:h-[calc(100dvh-8.5rem)]">
         <PageHeader
           title="Clinical assistant"
           subtitle="Protocol lookup and triage support. It does not diagnose or prescribe; the clinician decides."
@@ -223,7 +234,7 @@ export default function ClinicalAssistantPage() {
           <span className="text-body-sm font-semibold text-ink-muted uppercase tracking-wider block">
             Suggested questions
           </span>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory sm:mx-0 sm:px-0 sm:overflow-visible sm:grid sm:grid-cols-2 lg:grid-cols-4">
             {SUGGESTED_PROMPTS.map((item) => {
               const Icon = item.icon;
               return (
@@ -231,7 +242,7 @@ export default function ClinicalAssistantPage() {
                   key={item.title}
                   type="button"
                   onClick={() => handleSendMessage(item.prompt)}
-                  className="p-2.5 text-left rounded-card border border-rule bg-surface hover:border-action/40 hover:bg-surface-raised transition-all group"
+                  className="w-[15rem] shrink-0 snap-start p-2.5 text-left rounded-card border border-rule bg-surface hover:border-action/40 hover:bg-surface-raised transition-all group sm:w-auto sm:shrink"
                 >
                   <div className="flex items-center gap-1.5 text-action mb-0.5">
                     <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -249,8 +260,8 @@ export default function ClinicalAssistantPage() {
         </div>
 
         {/* Chat Feed Container */}
-        <div className="border border-rule rounded-card bg-surface flex-1 min-h-0 flex flex-col overflow-hidden">
-          <div ref={chatListRef} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+        <div className="border border-rule rounded-card bg-surface flex min-h-0 flex-col md:h-auto md:flex-1 md:overflow-hidden">
+          <div ref={chatListRef} className="flex-1 p-4 sm:p-5 space-y-4 md:min-h-0 md:overflow-y-auto">
             {messages.map((m) => {
               const isUser = m.role === "user";
               return (
@@ -322,19 +333,19 @@ export default function ClinicalAssistantPage() {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="p-2.5 sm:p-3 border-t border-rule bg-surface-raised/40 flex items-center gap-2 shrink-0"
+            className="sticky bottom-0 z-10 pad-safe-bottom p-2.5 sm:p-3 border-t border-rule bg-surface rounded-b-card flex items-center gap-2 shrink-0 md:static md:bg-surface-raised/40 md:rounded-none"
           >
             <input
               type="text"
               placeholder="Ask about triage steps, red flags, or a protocol..."
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
-              className="flex-1 px-3.5 py-2 text-body-sm bg-surface border border-rule rounded-card text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-action focus:border-action transition-all"
+              className="min-w-0 flex-1 h-11 px-3.5 py-2 text-body-sm bg-surface border border-rule rounded-card text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-action focus:border-action transition-all md:h-auto"
             />
             <button
               type="submit"
               disabled={!inputQuery.trim() || isThinking}
-              className="px-4 py-2 bg-action hover:bg-action-hover disabled:opacity-50 disabled:cursor-not-allowed text-on-action font-semibold text-body-sm rounded-card inline-flex items-center gap-1.5 transition-colors shrink-0"
+              className="h-11 px-4 py-2 bg-action hover:bg-action-hover disabled:opacity-50 disabled:cursor-not-allowed text-on-action font-semibold text-body-sm rounded-card inline-flex items-center gap-1.5 transition-colors shrink-0 md:h-auto"
             >
               <span>Send</span>
               <Send className="h-3.5 w-3.5" />

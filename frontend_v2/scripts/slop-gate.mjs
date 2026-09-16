@@ -10,7 +10,11 @@ const RULES = [
   { name: "hardcoded slate text", pattern: /\btext-slate-\d/ },
   { name: "hardcoded teal", pattern: /\b(bg|text|border|ring)-teal-\d/ },
   { name: "sub-13px type (text-xs)", pattern: /\btext-xs\b/ },
-  { name: "arbitrary 10px type", pattern: /text-\[10px\]/ },
+  // `text-xs` was the only sub-13px spelling this gate knew, so a literal
+  // `text-[11px]` walked past it into components/history. Any arbitrary type
+  // size below the scale's 13px floor is caught now, in px or rem.
+  { name: "sub-13px arbitrary type", pattern: /text-\[(?:[0-9]|1[0-2])(?:\.\d+)?px\]/ },
+  { name: "sub-13px arbitrary rem type", pattern: /text-\[0\.(?:[0-7]\d*|80\d*)rem\]/ },
   { name: "font-black", pattern: /\bfont-black\b/ },
   // A Tailwind variant is always glued straight to the utility it modifies
   // (dark:text-white). Requiring a non-space after the colon keeps this from
@@ -37,7 +41,10 @@ const RULES = [
     // and separate from the workstation tokens on purpose.
     // app/opengraph-image.tsx renders at the edge with no stylesheet, so it
     // repeats the landing palette literally.
-    allow: ["styles/globals.css", "lib/tokens.ts", "styles/landing.css", "app/opengraph-image.tsx"],
+    // app/layout.tsx carries the browser-chrome theme-color for each scheme.
+    // That meta tag is read by the OS before any stylesheet loads, so it can
+    // only be a literal; it mirrors --ground in globals.css.
+    allow: ["styles/globals.css", "lib/tokens.ts", "styles/landing.css", "app/opengraph-image.tsx", "app/layout.tsx"],
   },
   // Spec section 6: a surface carries either a border or a shadow, never
   // both, and a shadow only where the layer genuinely floats above the page

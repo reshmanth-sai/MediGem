@@ -1,29 +1,26 @@
 """Logging infrastructure for MediGem."""
 
+import atexit
 import logging
+import queue
 import sys
-from logging.handlers import RotatingFileHandler
+from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
 from pathlib import Path
 from typing import Optional
 
 from rich.logging import RichHandler
 from backend.config import settings
 
+_log_queue: queue.Queue = queue.Queue(-1)
+_listener: Optional[QueueListener] = None
 
-def setup_logger(
-    name: str = "MediGem",
-    log_file: Optional[Path] = None,
-    level: int = logging.INFO,
-) -> logging.Logger:
-    """Create and configure a multi-handler logger with console and file output."""
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
 
-    # Avoid duplicate handlers if already initialized
-    if logger.handlers:
-        return logger
+def _get_or_create_listener(log_file: Optional[Path] = None, level: int = logging.INFO) -> QueueListener:
+    """Initialize the background QueueListener once with Rich console and rotating file handlers."""
+    global _listener
+    if _listener is not None:
+        return _listener
 
-    # 1. Colored Console Handler using Rich
     console_handler = RichHandler(
         rich_tracebacks=True,
         markup=True,
@@ -31,9 +28,7 @@ def setup_logger(
         show_path=False,
     )
     console_handler.setLevel(level)
-    logger.addHandler(console_handler)
 
-    # 2. File Handler (Rotating log file in logs/app.log)
     if log_file is None:
         log_file = settings.LOGS_DIR / "app.log"
 
@@ -51,7 +46,28 @@ def setup_logger(
     )
     file_handler.setLevel(level)
     file_handler.setFormatter(file_formatter)
-    logger.addHandler(file_handler)
+
+    _listener = QueueListener(_log_queue, console_handler, file_handler, respect_handler_level=True)
+    _listener.start()
+    atexit.register(_listener.stop)
+    return _listener
+
+
+def setup_logger(
+    name: str = "MediGem",
+    log_file: Optional[Path] = None,
+    level: int = logging.INFO,
+) -> logging.Logger:
+    """Create and configure a non-blocking logger dispatching to a background QueueListener."""
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+
+    # Avoid duplicate handlers if already initialized
+    if logger.handlers:
+        return logger
+
+    _get_or_create_listener(log_file=log_file, level=level)
+    logger.addHandler(QueueHandler(_log_queue))
 
     return logger
 

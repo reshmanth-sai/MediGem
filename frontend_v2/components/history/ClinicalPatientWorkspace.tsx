@@ -98,7 +98,7 @@ export function ClinicalPatientWorkspace({
               <WorkspaceRiskBadge level={patient.riskLevel} />
               <button
                 type="button"
-                className="p-1 text-ink-muted hover:text-ink rounded hover:bg-surface-raised transition-colors"
+                className="inline-flex h-11 w-11 items-center justify-center -mr-2 lg:h-auto lg:w-auto lg:mr-0 lg:p-1 text-ink-muted hover:text-ink rounded hover:bg-surface-raised transition-colors"
                 aria-label="More options"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function ClinicalPatientWorkspace({
                   key={v.label}
                   className="border border-rule rounded-card p-2.5 bg-surface space-y-0.5"
                 >
-                  <span className="text-[11px] font-medium text-ink-muted">{v.label}</span>
+                  <span className="text-body-sm font-medium text-ink-muted">{v.label}</span>
                   <div
                     className={cn(
                       "text-body-sm font-bold font-mono",
@@ -235,14 +235,14 @@ export function ClinicalPatientWorkspace({
         <div className="grid grid-cols-3 gap-2">
           <Link
             href={`/results/${patient.caseId}#care-plan`}
-            className="bg-action hover:bg-action-hover text-on-action px-3 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="bg-action hover:bg-action-hover text-on-action px-3 py-2 min-h-[44px] lg:min-h-0 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <ClipboardList className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span className="truncate">{patient.plan ? "Update care plan" : "Set care plan"}</span>
           </Link>
           <Link
             href={`/results/${patient.caseId}`}
-            className="border border-rule bg-surface hover:bg-surface-raised text-ink px-2.5 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="border border-rule bg-surface hover:bg-surface-raised text-ink px-2.5 py-2 min-h-[44px] lg:min-h-0 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5 text-ink-muted shrink-0" aria-hidden="true" />
             <span className="truncate">Open case</span>
@@ -250,7 +250,7 @@ export function ClinicalPatientWorkspace({
           <button
             type="button"
             onClick={onOpenReferralModal}
-            className="border border-rule bg-surface hover:bg-surface-raised text-ink px-2 py-2 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="border border-rule bg-surface hover:bg-surface-raised text-ink px-2 py-2 min-h-[44px] lg:min-h-0 rounded-card text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <FileUp className="h-3.5 w-3.5 text-ink-muted shrink-0" aria-hidden="true" />
             <span className="truncate">Referral note</span>

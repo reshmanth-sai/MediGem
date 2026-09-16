@@ -149,7 +149,9 @@ export function MeasuredPerformance() {
         What this does not measure: whether the assessments are clinically right. These are mechanical figures, latency and schema validity, not accuracy against a clinician&apos;s judgment. That evaluation needs a labelled case set reviewed by a clinician; see Limitations in the README.
       </BodySm>
 
-      <Label as="p" className="text-ink-muted normal-case font-mono">
+      {/* break-words: the trailing script path is one unbreakable token and
+          overran a 320px screen at the large-text scale. */}
+      <Label as="p" className="text-ink-muted normal-case font-mono break-words">
         {meta.hardware.chip} · {meta.model} via Ollama · captured {meta.captured_at.slice(0, 10)} by evaluation/capture_landing_data.py
       </Label>
     </div>

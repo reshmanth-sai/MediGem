@@ -39,7 +39,7 @@ export function MobileNav({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
         role="dialog"
         aria-modal="true"
         aria-label="Navigation"
-        className="absolute inset-y-0 left-0 w-[min(20rem,85vw)] bg-surface border-r border-rule flex flex-col justify-between py-5 px-3.5 overflow-y-auto"
+        className="absolute inset-y-0 left-0 w-[min(20rem,85vw)] pad-safe-top pad-safe-bottom pad-safe-left bg-surface border-r border-rule flex flex-col justify-between py-5 px-3.5 overflow-y-auto overscroll-contain"
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between min-h-[44px] px-1.5">
@@ -47,7 +47,7 @@ export function MobileNav({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
             <button
               type="button"
               onClick={onClose}
-              className="h-9 w-9 flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover"
+              className="h-11 w-11 -mr-1 flex items-center justify-center rounded-control text-ink-muted hover:text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
               aria-label="Close navigation"
             >
               <X className="h-4 w-4" aria-hidden="true" />

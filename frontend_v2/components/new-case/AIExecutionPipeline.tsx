@@ -92,7 +92,18 @@ export function AIExecutionPipeline({ run, onComplete, onCancel }: AIExecutionPi
   };
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="pipeline-heading" className="fixed inset-0 z-50 bg-ground/80 flex items-center justify-center p-4">
+    <div role="dialog" aria-modal="true" aria-labelledby="pipeline-heading" className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-ground/80">
+      {/*
+        The overlay scrolls, the panel does not stretch. `fixed inset-0` with
+        `items-center` and no overflow silently truncates any dialog taller
+        than the viewport: the panel centres, its ends fall outside the fixed
+        box, and nothing can scroll to them. The emergency gate result did
+        exactly that at 320px, leaving "Open referral" unreachable and the
+        intake flow impossible to finish on a small phone. Scrolling on the
+        backdrop with `min-h-full` on the inner wrapper keeps short dialogs
+        centred and lets tall ones scroll end to end.
+      */}
+      <div className="flex min-h-full items-center justify-center p-4 pad-safe-bottom pad-safe-top">
       <div className="w-full max-w-lg rounded-control bg-surface border border-rule p-6 space-y-6">
         <div className="flex items-center gap-3 pb-3 border-b border-rule">
           <span className="p-2.5 rounded-control bg-action-subtle text-action border border-rule">
@@ -196,6 +207,7 @@ export function AIExecutionPipeline({ run, onComplete, onCancel }: AIExecutionPi
             </Button>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

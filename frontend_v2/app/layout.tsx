@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { RootProvider } from "@/providers";
 import { fontClassNames } from "./fonts";
@@ -20,6 +20,28 @@ export const metadata: Metadata = {
   // The workstation is a demo surface with synthetic patients; only the
   // product page is meant to be indexed. robots.ts carries the path rules.
   robots: { index: true, follow: true },
+};
+
+/*
+ * `viewport-fit=cover` lets the page paint into the notch and home-indicator
+ * strips, which is what makes `env(safe-area-inset-*)` resolve to real values
+ * -- without it those insets are always 0px and the .pad-safe-* utilities in
+ * globals.css do nothing. Anything pinned to a viewport edge pads itself with
+ * the matching inset.
+ *
+ * No `maximum-scale` or `user-scalable=no`: pinch zoom stays available, which
+ * WCAG 1.4.4 requires and a clinician reading a small readout outdoors needs.
+ * The zoom this app used to force came from sub-16px form controls, fixed in
+ * globals.css rather than by locking the viewport.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#111815" },
+  ],
 };
 
 export default function RootLayout({

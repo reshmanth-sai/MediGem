@@ -20,8 +20,8 @@
     "pipeline_ms_max": 11381.29,
     "ocr_confidence_mean": 0.775,
     "ocr_samples": 2,
-    "gate_latency_ms_median": 0.445,
-    "gate_latency_ms_max": 7.267,
+    "gate_latency_ms_median": 0.196,
+    "gate_latency_ms_max": 0.889,
     "gate_rule_count": 11,
     "supported_inputs": 4
   },
@@ -48,11 +48,11 @@
       ]
     },
     "latency_ms": {
-      "match_median": 0.445,
-      "match_p95": 0.511,
-      "match_max": 7.267,
-      "benign_median": 0.329,
-      "benign_max": 7.039
+      "match_median": 0.196,
+      "match_p95": 0.22,
+      "match_max": 0.889,
+      "benign_median": 0.107,
+      "benign_max": 0.712
     },
     "rule_count": 11,
     "rules": [
@@ -194,8 +194,8 @@
     "orchestrator_block": {
       "status": "EMERGENCY_INTERCEPTED",
       "summary": "EMERGENCY GATE INTERCEPTION: Emergency detected (CARDIAC): Acute Cardiac Event. Recommended Action: CALL_AMBULANCE.",
-      "duration_ms": 2.38,
-      "wall_ms": 3.496,
+      "duration_ms": 0.36,
+      "wall_ms": 0.405,
       "risk_level": "EMERGENCY"
     }
   },

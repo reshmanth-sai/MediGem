@@ -176,6 +176,44 @@ html, body {
 
 .tabular { font-variant-numeric: tabular-nums; }
 
+/*
+ * Mobile form controls: 16px minimum.
+ *
+ * iOS Safari zooms the whole page in when a focused form control renders
+ * below 16px, and it does not zoom back out on blur -- the clinician is left
+ * pinching the layout back into place after every field. The project's
+ * `body-sm` control type is 13px, so every input, select and textarea in the
+ * intake form tripped it. Below the `md` breakpoint (the same 768px line the
+ * sidebar and mobile nav switch on) controls render at 16px instead. This is
+ * 1rem rather than a hard 16px so the Settings > Accessibility large-text
+ * scale, which drives the root font size, still moves these with everything
+ * else. A control that genuinely needs larger type overrides this rule.
+ */
+@media (max-width: 767px) {
+  /*
+   * One `:is()` rather than three comma-separated selectors: each selector in
+   * a list carries its own specificity, so a bare `select` (0,0,1) lost to
+   * Tailwind's `.text-body-sm` (0,1,0) and the gender select and complaint
+   * textarea stayed at 13px while the inputs moved. `:is()` takes its
+   * argument's specificity, so the three `:not()` clauses lift all three
+   * element types over the utility class together.
+   */
+  :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+    font-size: 1rem;
+  }
+}
+
+/*
+ * Safe-area insets. Notched and home-indicator devices reserve strips at the
+ * edges that the browser will happily paint under. Anything pinned to a
+ * viewport edge adds the inset to its own padding rather than assuming the
+ * edge is reachable; `env()` resolves to 0px everywhere else, so these are
+ * inert on hardware without insets.
+ */
+.pad-safe-top { padding-top: env(safe-area-inset-top, 0px); }
+.pad-safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pad-safe-left { padding-left: env(safe-area-inset-left, 0px); }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

@@ -45,7 +45,7 @@ flowchart LR
 
 Three decisions shape the design:
 
-**Rules before the model.** Acute presentations (cardiac, stroke, sepsis, anaphylaxis, obstetric, snakebite, …) are matched by deterministic rules across 11 distinct categories with a synonym table before any inference. A match ends the request: the model is never consulted for a case where a wrong answer is most expensive. Median 0.45 ms (p95 0.51 ms; worst-case max up to 19.5 ms under full logging; target <5.0 ms). The product page runs the same rules in the browser, a TypeScript port held to the Python engine by 98 recorded answers, so a visitor can type symptoms and watch the gate decide. The Pipeline Inspector shows a coverage matrix of every rule against phrasings that should and should not fire it, gaps included: 40 of 49 behave as expected today; the rest are the 7 romanised Hindi phrasings (no Hindi synonym table yet) and 2 substring-matching over-fires.
+**Rules before the model.** Acute presentations (cardiac, stroke, sepsis, anaphylaxis, obstetric, snakebite, …) are matched by deterministic rules across 11 distinct categories with a synonym table before any inference. A match ends the request: the model is never consulted for a case where a wrong answer is most expensive. Median 0.20 ms (p95 0.22 ms; max 0.89 ms harness, <2.8 ms under logging; target <5.0 ms met cleanly via async queue logging). The product page runs the same rules in the browser, a TypeScript port held to the Python engine by 98 recorded answers, so a visitor can type symptoms and watch the gate decide. The Pipeline Inspector shows a coverage matrix of every rule against phrasings that should and should not fire it, gaps included: 40 of 49 behave as expected today; the rest are the 7 romanised Hindi phrasings (no Hindi synonym table yet) and 2 substring-matching over-fires.
 
 **One output contract.** The model must return a Pydantic-validated `ClinicalReasoningOutput`. `requires_human_review` defaults to `true`. A separate `SafetyGuard` runs regex checks for prohibited content (doses, "diagnosed with", certainty claims). Anything that fails is reported as DEGRADED, never passed off as an assessment.
 
@@ -57,7 +57,7 @@ Three decisions shape the design:
 
 | Metric | Value | Method |
 |---|---|---|
-| Emergency gate, matching case | **0.445 ms** median, 0.511 ms p95 (max 7.27 ms; up to 19.49 ms under logging) | 5,000 evaluations |
+| Emergency gate, matching case | **0.20 ms** median (0.196 ms), 0.22 ms p95 (max 0.89 ms harness; <2.8 ms under logging) | 5,000 evaluations |
 | End to end, image → validated assessment | **9.1 s** median (9,098 ms; mean 9,239 ms), 7.9–11.4 s | 20 runs × 4 modalities (80 runs) |
 | Schema-valid outputs | **80 / 80**, all `COMPLETED` | every run validated against `ClinicalReasoningOutput` |
 | OCR confidence | 77.5 % | Tesseract mean over the 2 sample documents with a text layer |

@@ -66,7 +66,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <main
             id="main-content"
             tabIndex={-1}
-            className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto min-w-0"
+            /*
+              `overflow-y-auto` only from md up. On a phone this element is
+              `flex-1` inside a `min-h-screen` column, so it never overflows
+              and never scrolls -- the body does. It was still a scroll
+              container as far as CSS was concerned, which made it the
+              scrollport for every `position: sticky` descendant. A sticky
+              element therefore had no range to travel in and simply never
+              stuck: the assistant composer and the patient workspace rail
+              both resolved against a container that does not move. Letting
+              overflow stay visible below md hands sticky back to the viewport.
+            */
+            className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 md:overflow-y-auto"
           >
             {children}
           </main>

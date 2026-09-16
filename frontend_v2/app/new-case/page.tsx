@@ -436,7 +436,7 @@ export default function NewCasePage() {
               />
             )}
 
-            <div className="flex items-center justify-between gap-3 p-4 rounded-card bg-surface border border-rule">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-card bg-surface border border-rule">
               <Button
                 variant="secondary"
                 disabled={step === 1}

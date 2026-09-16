@@ -3,6 +3,7 @@
 import React from "react";
 import { Check, Clock, ShieldCheck } from "lucide-react";
 import { Label, BodySm } from "@/components/ui/Typography";
+import { prefersReducedMotion } from "@/lib/motion";
 
 export interface IntakeStepperProps {
   currentStep: number;
@@ -24,6 +25,25 @@ export function IntakeStepper({
   onSelectStep,
   progressPct,
 }: IntakeStepperProps) {
+  const stripRef = React.useRef<HTMLOListElement>(null);
+
+  // On the mobile strip the current step can sit off to the right after an
+  // advance. Bring it back into view; on `sm` and up the list is a static
+  // grid and there is nothing to scroll.
+  React.useEffect(() => {
+    const active = stripRef.current?.querySelector<HTMLElement>("[data-active]");
+    // jsdom has no layout and so no scrollIntoView; the guard keeps the
+    // component mountable under test as well as in a browser without it.
+    // Smooth scrolling is motion, so it goes through the same preference the
+    // rest of the app reads -- reduced motion still moves the strip, it just
+    // jumps rather than animates.
+    active?.scrollIntoView?.({
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [currentStep]);
+
   return (
     <nav
       aria-label="Intake progress"
@@ -51,7 +71,26 @@ export function IntakeStepper({
         </div>
       </div>
 
-      <ol className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 list-none p-0 m-0">
+      {/*
+        Two columns of five cards cost a phone most of a screen before the
+        clinician reaches the first field. Below `sm` the steps become one
+        horizontally scrolling row, which keeps every step reachable -- a
+        completed one is still the way back -- in a single row's height.
+        The active step is scrolled into view by the effect above.
+      */}
+      <ol
+        ref={stripRef}
+        // A scroll container that a keyboard cannot reach is WCAG 2.1.1:
+        // at step 1 every card is a plain div, so the strip holds nothing
+        // focusable and arrow keys never get a chance to pan it. tabIndex=0
+        // makes the region itself a tab stop, which is what axe's
+        // scrollable-region-focusable rule asks for, and the label says what
+        // the stop is. Both are inert from `sm` up, where the list is a grid
+        // with nothing to scroll.
+        tabIndex={0}
+        aria-label="Intake steps"
+        className="flex gap-2 overflow-x-auto snap-x snap-mandatory -mx-1 px-1 pt-1 list-none m-0 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:mx-0 sm:px-0 sm:overflow-visible sm:grid sm:grid-cols-5"
+      >
         {STEPS.map((s) => {
           const isCompleted = currentStep > s.num;
           const isActive = currentStep === s.num;
@@ -104,19 +143,30 @@ export function IntakeStepper({
           );
 
           return (
-            <li key={s.num}>
+            <li
+              key={s.num}
+              data-active={isActive || undefined}
+              // `relative` is load-bearing: the status text below is `sr-only`,
+              // which is absolutely positioned. With no positioned ancestor it
+              // resolves against the initial containing block, escapes the
+              // strip's `overflow-x-auto` clip entirely, and drags the document
+              // scroll width out to the full width of all five cards -- a
+              // 565px horizontal scrollbar on the whole page. Positioning the
+              // item makes it the containing block, so the clip applies.
+              className="relative w-[13.5rem] shrink-0 snap-start sm:w-auto sm:shrink"
+            >
               {isCompleted ? (
                 <button
                   type="button"
                   onClick={() => onSelectStep(s.num)}
-                  className={`w-full text-left p-2.5 rounded-control border transition-colors hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${tone}`}
+                  className={`h-full w-full text-left p-2.5 rounded-control border transition-colors hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${tone}`}
                 >
                   {content}
                 </button>
               ) : (
                 <div
                   aria-current={isActive ? "step" : undefined}
-                  className={`p-2.5 rounded-control border ${tone}`}
+                  className={`h-full p-2.5 rounded-control border ${tone}`}
                 >
                   {content}
                 </div>
